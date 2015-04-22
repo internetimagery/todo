@@ -6,6 +6,7 @@ import collections
 import json
 import sys
 import os
+import re
 
 
 class FileInfo(collections.MutableMapping):
@@ -160,7 +161,8 @@ class MainWindow(object):
         text = cmds.textField()
         cmds.button(label="Create a new TODO", h=40, c=lambda x: s.createTodo(cmds.textField(text, q=True, tx=True)))
         s.todowrap = cmds.scrollLayout(bgc=[0.2, 0.2, 0.2], cr=True)
-        for k in sorted([k for k in s.data.keys() if s.basename in k], key=lambda x: s.data[x]["label"]):
+        regex = re.compile("^TODO_\d+")
+        for k in sorted([k for k in s.data.keys() if k and regex.match(k)], key=lambda x: s.data[x]["label"]):
             s.addTodo(k)
         cmds.setParent("..")
         cmds.setParent(s.wrapper)
