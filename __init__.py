@@ -36,7 +36,7 @@ class FileInfo(collections.MutableMapping):
         init = cmds.fileInfo(q=True)
         if init:
             s.data = dict((k, s._decode(v)) for k, v in (lambda x: zip(x[::2], x[1::2]))(cmds.fileInfo(q=True)))
-        s.update(s.data)
+        s.update(dict())
 
     def __getitem__(s, k):
         k = s._key(k)
@@ -96,8 +96,6 @@ class Scene(object):
             cmds.file(rename=os.path.join(path, name))
             cmds.file(save=True, compress=True)
             cmds.file(rename=s.path[0])
-
-Scene().archive("/Users/Maczone/Desktop", "commentshere")
 
 
 class Call(object):
@@ -224,7 +222,6 @@ class MainWindow(object):
             v=data["archive"],
             cc=lambda x: update("archive", x))
         # File archive path
-        # cmds.file(save="PATH", compress=True)
         data["archive_path"] = data.get("archive_path", "")
         cmds.iconTextButton(
             en=data["archive"],
@@ -308,12 +305,29 @@ class MainWindow(object):
         """
         [cmds.deleteUI(ui) for ui in cmds.rowLayout(gui, q=True, ca=True)]
         prog = cmds.progressBar(p=gui, pr=0)
-        import time
+
+        def update(p):
+            cmds.progressBar(prog, e=True, pr=p)
+
+        s.performArchive(uid, update)
         for i in range(10):
             cmds.progressBar(prog, e=True, pr=i*10)
             time.sleep(0.1)
             cmds.refresh(cr=True)
         s.removeTodo(uid, gui)
+
+    def performArchive(s, uid, callback):
+        """
+        Do the archive process
+        """
+        data = s.data["todo_settings"]
+        scene = Scene()
+        if "archive" in data and data["archive"]:
+            if "archive_path" in data and data["archive_path"] and os.path.isdir(data["archive_path"]):
+                scene.archive(data["archive_path"], s.data[uid]["label"])
+                print "Archiving File."
+            else:
+                cmds.confirmDialog(title="Uh oh...", message="Can't save file archive. You need to provide a folder.")
 
     def moveDock(s):  # Update dock location information
         if cmds.dockControl(s.dock, q=True, fl=True):
@@ -332,4 +346,4 @@ class MainWindow(object):
             cmds.deleteUI(s.dock, ctl=True)
             print "Window closed."
 
-#MainWindow()
+MainWindow()
