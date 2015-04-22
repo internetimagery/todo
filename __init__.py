@@ -1,4 +1,5 @@
 # TODO!!
+# jason.dixon.email@gmail.com
 from functools import wraps
 import maya.cmds as cmds
 import collections
@@ -143,7 +144,10 @@ class MainWindow(object):
         Refresh the data
         """
         s.data = FileInfo()
-        s._buildTodo() if s.page == "todo" else ""
+        if s.page == "todo":
+            s._buildTodo()
+        if s.page == "settings":
+            s._buildSettings()
 
     def _buildTodo(s, *args):
         """
@@ -214,8 +218,11 @@ class MainWindow(object):
         cmds.setParent(s.wrapper)
 
     def addTodo(s, uid):
+        """
+        Insert a todo
+        """
         wrapper = cmds.rowLayout(nc=3, ad3=1)
-        button = cmds.iconTextButton(
+        cmds.iconTextButton(
             image="Bookmark.png",
             h=30,
             style="iconAndTextHorizontal",
@@ -227,7 +234,9 @@ class MainWindow(object):
         cmds.setParent("..")
 
     def editTodo(s, uid, gui):
-
+        """
+        Change a todos information
+        """
         def update(uid, label):
             data = s.data[uid]
             data["label"] = label
@@ -241,6 +250,9 @@ class MainWindow(object):
         cmds.button(l="Ok", p=gui, c=lambda x: update(uid, cmds.textField(text, q=True, tx=True)))
 
     def createTodo(s, txt):
+        """
+        Create a new Todo
+        """
         if txt:
             def name(i):
                 return "%s_%s" % (s.basename, i)
@@ -256,11 +268,17 @@ class MainWindow(object):
             cmds.confirmDialog(title="Whoops...", message="You need to add some text for your Todo.")
 
     def removeTodo(s, uid, gui):
+        """
+        Remove a Todo
+        """
         if cmds.rowLayout(gui, ex=True):
             cmds.deleteUI(gui)
         del s.data[uid]
 
     def activateTodo(s, uid, gui):
+        """
+        Trigger the todo archive process
+        """
         [cmds.deleteUI(ui) for ui in cmds.rowLayout(gui, q=True, ca=True)]
         prog = cmds.progressBar(p=gui, pr=0)
         import time
@@ -272,11 +290,11 @@ class MainWindow(object):
 
     def moveDock(s):  # Update dock location information
         if cmds.dockControl(s.dock, q=True, fl=True):
-            s.setLocation("float")
+            s.data["todo_location"] = "float"
             print "Floating Dock."
         else:
             area = cmds.dockControl(s.dock, q=True, a=True)
-            s.setLocation(area)
+            s.data["todo_location"] = area
             print "Docking %s." % area
 
     def closeDock(s, *loop):
@@ -286,11 +304,5 @@ class MainWindow(object):
         elif not visible:
             cmds.deleteUI(s.dock, ctl=True)
             print "Window closed."
-
-    def getLocation(s):
-        pass
-
-    def setLocation(s, l):
-        s.data["todo_location"] = l
 
 MainWindow()
