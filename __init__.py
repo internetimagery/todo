@@ -69,9 +69,8 @@ class Scene(object):
         return cmds.file(q=True, sn=True)
 
     def save(s):
-        print "saving"
-        s.path = s._getPath()
-        return s.path
+        print "Saving scene."
+        s.path = cmds.file(save=s._getPath())
 
 
 class Call(object):
@@ -89,7 +88,7 @@ class Call(object):
 
 def unique(item):
     """
-    Only keep one class active at a time
+    Only allow one window
     """
     items = {}
 
@@ -186,7 +185,7 @@ class MainWindow(object):
         cmds.columnLayout(adjustableColumn=True)
         cmds.iconTextButton(h=30, image="revealSelected.png", label="<- Todo", style="iconAndTextHorizontal", c=s._buildTodo)
         cmds.separator()
-        cmds.text(label="SETTINGS IN HERE", h=50)
+        cmds.text(label="Settings are scene independent.", h=50)
         # Use File Archiving
         data["archive"] = data.get("archive", False)
         cmds.columnLayout(
