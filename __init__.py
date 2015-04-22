@@ -3,7 +3,9 @@
 from functools import wraps
 import maya.cmds as cmds
 import collections
+import datetime
 import json
+import time
 import sys
 import os
 import re
@@ -67,11 +69,35 @@ class Scene(object):
         s.path = s._getPath()
 
     def _getPath(s):
-        return cmds.file(q=True, sn=True)
+        """
+        Get scene location
+        """
+        path = re.findall("^((.+?)(\w*)(\.ma|\.mb))$", cmds.file(q=True, sn=True))
+        if path:
+            return path[0]  # (0 source, 1 path, 2 name, 3 extension)
 
     def save(s):
+        """
+        Save the scene
+        """
         print "Saving scene."
-        s.path = cmds.file(save=s._getPath())
+        path = s._getPath()
+        if path and path[2]:
+            cmds.file(rename=path[0])
+            cmds.file(save=True)
+            s.path = path
+
+    def archive(s, path, comment=""):
+        """
+        Save scene compressed with explicit name
+        """
+        if s.path and s.path[2]:
+            name = "%s_%s_%s.ma" % (s.path[2], int(time.time()*100), comment)
+            cmds.file(rename=os.path.join(path, name))
+            cmds.file(save=True, compress=True)
+            cmds.file(rename=s.path[0])
+
+Scene().archive("/Users/Maczone/Desktop", "commentshere")
 
 
 class Call(object):
@@ -306,4 +332,4 @@ class MainWindow(object):
             cmds.deleteUI(s.dock, ctl=True)
             print "Window closed."
 
-MainWindow()
+#MainWindow()
