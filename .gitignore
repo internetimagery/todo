@@ -17,4 +17,4 @@ xcuserdata
 .svn
 CVS
 
-.pyc
+*.pyc

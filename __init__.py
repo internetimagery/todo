@@ -202,6 +202,15 @@ class MainWindow(object):
             style="iconAndTextHorizontal",
             c=lambda: update("archive_path", cmds.fileDialog2(ds=2, cap="Select a Folder.", fm=3, okc="Select")[0]))
         cmds.setParent("..")
+        # Use AMP
+        data["amp"] = data.get("amp", False)
+        cmds.columnLayout(
+            adjustableColumn=True,
+            bgc=colour(data["amp"]))
+        cmds.checkBox(
+            l="Use AMP archive",
+            v=data["amp"],
+            cc=lambda x: update("amp", x))
         cmds.setParent(s.wrapper)
 
     def addTodo(s, uid):
