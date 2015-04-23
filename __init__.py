@@ -257,17 +257,16 @@ class MainWindow(object):
         if cmds.scrollLayout(s.todoContainer, ex=True):
             cmds.deleteUI(s.todoContainer)
         regex = re.compile("^TODO_\d+")
-        s.todoContainer = cmds.scrollLayout(bgc=[0.2, 0.2, 0.2], cr=True)
+        s.todoContainer = cmds.scrollLayout(bgc=[0.2, 0.2, 0.2], cr=True, p=s.todowrap)
         for k in sorted([k for k in s.data.keys() if k and regex.match(k)], key=lambda x: s.data[x]["label"]):
             s.addTodo(k)
-        cmds.setParent(s.todowrap)
 
     def _buildSettings(s, *args):
         """
         Load the settings page
         """
         s.page = "settings"
-        data = s.data["todo_settings"] if "todo_settings" in s.data.keys() else {}
+        data = s.data["todo_settings"] if "todo_settings" in s.data.keys() and s.data["todo_settings"] else {}
 
         def colour(val):
             return [0.5, 0.5, 0.5] if val else [0.2, 0.2, 0.2]
@@ -283,6 +282,7 @@ class MainWindow(object):
         cmds.separator()
         cmds.text(label="Settings are scene independent.", h=50)
         # Use File Archiving
+        print "DATA", data
         data["archive"] = data.get("archive", False)
         cmds.columnLayout(
             adjustableColumn=True,
