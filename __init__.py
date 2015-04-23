@@ -210,9 +210,6 @@ class MainWindow(object):
         Load up the TODO layout
         """
         s.page = "todo"
-        if args and args[0] == "debug":
-            print "OK"
-            return
         s._clear()
         cmds.columnLayout(adjustableColumn=True)
         cmds.columnLayout(adjustableColumn=True)
@@ -234,7 +231,6 @@ class MainWindow(object):
         s.todowrap = cmds.columnLayout(adjustableColumn=True)
         # Todo items in here!
         s.todoContainer = ""
-
         cmds.setParent("..")
         cmds.setParent(s.wrapper)
 
@@ -242,7 +238,7 @@ class MainWindow(object):
 
     def _buidTodoTasks(s):
         """
-        Refresh the todo task section of the window (fixes bug with lambda never returning
+        Refresh the todo task section of the window (fixes bug with lambda never returning)
         """
         if cmds.scrollLayout(s.todoContainer, ex=True):
             cmds.deleteUI(s.todoContainer)
@@ -330,7 +326,7 @@ class MainWindow(object):
 
         [cmds.deleteUI(ui) for ui in cmds.rowLayout(gui, q=True, ca=True)]
         cmds.rowLayout(gui, e=True, nc=2)
-        text = cmds.textField(p=gui, ec=Call(s._buildTodo))
+        text = cmds.textField(p=gui, tx=s.data[uid]["label"])
         cmds.button(l="Ok", p=gui, c=lambda x: update(uid, cmds.textField(text, q=True, tx=True)))
 
     def createTodo(s, txt):
