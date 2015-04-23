@@ -68,7 +68,7 @@ class SafetyNet(object):
     """
     Keep archives running smoothly
     """
-    def delete(self, path):
+    def delete(s, path):
         try:
             if os.path.isfile(path):
                 os.remove(path)
@@ -238,7 +238,6 @@ class MainWindow(object):
             data[k] = v
             s.data["todo_settings"] = data
             s._buildSettings()
-            print data
 
         s._clear()
         cmds.columnLayout(adjustableColumn=True)
@@ -342,12 +341,12 @@ class MainWindow(object):
 
         def update(p):
             cmds.progressBar(prog, e=True, pr=p)
+            cmds.refresh(cv=True)
+            time.sleep(0.1)
 
         s.performArchive(uid, update)
         for i in range(10):
-            cmds.progressBar(prog, e=True, pr=i*10)
-            time.sleep(0.1)
-            cmds.refresh(cr=True)
+            update(i+10)
         s.removeTodo(uid, gui)
 
     def performArchive(s, uid, callback):
@@ -356,18 +355,21 @@ class MainWindow(object):
         """
         data = s.data["todo_settings"]
         scene = cmds.file(q=True, sn=True)
-        print os.path.split(scene)
-        if os.path.isfile(scene):  # Check if the savepath exists (ie if we are not an untitled scene)
+        base = os.path.splitext(os.path.basename(scene))
+        if base[0] and os.path.isfile(scene):  # Check if the savepath exists (ie if we are not an untitled scene)
             try:
                 cmds.file(save=True)  # Save the file regardless
                 if "archive" in data and data["archive"]:
                     if "archive_path" in data and data["archive_path"] and os.path.isdir(data["archive_path"]):
-                        print "Archiving File."
-
+                        with SafetyNet() as safe:
+                            import zipfile
+                            print "Archiving File"
+                            FileArchive().archive(scene, data["archive_path"], s.data[uid]["label"])
                     else:
                         cmds.confirmDialog(title="Uh oh...", message="Can't save file archive. You need to provide a folder.")
                 if "amp" in data and data["amp"]:
-                    print "saving to amp"
+                    with SafetyNet() as safe:
+                        print "Archiving with AMP"
             except RuntimeError as e:  # Likely canceled the save. Gotta save to achive!
                 print "Err", e
 
@@ -389,5 +391,20 @@ class MainWindow(object):
             print "Window closed."
 
 
+#######
+class FileArchive(object):
+    """
+    Archive using zipfile
+    """
+    def __init__(s):
+        s.zip = __import__("zipfile")
+
+    def archive(s, src, dest, comment=""):
+        basename = os.path.basename(src)
+        name = "%s_%s_%s.zip" % (os.path.splitext(basename)[0], int(time.time() * 100), comment)
+        dest = os.path.join(dest, name)
+        z = s.zip.ZipFile(dest, "w")
+        z.write(src, basename)
+        z.close()
 
 MainWindow()
