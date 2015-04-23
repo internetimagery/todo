@@ -413,15 +413,13 @@ class MainWindow(object):
         def update(p):
             cmds.progressBar(prog, e=True, pr=p)
             cmds.refresh(cv=True)
-            time.sleep(0.1)
 
         try:
             s.performArchive(uid, update)
-            for i in range(10):  # Make todo look fancy
-                update(i*10)
             s.removeTodo(uid, gui)
         except RuntimeError as e:
             print "Warning:", e
+            s._buidTodoTasks()
 
     def performArchive(s, uid, callback):
         """
@@ -443,6 +441,9 @@ class MainWindow(object):
                 with SafetyNet():
                     print "Archiving to AMP"
                     AMPArchive().archive(scene, s.data[uid]["label"])
+        for i in range(10):  # Make todo look fancy
+            callback(i*10)
+            time.sleep(0.03)
 
     def moveDock(s):  # Update dock location information
         if cmds.dockControl(s.dock, q=True, fl=True):
