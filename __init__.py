@@ -210,19 +210,47 @@ class MainWindow(object):
         Load up the TODO layout
         """
         s.page = "todo"
+        if args and args[0] == "debug":
+            print "OK"
+            return
         s._clear()
+        cmds.columnLayout(adjustableColumn=True)
         cmds.columnLayout(adjustableColumn=True)
         cmds.iconTextButton(h=30, image="attributes.png", label="Settings ->", style="iconAndTextHorizontal", c=s._buildSettings)
         cmds.separator()
-        text = cmds.textField(aie=True, ed=True)  #, ec="")
-        cmds.button(label="Create a new TODO", h=40, c=lambda x: s.createTodo(cmds.textField(text, q=True, tx=True)))
+        text = cmds.textField(
+            aie=True,
+            ed=True,
+            ec=lambda x: (s.createTodo(x), clear()))
+        cmds.button(
+            label="Create a new TODO",
+            h=40,
+            c=lambda x: (s.createTodo(cmds.textField(text, q=True, tx=True)), clear()))
+        cmds.setParent("..")
 
-        s.todowrap = cmds.scrollLayout(bgc=[0.2, 0.2, 0.2], cr=True)
-        regex = re.compile("^TODO_\d+")
-        for k in sorted([k for k in s.data.keys() if k and regex.match(k)], key=lambda x: s.data[x]["label"]):
-            s.addTodo(k)
+        def clear():  # Clear the text field
+            cmds.textField(text, e=True, tx="")
+
+        s.todowrap = cmds.columnLayout(adjustableColumn=True)
+        # Todo items in here!
+        s.todoContainer = ""
+
         cmds.setParent("..")
         cmds.setParent(s.wrapper)
+
+        s._buidTodoTasks()
+
+    def _buidTodoTasks(s):
+        """
+        Refresh the todo task section of the window (fixes bug with lambda never returning
+        """
+        if cmds.scrollLayout(s.todoContainer, ex=True):
+            cmds.deleteUI(s.todoContainer)
+        regex = re.compile("^TODO_\d+")
+        s.todoContainer = cmds.scrollLayout(bgc=[0.2, 0.2, 0.2], cr=True)
+        for k in sorted([k for k in s.data.keys() if k and regex.match(k)], key=lambda x: s.data[x]["label"]):
+            s.addTodo(k)
+        cmds.setParent(s.todowrap)
 
     def _buildSettings(s, *args):
         """
@@ -319,10 +347,10 @@ class MainWindow(object):
                 i += 1
                 n = name(i)
             s.data[n] = {"label": txt}
-            s._buildTodo()
+            s._buidTodoTasks()
+            #s._buildTodo("debug")
         else:
             cmds.confirmDialog(title="Whoops...", message="You need to add some text for your Todo.")
-        return
 
     def removeTodo(s, uid, gui):
         """
@@ -371,7 +399,7 @@ class MainWindow(object):
             if "amp" in data and data["amp"]:
                 with SafetyNet():
                     print "Archiving to AMP"
-                    AMP().archive(scene, s.data[uid]["label"])
+                    AMPArchive().archive(scene, s.data[uid]["label"])
 
     def moveDock(s):  # Update dock location information
         if cmds.dockControl(s.dock, q=True, fl=True):
@@ -391,7 +419,7 @@ class MainWindow(object):
             print "Window closed."
 
 
-#######
+####### ARCHIVE METHODS
 class FileArchive(object):
     """
     Archive using zipfile
@@ -408,7 +436,7 @@ class FileArchive(object):
         z.close()
 
 
-class AMP(object):
+class AMPArchive(object):
     """
     Archive using AMP
     """
