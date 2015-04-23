@@ -316,7 +316,7 @@ class MainWindow(object):
         Insert a todo
         """
         label = s.data[uid]["label"] # fileSave.png 
-        parse = re.match("^[^\d]*?(\d+)(\s*(-|,|to)\s*(\d+))?", label)  # Test for frame ranges
+        parse = re.match("^[^\d]*?(\d+)(\s*(-|,|to|and)\s*(\d+))?", label)  # Test for frame ranges
         range1 = parse.group(1) if parse else False
         range2 = parse.group(4) if parse else False
 
