@@ -346,11 +346,11 @@ class MainWindow(object):
 
         try:
             s.performArchive(uid, update)
-            for i in range(10):
+            for i in range(10):  # Make todo look fancy
                 update(i*10)
             s.removeTodo(uid, gui)
         except RuntimeError as e:
-            print "Err", e
+            print "Warning:", e
 
     def performArchive(s, uid, callback):
         """
@@ -363,14 +363,14 @@ class MainWindow(object):
             cmds.file(save=True)  # Save the file regardless
             if "archive" in data and data["archive"]:
                 if "archive_path" in data and data["archive_path"] and os.path.isdir(data["archive_path"]):
-                    with SafetyNet() as safe:
-                        print "Archiving File"
+                    with SafetyNet():
+                        print "Archiving to folder: %s" % data["archive_path"]
                         FileArchive().archive(scene, data["archive_path"], s.data[uid]["label"])
                 else:
                     cmds.confirmDialog(title="Uh oh...", message="Can't save file archive. You need to provide a folder.")
             if "amp" in data and data["amp"]:
-                with SafetyNet() as safe:
-                    print "Archiving with AMP"
+                with SafetyNet():
+                    print "Archiving to AMP"
                     AMP().archive(scene, s.data[uid]["label"])
 
     def moveDock(s):  # Update dock location information
@@ -414,8 +414,9 @@ class AMP(object):
     """
     def __init__(s):
         try:
-            s.config = __import__("am.cmclient.config").Configurator()
-            s.manager = __import__("am.cmclient.manager").getShotManager(s.config)
+            am = __import__("am")
+            s.config = am.cmclient.config.Configurator()
+            s.manager = am.cmclient.manager.getShotManager(s.config)
             s.root = s.manager.contentRoot
             s.working = s._walk(s.root, [], "working")
         except ImportError:
