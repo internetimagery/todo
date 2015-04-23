@@ -179,7 +179,7 @@ class MainWindow(object):
     def __init__(s):
         s.page = ""  # Page we are on.
         s.data = FileInfo()
-        s.data["todo_location"] = s.data["todo_location"] if "todo_location" in s.data.keys() else "float"
+        s.data["todo_location"] = s.data["todo_location"] if s.data["todo_location"] else "float"
         s.basename = "TODO"  # Name for all todo's to derive from
 
         title = "TODO:"
@@ -266,7 +266,7 @@ class MainWindow(object):
         Load the settings page
         """
         s.page = "settings"
-        data = s.data["todo_settings"] if "todo_settings" in s.data.keys() and s.data["todo_settings"] else {}
+        data = s.data["todo_settings"] if s.data["todo_settings"] else {}
 
         def colour(val):
             return [0.5, 0.5, 0.5] if val else [0.2, 0.2, 0.2]
@@ -282,7 +282,6 @@ class MainWindow(object):
         cmds.separator()
         cmds.text(label="Settings are scene independent.", h=50)
         # Use File Archiving
-        print "DATA", data
         data["archive"] = data.get("archive", False)
         cmds.columnLayout(
             adjustableColumn=True,
