@@ -344,10 +344,13 @@ class MainWindow(object):
             cmds.refresh(cv=True)
             time.sleep(0.1)
 
-        s.performArchive(uid, update)
-        for i in range(10):
-            update(i+10)
-        s.removeTodo(uid, gui)
+        try:
+            s.performArchive(uid, update)
+            for i in range(10):
+                update(i*10)
+            s.removeTodo(uid, gui)
+        except RuntimeError as e:
+            print "Err", e
 
     def performArchive(s, uid, callback):
         """
@@ -357,21 +360,18 @@ class MainWindow(object):
         scene = cmds.file(q=True, sn=True)
         base = os.path.splitext(os.path.basename(scene))
         if base[0] and os.path.isfile(scene):  # Check if the savepath exists (ie if we are not an untitled scene)
-            try:
-                cmds.file(save=True)  # Save the file regardless
-                if "archive" in data and data["archive"]:
-                    if "archive_path" in data and data["archive_path"] and os.path.isdir(data["archive_path"]):
-                        with SafetyNet() as safe:
-                            import zipfile
-                            print "Archiving File"
-                            FileArchive().archive(scene, data["archive_path"], s.data[uid]["label"])
-                    else:
-                        cmds.confirmDialog(title="Uh oh...", message="Can't save file archive. You need to provide a folder.")
-                if "amp" in data and data["amp"]:
+            cmds.file(save=True)  # Save the file regardless
+            if "archive" in data and data["archive"]:
+                if "archive_path" in data and data["archive_path"] and os.path.isdir(data["archive_path"]):
                     with SafetyNet() as safe:
-                        print "Archiving with AMP"
-            except RuntimeError as e:  # Likely canceled the save. Gotta save to achive!
-                print "Err", e
+                        print "Archiving File"
+                        FileArchive().archive(scene, data["archive_path"], s.data[uid]["label"])
+                else:
+                    cmds.confirmDialog(title="Uh oh...", message="Can't save file archive. You need to provide a folder.")
+            if "amp" in data and data["amp"]:
+                with SafetyNet() as safe:
+                    print "Archiving with AMP"
+                    AMP().archive(scene, s.data[uid]["label"])
 
     def moveDock(s):  # Update dock location information
         if cmds.dockControl(s.dock, q=True, fl=True):
@@ -406,5 +406,72 @@ class FileArchive(object):
         z = s.zip.ZipFile(dest, "w")
         z.write(src, basename)
         z.close()
+
+
+class AMP(object):
+    """
+    Archive using AMP
+    """
+    def __init__(s):
+        try:
+            s.config = __import__("am.cmclient.config").Configurator()
+            s.manager = __import__("am.cmclient.manager").getShotManager(s.config)
+            s.root = s.manager.contentRoot
+            s.working = s._walk(s.root, [], "working")
+        except ImportError:
+            s.manager = False
+
+    def archive(s, path, comment):
+        """
+        Save off file.
+        """
+        if s.manager and os.path.isfile(path) and s.root in path:
+            if s._status(path):
+                s._checkIn(path, comment)
+                s._checkOut(path)
+                return True
+            elif "Confirm" == cmds.confirmDialog(title="Hold up...", message="You need to check out the file first.\nWould you like to do that now?"):
+                s._checkOut(path)
+                s._checkIn(path, comment)
+                s._checkOut(path)
+                return True
+        return False
+
+    def _walk(s, path, paths, stop):
+        """
+        Search files for working dir
+        """
+        for d in os.listdir(path):
+            p = os.path.join(path, d)
+            if os.path.isdir(p):
+                if d == stop:
+                    paths.append(p)
+                else:
+                    s._walk(p, paths, stop)
+        return paths
+
+    def _checkIn(s, path, comment):
+        """
+        Check in the file to lock in changes.
+        """
+        s.manager.checkinViewItemByPath(path, comment=comment)
+
+    def _checkOut(s, path):
+        """
+        Check out file for editing.
+        """
+        s.manager.checkoutViewItemByPath(path)
+
+    def _revert(s, path):
+        """
+        Revert file back to the most recent state.
+        """
+        s.manager.revertViewItemByPath(path)
+
+    def _status(s, path):
+        """
+        Check the locked status of a file.
+        """
+        return os.access(path, os.W_OK)  # True = Checked out. False = Checked in.
 
 MainWindow()
