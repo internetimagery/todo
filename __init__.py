@@ -3,7 +3,9 @@
 from functools import wraps
 import maya.cmds as cmds
 import collections
+import traceback
 import datetime
+import shutil
 import json
 import time
 import sys
@@ -23,19 +25,20 @@ class FileInfo(collections.MutableMapping):
         try:
             return json.loads(u)
         except ValueError as e:
-            print "ERR: %s" % e
+            print "ERR: %s" % e, u
             return u
 
     def _key(s, k):
-        if k in ["application", "product", "version", "cutIdentifier", "osv", "license"]:
+        if k in s.blacklist:
             return "%s_" % k
         return k
 
     def __init__(s):
+        s.blacklist = ["application", "product", "version", "cutIdentifier", "osv", "license"]
         s.data = dict()
         init = cmds.fileInfo(q=True)
         if init:
-            s.data = dict((k, s._decode(v)) for k, v in (lambda x: zip(x[::2], x[1::2]))(cmds.fileInfo(q=True)))
+            s.data = dict((k, s._decode(v)) for k, v in (lambda x: zip(x[::2], x[1::2]))(cmds.fileInfo(q=True)) if k not in s.blacklist)
         s.update(dict())
 
     def __getitem__(s, k):
@@ -59,6 +62,35 @@ class FileInfo(collections.MutableMapping):
 
     def __len__(s):
         return len(s.data)
+
+
+class SafetyNet(object):
+    """
+    Keep archives running smoothly
+    """
+    def delete(self, path):
+        try:
+            if os.path.isfile(path):
+                os.remove(path)
+                print "Deleting file %s" % path
+            elif os.path.isdir(path):
+                shutil.rmtree(path)
+                print "Removing folder %s" % path
+        except OSError as e:
+            print e
+
+    def __enter__(s):
+        s.cleanup = []
+        return s
+
+    def __exit__(s, errType, errVal, trace):
+        if errType:
+            print "Uh oh... there was a problem. :("
+            print "%s :: %s" % (errType.__name__, errVal)
+            print "\n".join(traceback.format_tb(trace))
+        if s.cleanup:
+            for clean in s.cleanup:
+                s.delete(clean)
 
 
 class Scene(object):
@@ -182,8 +214,9 @@ class MainWindow(object):
         cmds.columnLayout(adjustableColumn=True)
         cmds.iconTextButton(h=30, image="attributes.png", label="Settings ->", style="iconAndTextHorizontal", c=s._buildSettings)
         cmds.separator()
-        text = cmds.textField()
+        text = cmds.textField(aie=True, ed=True)  #, ec="")
         cmds.button(label="Create a new TODO", h=40, c=lambda x: s.createTodo(cmds.textField(text, q=True, tx=True)))
+
         s.todowrap = cmds.scrollLayout(bgc=[0.2, 0.2, 0.2], cr=True)
         regex = re.compile("^TODO_\d+")
         for k in sorted([k for k in s.data.keys() if k and regex.match(k)], key=lambda x: s.data[x]["label"]):
@@ -290,6 +323,7 @@ class MainWindow(object):
             s._buildTodo()
         else:
             cmds.confirmDialog(title="Whoops...", message="You need to add some text for your Todo.")
+        return
 
     def removeTodo(s, uid, gui):
         """
@@ -321,13 +355,21 @@ class MainWindow(object):
         Do the archive process
         """
         data = s.data["todo_settings"]
-        scene = Scene()
-        if "archive" in data and data["archive"]:
-            if "archive_path" in data and data["archive_path"] and os.path.isdir(data["archive_path"]):
-                scene.archive(data["archive_path"], s.data[uid]["label"])
-                print "Archiving File."
-            else:
-                cmds.confirmDialog(title="Uh oh...", message="Can't save file archive. You need to provide a folder.")
+        scene = cmds.file(q=True, sn=True)
+        print os.path.split(scene)
+        if os.path.isfile(scene):  # Check if the savepath exists (ie if we are not an untitled scene)
+            try:
+                cmds.file(save=True)  # Save the file regardless
+                if "archive" in data and data["archive"]:
+                    if "archive_path" in data and data["archive_path"] and os.path.isdir(data["archive_path"]):
+                        print "Archiving File."
+
+                    else:
+                        cmds.confirmDialog(title="Uh oh...", message="Can't save file archive. You need to provide a folder.")
+                if "amp" in data and data["amp"]:
+                    print "saving to amp"
+            except RuntimeError as e:  # Likely canceled the save. Gotta save to achive!
+                print "Err", e
 
     def moveDock(s):  # Update dock location information
         if cmds.dockControl(s.dock, q=True, fl=True):
@@ -345,5 +387,7 @@ class MainWindow(object):
         elif not visible:
             cmds.deleteUI(s.dock, ctl=True)
             print "Window closed."
+
+
 
 MainWindow()
