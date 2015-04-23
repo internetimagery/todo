@@ -130,6 +130,20 @@ class Scene(object):
             cmds.file(rename=s.path[0])
 
 
+class TimeSlider(object):
+    """
+    Timeslider functionality
+    """
+    def frame(s, frame):
+        cmds.currentTime(frame)
+
+    def range(s, start, end):
+        """
+        Set frame range
+        """
+        cmds.playbackOptions(e=True, min=start, max=end)
+
+
 class Call(object):
     """
     Generic callback
@@ -170,7 +184,7 @@ class MainWindow(object):
 
         title = "TODO:"
 
-        window = cmds.window(title=title)
+        window = cmds.window(title=title, rtf=True)
         s.container = cmds.columnLayout(adjustableColumn=True)
         s.wrapper = ""
 
@@ -301,16 +315,48 @@ class MainWindow(object):
         """
         Insert a todo
         """
-        wrapper = cmds.rowLayout(nc=3, ad3=1)
+        label = s.data[uid]["label"] # fileSave.png 
+        parse = re.match("^[^\d]*?(\d+)(\s*(-|,|to)\s*(\d+))?", label)  # Test for frame ranges
+        range1 = parse.group(1) if parse else False
+        range2 = parse.group(4) if parse else False
+
+        wrapper = cmds.rowLayout(nc=4, ad4=1)  # if range1 else cmds.rowLayout(nc=3, ad3=1)
         cmds.iconTextButton(
-            image="Bookmark.png",
+            image="fileSave.png",  #"Bookmark.png", 
             h=30,
             style="iconAndTextHorizontal",
-            label=s.data[uid]["label"],
+            label=label,
             fn="fixedWidthFont",
+            ann="Click to check off and save.",
             c=Call(s.activateTodo, uid, wrapper))
-        cmds.iconTextButton(image="editBookmark.png", style="iconOnly", w=30, c=Call(s.editTodo, uid, wrapper))
-        cmds.iconTextButton(image="removeRenderable.png", style="iconOnly", w=30, c=Call(s.removeTodo, uid, wrapper))
+        if range1 or range1 is 0:
+            if range2 or range2 is 0:
+                r = sorted([range1, range2])
+                cmds.iconTextButton(
+                    image="traxFrameRange.png",
+                    style="iconOnly",
+                    w=30,
+                    ann="Jump to frame range (%s to %s)." % (r[0], r[1]),
+                    c=lambda: TimeSlider().range(r[0], r[1]))
+            else:
+                cmds.iconTextButton(
+                    image="centerCurrentTime.png",
+                    style="iconOnly",
+                    w=30,
+                    ann="Go to frame %s." % range1,
+                    c=lambda: TimeSlider().frame(range1))
+        cmds.iconTextButton(
+            image="editBookmark.png",
+            style="iconOnly",
+            w=30,
+            ann="Edit Todo.",
+            c=Call(s.editTodo, uid, wrapper))
+        cmds.iconTextButton(
+            image="removeRenderable.png",
+            style="iconOnly",
+            w=30,
+            ann="Delete Todo without saving.",
+            c=Call(s.removeTodo, uid, wrapper))
         cmds.setParent("..")
 
     def editTodo(s, uid, gui):
