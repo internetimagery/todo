@@ -324,7 +324,8 @@ class MainWindow(object):
             print "Updated Todo."
             s._buildTodo()
 
-        [cmds.deleteUI(ui) for ui in cmds.rowLayout(gui, q=True, ca=True)]
+        for ui in cmds.rowLayout(gui, q=True, ca=True):
+            cmds.deleteUI(ui)
         cmds.rowLayout(gui, e=True, nc=2)
         text = cmds.textField(p=gui, tx=s.data[uid]["label"])
         cmds.button(l="Ok", p=gui, c=lambda x: update(uid, cmds.textField(text, q=True, tx=True)))
@@ -360,7 +361,8 @@ class MainWindow(object):
         """
         Trigger the todo archive process
         """
-        [cmds.deleteUI(ui) for ui in cmds.rowLayout(gui, q=True, ca=True)]
+        for ui in cmds.rowLayout(gui, q=True, ca=True):
+            cmds.deleteUI(ui)
         prog = cmds.progressBar(p=gui, pr=0)
 
         def update(p):
