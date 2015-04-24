@@ -314,8 +314,8 @@ class MainWindow(object):
         """
         Insert a todo
         """
-        label = s.data[uid]["label"] # fileSave.png 
-        parse = re.match("^[^\d]*?(\d+)(\s*(-|,|to|and)\s*(\d+))?", label)  # Test for frame ranges
+        label = s.data[uid] # fileSave.png 
+        parse = re.match("^[^\d]*?[^#](\d+)(\s*(-|,|to|and)\s*(\d+))?", label)  # Test for frame ranges
         range1 = parse.group(1) if parse else False
         range2 = parse.group(4) if parse else False
 
@@ -372,7 +372,7 @@ class MainWindow(object):
         for ui in cmds.rowLayout(gui, q=True, ca=True):
             cmds.deleteUI(ui)
         cmds.rowLayout(gui, e=True, nc=2)
-        text = cmds.textField(p=gui, tx=s.data[uid]["label"])
+        text = cmds.textField(p=gui, tx=s.data[uid])
         cmds.button(l="Ok", p=gui, c=lambda x: update(uid, cmds.textField(text, q=True, tx=True)))
 
     def createTodo(s, txt):
@@ -388,7 +388,7 @@ class MainWindow(object):
             while n in s.data.keys():
                 i += 1
                 n = name(i)
-            s.data[n] = {"label": txt}
+            s.data[n] = txt
             s._buidTodoTasks()
             #s._buildTodo("debug")
         else:
@@ -434,13 +434,13 @@ class MainWindow(object):
                 if "archive_path" in data and data["archive_path"] and os.path.isdir(data["archive_path"]):
                     with SafetyNet():
                         print "Archiving to folder: %s" % data["archive_path"]
-                        FileArchive().archive(scene, data["archive_path"], s.data[uid]["label"])
+                        FileArchive().archive(scene, data["archive_path"], s.data[uid])
                 else:
                     cmds.confirmDialog(title="Uh oh...", message="Can't save file archive. You need to provide a folder.")
             if "amp" in data and data["amp"]:
                 with SafetyNet():
                     print "Archiving to AMP"
-                    AMPArchive().archive(scene, s.data[uid]["label"])
+                    AMPArchive().archive(scene, s.data[uid])
         for i in range(10):  # Make todo look fancy
             callback(i*10)
             time.sleep(0.03)
