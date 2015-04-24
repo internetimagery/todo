@@ -316,8 +316,6 @@ class MainWindow(object):
         Insert a todo
         """
         label = s.data[uid]  # fileSave.png
-# ((?<=#)\w+)  # Match hashtag
-# (\A\w+(?=:))  # Match tag with colon ie: "this:"
         reg = "(\A\w+(?=:))?"  # Token
         reg += "((?<=#)\w+)?"  # Hashtag
         frr = "(?:(\d+)\s*(?:,|-to|and)\s*(\d+))"  # Frame range
