@@ -316,9 +316,9 @@ class MainWindow(object):
         Insert a todo
         """
         label = s.data[uid] # fileSave.png 
-        parse = re.match("^[^\d]+?(\d+)(\s*(-|,|to|and)\s*(\d+))?", label)  # Test for frame ranges
-        range1 = parse.group(1) if parse else False
-        range2 = parse.group(4) if parse else False
+        parse = re.match("^(\w+:)?[^\d]*?(\d+)(\s*(-|,|to|and)\s*(\d+))?", label)  # Test for frame ranges
+        range1 = parse.group(2) if parse else False
+        range2 = parse.group(5) if parse else False
 
         wrapper = cmds.rowLayout(nc=4, ad4=1)  # if range1 else cmds.rowLayout(nc=3, ad3=1)
         cmds.iconTextButton(
