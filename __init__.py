@@ -259,7 +259,7 @@ class MainWindow(object):
             cmds.deleteUI(s.todoContainer)
         regex = re.compile("^TODO_\d+")
         s.todoContainer = cmds.scrollLayout(bgc=[0.2, 0.2, 0.2], cr=True, p=s.todowrap)
-        for k in sorted([k for k in s.data.keys() if k and regex.match(k)], key=lambda x: s.data[x]["label"]):
+        for k in sorted([k for k in s.data.keys() if k and regex.match(k)], key=lambda x: s.data[x]):
             s.addTodo(k)
 
     def _buildSettings(s, *args):
@@ -315,10 +315,30 @@ class MainWindow(object):
         """
         Insert a todo
         """
-        label = s.data[uid] # fileSave.png 
-        parse = re.match("^(\w+:)?[^\d]*?(\d+)(\s*(-|,|to|and)\s*(\d+))?", label)  # Test for frame ranges
-        range1 = parse.group(2) if parse else False
-        range2 = parse.group(5) if parse else False
+        label = s.data[uid]  # fileSave.png
+# ((?<=#)\w+)  # Match hashtag
+# (\A\w+(?=:))  # Match tag with colon ie: "this:"
+        reg = "(\A\w+(?=:))?"  # Token
+        reg += "((?<=#)\w+)?"  # Hashtag
+        frr = "(?:(\d+)\s*(?:,|-to|and)\s*(\d+))"  # Frame range
+        fr = "(\d+)"  # Frame
+        reg += "(?:%s|%s)?" % (frr, fr)
+        parse = re.finditer(reg, label)
+        token = ""
+        hashtag = []
+        frame = False
+        framerange = []
+        if parse:
+            for p in parse:
+                m = p.groups()
+                if m[0]:  # Match tokens
+                    token = m[0]
+                if m[1]:
+                    hashtag.append(m[1])
+                if m[2] and m[3]:
+                    framerange = [m[2], m[3]]
+                if m[4]:
+                    frame = m[4]
 
         wrapper = cmds.rowLayout(nc=4, ad4=1)  # if range1 else cmds.rowLayout(nc=3, ad3=1)
         cmds.iconTextButton(
@@ -329,22 +349,21 @@ class MainWindow(object):
             fn="fixedWidthFont",
             ann="Click to check off and save.",
             c=Call(s.activateTodo, uid, wrapper))
-        if range1 or range1 is 0:
-            if range2 or range2 is 0:
-                r = sorted([range1, range2])
-                cmds.iconTextButton(
-                    image="traxFrameRange.png",
-                    style="iconOnly",
-                    w=30,
-                    ann="Jump to frame range (%s to %s)." % (r[0], r[1]),
-                    c=lambda: TimeSlider().range(r[0], r[1]))
-            else:
-                cmds.iconTextButton(
-                    image="centerCurrentTime.png",
-                    style="iconOnly",
-                    w=30,
-                    ann="Go to frame %s." % range1,
-                    c=lambda: TimeSlider().frame(range1))
+        if frame:
+            cmds.iconTextButton(
+                image="centerCurrentTime.png",
+                style="iconOnly",
+                w=30,
+                ann="Go to frame %s." % frame,
+                c=lambda: TimeSlider().frame(frame))
+        elif framerange:
+            r = sorted(framerange)
+            cmds.iconTextButton(
+                image="traxFrameRange.png",
+                style="iconOnly",
+                w=30,
+                ann="Jump to frame range (%s to %s)." % (r[0], r[1]),
+                c=lambda: TimeSlider().range(r[0], r[1]))
         cmds.iconTextButton(
             image="editBookmark.png",
             style="iconOnly",
@@ -364,9 +383,7 @@ class MainWindow(object):
         Change a todos information
         """
         def update(uid, label):
-            data = s.data[uid]
-            data["label"] = label
-            s.data[uid] = data
+            s.data[uid] = label
             print "Updated Todo."
             s._buildTodo()
 
