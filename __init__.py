@@ -179,7 +179,6 @@ class MainWindow(object):
     def __init__(s):
         s.page = ""  # Page we are on.
         s.data = FileInfo()
-        s.data["todo_location"] = s.data["todo_location"] if s.data["todo_location"] else "float"
         s.basename = "TODO"  # Name for all todo's to derive from
 
         title = "TODO:"
@@ -197,6 +196,8 @@ class MainWindow(object):
             cmds.dockControl(s.dock, e=True, fl=True)
         elif s.data["todo_location"] in allowed_areas:
             cmds.dockControl(s.dock, e=True, a=s.data["todo_location"], fl=False)
+        else:
+            s.data["todo_location"] = "float"
 
         cmds.scriptJob(e=["PostSceneRead", Call(s._refresh)], p=s.dock)
         cmds.scriptJob(e=["NewSceneOpened", Call(s._refresh)], p=s.dock)
@@ -315,7 +316,7 @@ class MainWindow(object):
         Insert a todo
         """
         label = s.data[uid] # fileSave.png 
-        parse = re.match("^[^\d]*?[^#](\d+)(\s*(-|,|to|and)\s*(\d+))?", label)  # Test for frame ranges
+        parse = re.match("^[^\d]+?(\d+)(\s*(-|,|to|and)\s*(\d+))?", label)  # Test for frame ranges
         range1 = parse.group(1) if parse else False
         range2 = parse.group(4) if parse else False
 
