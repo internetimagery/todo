@@ -292,6 +292,8 @@ class MainWindow(object):
             v=data["archive"],
             cc=lambda x: update("archive", x))
         # File archive path
+        cmds.rowLayout(nc=2, ad2=2)
+        cmds.text(label=" - ")
         data["archive_path"] = data.get("archive_path", "")
         cmds.iconTextButton(
             en=data["archive"],
@@ -299,6 +301,7 @@ class MainWindow(object):
             l=data["archive_path"] if data["archive_path"] else "Pick archive folder.",
             style="iconAndTextHorizontal",
             c=lambda: update("archive_path", cmds.fileDialog2(ds=2, cap="Select a Folder.", fm=3, okc="Select")[0]))
+        cmds.setParent("..")
         cmds.setParent("..")
         # Use AMP
         data["amp"] = data.get("amp", False)
@@ -340,7 +343,7 @@ class MainWindow(object):
 
         wrapper = cmds.rowLayout(nc=4, ad4=1)  # if range1 else cmds.rowLayout(nc=3, ad3=1)
         cmds.iconTextButton(
-            image="fileSave.png",  #"Bookmark.png", 
+            image="fileSave.png",
             h=30,
             style="iconAndTextHorizontal",
             label=label,
