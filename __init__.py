@@ -258,9 +258,15 @@ class MainWindow(object):
         """
         if cmds.scrollLayout(s.todoContainer, ex=True):
             cmds.deleteUI(s.todoContainer)
-        regex = re.compile("^TODO_\d+")
+        regex = re.compile("^%s_\d+" % s.basename)
         s.todoContainer = cmds.scrollLayout(bgc=[0.2, 0.2, 0.2], cr=True, p=s.todowrap)
-        for k in sorted([k for k in s.data.keys() if k and regex.match(k)], key=lambda x: s.data[x]):
+        for k in sorted([s._parseTodo(k) for k in s.data.keys() if k and regex.match(k)], key=lambda x: x["label"]):
+            settings = s.data["todo_settings"]
+            if "sorting" in settings:
+                if settings["sorting"] == "token":
+                    print "SORTING BY TOKEN"
+                elif settings["sorting"] == "hash":
+                    print "SORITNG BY HASHTAG"
             s.addTodo(k)
 
     def _buildSettings(s, *args):
@@ -337,12 +343,12 @@ class MainWindow(object):
         cmds.setParent("..")
         ready = True
 
-
-    def _parseTodo(s, label):
+    def _parseTodo(s, uid):
         """
         Parse out metadata from Todo
         """
-        result = {}
+        result = {"uid": uid}
+        label = s.data[uid]
         reg = "(\A\w+(?=:))?"  # Token
         reg += "((?<=#)\w+)?"  # Hashtag
         frr = "(?:(\d+)\s*(?:,|-|to|and)\s*(\d+))"  # Frame range
@@ -367,13 +373,10 @@ class MainWindow(object):
                     result["frame"] = m[4]
         return result
 
-    def addTodo(s, uid):
+    def addTodo(s, todo):
         """
         Insert a todo
         """
-        todo = s._parseTodo(s.data[uid])  # Parse out metadata
-        print todo
-
         wrapper = cmds.rowLayout(nc=4, ad4=1)
         cmds.iconTextButton(
             image="fileSave.png",
@@ -382,7 +385,7 @@ class MainWindow(object):
             label=todo["label"],
             fn="fixedWidthFont",
             ann="Click to check off and save.",
-            c=Call(s.activateTodo, uid, wrapper))
+            c=Call(s.activateTodo, todo["uid"], wrapper))
         if todo["frame"]:
             cmds.iconTextButton(
                 image="centerCurrentTime.png",
@@ -402,13 +405,13 @@ class MainWindow(object):
             style="iconOnly",
             w=30,
             ann="Edit Todo.",
-            c=Call(s.editTodo, uid, wrapper))
+            c=Call(s.editTodo, todo["uid"], wrapper))
         cmds.iconTextButton(
             image="removeRenderable.png",
             style="iconOnly",
             w=30,
             ann="Delete Todo without saving.",
-            c=Call(s.removeTodo, uid, wrapper))
+            c=Call(s.removeTodo, todo["uid"], wrapper))
         cmds.setParent("..")
 
     def editTodo(s, uid, gui):
@@ -441,7 +444,6 @@ class MainWindow(object):
                 n = name(i)
             s.data[n] = txt
             s._buidTodoTasks()
-            #s._buildTodo("debug")
         else:
             cmds.confirmDialog(title="Whoops...", message="You need to add some text for your Todo.")
 
