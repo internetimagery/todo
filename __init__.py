@@ -260,14 +260,25 @@ class MainWindow(object):
             cmds.deleteUI(s.todoContainer)
         regex = re.compile("^%s_\d+" % s.basename)
         s.todoContainer = cmds.scrollLayout(bgc=[0.2, 0.2, 0.2], cr=True, p=s.todowrap)
-        for k in sorted([s._parseTodo(k) for k in s.data.keys() if k and regex.match(k)], key=lambda x: x["label"]):
-            settings = s.data["todo_settings"]
-            if "sorting" in settings:
-                if settings["sorting"] == "token":
-                    print "SORTING BY TOKEN"
-                elif settings["sorting"] == "hash":
-                    print "SORITNG BY HASHTAG"
-            s.addTodo(k)
+        sorter = cmds.columnLayout(adj=True, p=s.todoContainer)
+        unsort = cmds.columnLayout(adj=True, p=s.todoContainer)
+        sort_data = {}
+
+        def section(title):  # Build a section for each piece
+            if title in sort_data:
+                return sort_data[title]
+            else:
+                sort_data[title] = cmds.frameLayout(l=title, p=sorter, collapsable=True)
+                return sort_data[title]
+
+        for k, v in enumerate(sorted([s._parseTodo(k) for k in s.data.keys() if k and regex.match(k)], key=lambda x: x["label"])):
+            if v["token"]:
+                s.addTodo(v, section(v["token"]))
+            elif v["hashtag"]:
+                for h in v["hashtag"]:
+                    s.addTodo(v, section(h))
+            else:  # Unsorted todos
+                s.addTodo(v, unsort)
 
     def _buildSettings(s, *args):
         """
@@ -324,23 +335,6 @@ class MainWindow(object):
             cc=lambda x: update("amp", x))
         cmds.setParent("..")
         cmds.setParent("..")
-        # Sorting options
-        data["sorting"] = data.get("sorting", "none")
-        cmds.frameLayout(l="Sorting options:")
-        cmds.columnLayout(adjustableColumn=True, bgc=colour(False))
-        sort_optons = cmds.radioCollection()
-        sort_none = cmds.radioButton(l="None", onc=lambda x: update("sorting", "none"))
-        sort_token = cmds.radioButton(l="Token", onc=lambda x: update("sorting", "token"))
-        sort_hash = cmds.radioButton(l="Hashtags", onc=lambda x: update("sorting", "hash"))
-        cmds.setParent("..")
-        # Selection:
-        def_sort = sort_none
-        if data["sorting"] == "token":
-            def_sort = sort_token
-        elif data["sorting"] == "hash":
-            def_sort = sort_hash
-        cmds.radioCollection(sort_optons, e=True, select=def_sort)
-        cmds.setParent("..")
         ready = True
 
     def _parseTodo(s, uid):
@@ -349,8 +343,8 @@ class MainWindow(object):
         """
         result = {"uid": uid}
         label = s.data[uid]
-        reg = "(\A\w+(?=:))?"  # Token
-        reg += "((?<=#)\w+)?"  # Hashtag
+        reg = "(\A\w+:)?"  # Token
+        reg += "(#\s?\w+)?"  # Hashtag
         frr = "(?:(\d+)\s*(?:,|-|to|and)\s*(\d+))"  # Frame range
         fr = "(\d+)"  # Frame
         reg += "(?:%s|%s)?" % (frr, fr)
@@ -364,20 +358,21 @@ class MainWindow(object):
             for p in parse:
                 m = p.groups()
                 if m[0]:  # Match tokens
-                    result["token"] = m[0]
+                    result["token"] = m[0][0:-1]
                 if m[1]:
-                    result["hashtag"].append(m[1])
+                    result["hashtag"].append(m[1][1:])
                 if m[2] and m[3]:
                     result["framerange"] = sorted([m[2], m[3]])
                 if m[4]:
                     result["frame"] = m[4]
+        result["label"] = re.sub(reg, "", label)
         return result
 
-    def addTodo(s, todo):
+    def addTodo(s, todo, parent):
         """
         Insert a todo
         """
-        wrapper = cmds.rowLayout(nc=4, ad4=1)
+        wrapper = cmds.rowLayout(nc=4, ad4=1, p=parent)
         cmds.iconTextButton(
             image="fileSave.png",
             h=30,
@@ -411,7 +406,7 @@ class MainWindow(object):
             style="iconOnly",
             w=30,
             ann="Delete Todo without saving.",
-            c=Call(s.removeTodo, todo["uid"], wrapper))
+            c=Call(s.removeTodo, todo["uid"]))
         cmds.setParent("..")
 
     def editTodo(s, uid, gui):
@@ -421,7 +416,7 @@ class MainWindow(object):
         def update(uid, label):
             s.data[uid] = label
             print "Updated Todo."
-            s._buildTodo()
+            s._buidTodoTasks()
 
         for ui in cmds.rowLayout(gui, q=True, ca=True):
             cmds.deleteUI(ui)
@@ -447,13 +442,12 @@ class MainWindow(object):
         else:
             cmds.confirmDialog(title="Whoops...", message="You need to add some text for your Todo.")
 
-    def removeTodo(s, uid, gui):
+    def removeTodo(s, uid):
         """
         Remove a Todo
         """
-        if cmds.rowLayout(gui, ex=True):
-            cmds.deleteUI(gui)
         del s.data[uid]
+        s._buidTodoTasks()
 
     def activateTodo(s, uid, gui):
         """
@@ -469,7 +463,7 @@ class MainWindow(object):
 
         try:
             s.performArchive(uid, update)
-            s.removeTodo(uid, gui)
+            s.removeTodo(uid)
         except RuntimeError as e:
             print "Warning:", e
             s._buidTodoTasks()
