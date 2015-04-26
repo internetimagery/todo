@@ -233,10 +233,11 @@ class MainWindow(object):
         text = cmds.textField(
             aie=True,
             ed=True,
+            h=30,
             ec=lambda x: (s.createTodo(x), clear()))
         cmds.button(
             label="Create a new TODO",
-            h=40,
+            h=20,
             c=lambda x: (s.createTodo(cmds.textField(text, q=True, tx=True)), clear()))
         cmds.setParent("..")
 
@@ -266,6 +267,7 @@ class MainWindow(object):
         """
         Load the settings page
         """
+        ready = False  # Bug fix. Trigger updates when page is built
         s.page = "settings"
         data = s.data["todo_settings"] if s.data["todo_settings"] else {}
 
@@ -273,15 +275,17 @@ class MainWindow(object):
             return [0.5, 0.5, 0.5] if val else [0.2, 0.2, 0.2]
 
         def update(k, v):
-            data[k] = v
-            s.data["todo_settings"] = data
-            s._buildSettings()
+            if ready:
+                data[k] = v
+                s.data["todo_settings"] = data
+                s._buildSettings()
 
         s._clear()
-        cmds.columnLayout(adjustableColumn=True)
+        cmds.columnLayout(adjustableColumn=True, p=s.wrapper)
         cmds.iconTextButton(h=30, image="revealSelected.png", label="<- Todo", style="iconAndTextHorizontal", c=s._buildTodo)
         cmds.separator()
         cmds.text(label="Settings are scene independent.", h=50)
+        cmds.frameLayout(l="Archive options:")
         # Use File Archiving
         data["archive"] = data.get("archive", False)
         cmds.columnLayout(
@@ -312,7 +316,26 @@ class MainWindow(object):
             l="Use AMP archive",
             v=data["amp"],
             cc=lambda x: update("amp", x))
-        cmds.setParent(s.wrapper)
+        cmds.setParent("..")
+        cmds.setParent("..")
+        # Sorting options
+        data["sorting"] = data.get("sorting", "none")
+        cmds.frameLayout(l="Sorting options:")
+        cmds.columnLayout(adjustableColumn=True, bgc=colour(False))
+        sort_optons = cmds.radioCollection()
+        sort_none = cmds.radioButton(l="None", onc=lambda x: update("sorting", "none"))
+        sort_token = cmds.radioButton(l="Token", onc=lambda x: update("sorting", "token"))
+        sort_hash = cmds.radioButton(l="Hashtags", onc=lambda x: update("sorting", "hash"))
+        cmds.setParent("..")
+        # Selection:
+        def_sort = sort_none
+        if data["sorting"] == "token":
+            def_sort = sort_token
+        elif data["sorting"] == "hash":
+            def_sort = sort_hash
+        cmds.radioCollection(sort_optons, e=True, select=def_sort)
+        cmds.setParent("..")
+        ready = True
 
     def addTodo(s, uid):
         """
