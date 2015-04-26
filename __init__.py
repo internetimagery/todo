@@ -337,57 +337,66 @@ class MainWindow(object):
         cmds.setParent("..")
         ready = True
 
-    def addTodo(s, uid):
+
+    def _parseTodo(s, label):
         """
-        Insert a todo
+        Parse out metadata from Todo
         """
-        label = s.data[uid]  # fileSave.png
+        result = {}
         reg = "(\A\w+(?=:))?"  # Token
         reg += "((?<=#)\w+)?"  # Hashtag
-        frr = "(?:(\d+)\s*(?:,|-to|and)\s*(\d+))"  # Frame range
+        frr = "(?:(\d+)\s*(?:,|-|to|and)\s*(\d+))"  # Frame range
         fr = "(\d+)"  # Frame
         reg += "(?:%s|%s)?" % (frr, fr)
         parse = re.finditer(reg, label)
-        token = ""
-        hashtag = []
-        frame = False
-        framerange = []
+        result["label"] = label
+        result["token"] = ""
+        result["hashtag"] = []
+        result["frame"] = None
+        result["framerange"] = []
         if parse:
             for p in parse:
                 m = p.groups()
                 if m[0]:  # Match tokens
-                    token = m[0]
+                    result["token"] = m[0]
                 if m[1]:
-                    hashtag.append(m[1])
+                    result["hashtag"].append(m[1])
                 if m[2] and m[3]:
-                    framerange = [m[2], m[3]]
+                    result["framerange"] = sorted([m[2], m[3]])
                 if m[4]:
-                    frame = m[4]
+                    result["frame"] = m[4]
+        return result
 
-        wrapper = cmds.rowLayout(nc=4, ad4=1)  # if range1 else cmds.rowLayout(nc=3, ad3=1)
+    def addTodo(s, uid):
+        """
+        Insert a todo
+        """
+        todo = s._parseTodo(s.data[uid])  # Parse out metadata
+        print todo
+
+        wrapper = cmds.rowLayout(nc=4, ad4=1)
         cmds.iconTextButton(
             image="fileSave.png",
             h=30,
             style="iconAndTextHorizontal",
-            label=label,
+            label=todo["label"],
             fn="fixedWidthFont",
             ann="Click to check off and save.",
             c=Call(s.activateTodo, uid, wrapper))
-        if frame:
+        if todo["frame"]:
             cmds.iconTextButton(
                 image="centerCurrentTime.png",
                 style="iconOnly",
                 w=30,
-                ann="Go to frame %s." % frame,
-                c=lambda: TimeSlider().frame(frame))
-        elif framerange:
-            r = sorted(framerange)
+                ann="Go to frame %s." % todo["frame"],
+                c=lambda: TimeSlider().frame(todo["frame"]))
+        elif todo["framerange"]:
             cmds.iconTextButton(
                 image="traxFrameRange.png",
                 style="iconOnly",
                 w=30,
-                ann="Jump to frame range (%s to %s)." % (r[0], r[1]),
-                c=lambda: TimeSlider().range(r[0], r[1]))
+                ann="Jump to frame range (%s to %s)." % (todo["framerange"][0], todo["framerange"][1]),
+                c=lambda: TimeSlider().range(todo["framerange"][0], todo["framerange"][1]))
         cmds.iconTextButton(
             image="editBookmark.png",
             style="iconOnly",
