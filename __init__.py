@@ -179,8 +179,9 @@ class MainWindow(object):
     """
     def __init__(s):
         s.page = ""  # Page we are on.
-        s.data = FileInfo()
+        s.data = FileInfo()  # Scene stored data
         s.basename = "TODO"  # Name for all todo's to derive from
+        s.regex = {}  # Compiled regexes
 
         title = "TODO:"
 
@@ -259,7 +260,7 @@ class MainWindow(object):
         """
         if cmds.scrollLayout(s.todoContainer, ex=True):
             cmds.deleteUI(s.todoContainer)
-        regex = re.compile("^%s_\d+" % s.basename)
+        s.regex["uid"] = s.regex.get("uid", re.compile("^%s_\d+" % s.basename))
         s.todoContainer = cmds.scrollLayout(bgc=[0.2, 0.2, 0.2], cr=True, p=s.todowrap)
         sorter = cmds.columnLayout(adj=True, p=s.todoContainer)
         unsort = cmds.columnLayout(adj=True, p=s.todoContainer)
@@ -273,7 +274,7 @@ class MainWindow(object):
                 sort_data[title] = cmds.frameLayout(l=title, p=sorter, collapsable=True)
                 return sort_data[title]
 
-        for k, v in enumerate(sorted([s._parseTodo(k) for k in s.data.keys() if k and regex.match(k)], key=lambda x: x["label"])):
+        for k, v in enumerate(sorted([dict({"uid": k}, **s._parseTodo(s.data[k])) for k in s.data.keys() if k and s.regex["uid"].match(k)], key=lambda x: x["label"])):
             if v["token"]:
                 s.addTodo(v, section(v["token"]))
             elif v["hashtag"]:
@@ -339,19 +340,21 @@ class MainWindow(object):
         cmds.setParent("..")
         ready = True
 
-    def _parseTodo(s, uid):
+    def _parseTodo(s, label):
         """
         Parse out metadata from Todo
         """
-        result = {"uid": uid}
-        label = s.data[uid]
-        reg = "(\A\w+(?=:))?"  # Token
-        reg += "((?<=#)\s?\w+)?"  # Hashtag
-        frr = "(?:(\d+)\s*(?:,|-|to|and)\s*(\d+))"  # Frame range
-        fr = "(\d+)"  # Frame
-        reg += "(?:%s|%s)?" % (frr, fr)
-        parse = re.finditer(reg, label)
-        result["label"] = label
+        def build_reg():
+            reg = "(\A\w+(?=:))?"  # Token
+            reg += "((?<=#)\s?\w+)?"  # Hashtag
+            frr = "(?:(\d+)\s*(?:,|-|to|and)\s*(\d+))"  # Frame range
+            fr = "(\d+)"  # Frame
+            reg += "(?:%s|%s)?" % (frr, fr)
+            return re.compile(reg)
+
+        s.regex["label"] = s.regex.get("label", build_reg())
+        parse = s.regex["label"].finditer(label)
+        result = {}
         result["token"] = ""
         result["hashtag"] = []
         result["frame"] = None
@@ -362,15 +365,15 @@ class MainWindow(object):
                 if m[0]:  # Match tokens
                     result["token"] = m[0]
                 if m[1]:
-                    result["hashtag"].append(m[1].strip())
+                    if m[1] not in result["hashtag"]:
+                        result["hashtag"].append(m[1].strip())
                 if m[2] and m[3]:
                     result["framerange"] = sorted([m[2], m[3]])
                 if m[4]:
                     result["frame"] = m[4]
         # Clean out hashtags and tokens for nicer looking todos
-        reg = "(\A\w+:)?"
-        reg += "(#\s?\w+)?"
-        result["label"] = re.sub(reg, "", label)
+        s.regex["label_clean"] = s.regex.get("label_clean", re.compile("(\A\w+:)?" + "(#\s?\w+,?)?"))
+        result["label"] = s.regex["label_clean"].sub("", label).strip()
         return result
 
     def addTodo(s, todo, parent):
@@ -433,7 +436,8 @@ class MainWindow(object):
         """
         Create a new Todo
         """
-        if txt:
+        meta = s._parseTodo(txt)
+        if meta["label"]:
             def name(i):
                 return "%s_%s" % (s.basename, i)
 
