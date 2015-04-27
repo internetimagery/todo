@@ -246,11 +246,11 @@ class MainWindow(object):
             aie=True,
             ed=True,
             h=30,
-            ec=lambda x: (s.createTodo(x), clear()))
+            ec=lambda x: not s.createTodo(x) or clear())
         cmds.button(
             label="Create a new TODO",
             h=20,
-            c=lambda x: (s.createTodo(cmds.textField(text, q=True, tx=True)), clear()))
+            c=lambda x: not s.createTodo(cmds.textField(text, q=True, tx=True)) or clear())
         cmds.setParent("..")
 
         def clear():  # Clear the text field
@@ -458,8 +458,10 @@ class MainWindow(object):
                 n = name(i)
             s.data[n] = txt
             s._buidTodoTasks()
+            return True  # Return True to retain input
         else:
             cmds.confirmDialog(title="Whoops...", message="You need to add some text for your Todo.")
+            return False
 
     def removeTodo(s, uid):
         """
@@ -492,6 +494,8 @@ class MainWindow(object):
         Do the archive process
         """
         data = s.data["todo_settings"]
+        progress = 10
+        callback(progress)
         scene = cmds.file(q=True, sn=True)
         base = os.path.splitext(os.path.basename(scene))
         if base[0] and os.path.isfile(scene):  # Check if the savepath exists (ie if we are not an untitled scene)
@@ -499,17 +503,23 @@ class MainWindow(object):
             if "archive" in data and data["archive"]:
                 if "archive_path" in data and data["archive_path"] and os.path.isdir(data["archive_path"]):
                     with SafetyNet():
-                        print "Archiving to folder: %s" % data["archive_path"]
                         FileArchive().archive(scene, data["archive_path"], s.data[uid])
+                        print "Archiving to folder: %s" % data["archive_path"]
                 else:
                     cmds.confirmDialog(title="Uh oh...", message="Can't save file archive. You need to provide a folder.")
+                progress += 10
+                callback(progress)
             if "amp" in data and data["amp"]:
                 with SafetyNet():
-                    print "Archiving to AMP"
                     AMPArchive().archive(scene, s.data[uid])
-        for i in range(10):  # Make todo look fancy
-            callback(i*10)
-            time.sleep(0.03)
+                    print "Archiving to AMP"
+                progress += 10
+                callback(progress)
+        for i in range(20):  # Make marking off a todo look fancy
+            progress += i*5
+            if progress <= 100:
+                callback(progress)
+                time.sleep(0.05)
 
     def moveDock(s):  # Update dock location information
         if cmds.dockControl(s.dock, q=True, fl=True):
