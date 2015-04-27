@@ -284,12 +284,13 @@ class MainWindow(object):
                 sort_data[title] = cmds.frameLayout(l=title, p=sorter, collapsable=True)
                 return sort_data[title]
 
-        for k, v in enumerate(sorted([dict({"uid": k}, **s._parseTodo(s.data[k])) for k in s.data.keys() if k and s.regex["uid"].match(k)], key=lambda x: x["label"])):
-            if v["token"]:
-                s.addTodo(v, section(v["token"]))
-            elif v["hashtag"]:
-                for h in v["hashtag"]:
-                    s.addTodo(v, section(h))
+        for v in sorted([dict({"uid": k}, **s._parseTodo(s.data[k])) for k in s.data.keys() if k and s.regex["uid"].match(k)], key=lambda x: x["label"]):
+            if v["token"] or v["hashtag"]:
+                if v["token"]:
+                    s.addTodo(v, section(v["token"]))
+                if v["hashtag"]:
+                    for h in v["hashtag"]:
+                        s.addTodo(v, section(h))
             else:  # Unsorted todos
                 s.addTodo(v, unsort)
 
