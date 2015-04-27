@@ -211,8 +211,8 @@ class MainWindow(object):
         else:
             s.data["todo_location"] = "float"
 
-        cmds.scriptJob(e=["PostSceneRead", Call(s._refresh)], p=s.dock)
-        cmds.scriptJob(e=["NewSceneOpened", Call(s._refresh)], p=s.dock)
+        cmds.scriptJob(e=["PostSceneRead", s._refresh], p=s.dock)
+        cmds.scriptJob(e=["NewSceneOpened", s._refresh], p=s.dock)
 
     def _clear(s):
         """
@@ -399,7 +399,7 @@ class MainWindow(object):
             label=todo["label"],
             fn="fixedWidthFont",
             ann="Click to check off and save.",
-            c=Call(s.activateTodo, todo["uid"], wrapper))
+            c=lambda: s.activateTodo(todo["uid"], wrapper))
         if todo["frame"] or todo["frame"] is 0:
             cmds.iconTextButton(
                 image="centerCurrentTime.png",
@@ -419,13 +419,13 @@ class MainWindow(object):
             style="iconOnly",
             w=30,
             ann="Edit Todo.",
-            c=Call(s.editTodo, todo["uid"], wrapper))
+            c=lambda: s.editTodo(todo["uid"], wrapper))
         cmds.iconTextButton(
             image="removeRenderable.png",
             style="iconOnly",
             w=30,
             ann="Delete Todo without saving.",
-            c=Call(s.removeTodo, todo["uid"]))
+            c=lambda: s.removeTodo(todo["uid"]))
         cmds.setParent("..")
 
     def editTodo(s, uid, gui):
