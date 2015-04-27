@@ -485,22 +485,22 @@ class MainWindow(object):
             cmds.progressBar(prog, e=True, pr=p)
             cmds.refresh(cv=True)
 
+        temp = s.data[uid]
+        del s.data[uid]
         try:
-            s.performArchive(uid, update)
-            s.removeTodo(uid)
+            s.performArchive(temp, update)
         except RuntimeError as e:
             print "Warning:", e
+            s.data[uid] = temp  # Rebuild todo
         s._buidTodoTasks()
 
-    def performArchive(s, uid, callback):
+    def performArchive(s, todo, callback):
         """
         Do the archive process
         """
         data = s.data["todo_settings"]
         progress = 10
         callback(progress)
-        temp = s.data[uid]  # Hold file temporarally
-        del s.data[uid]  # Remove file before save
         scene = cmds.file(q=True, sn=True)
         base = os.path.splitext(os.path.basename(scene))
         if base[0] and os.path.isfile(scene):  # Check if the savepath exists (ie if we are not an untitled scene)
@@ -508,7 +508,7 @@ class MainWindow(object):
             if "archive" in data and data["archive"]:
                 if "archive_path" in data and data["archive_path"] and os.path.isdir(data["archive_path"]):
                     with SafetyNet():
-                        FileArchive().archive(scene, data["archive_path"], temp)
+                        FileArchive().archive(scene, data["archive_path"], todo)
                         print "Archiving to folder: %s" % data["archive_path"]
                 else:
                     cmds.confirmDialog(title="Uh oh...", message="Can't save file archive. You need to provide a folder.")
@@ -516,11 +516,10 @@ class MainWindow(object):
                 callback(progress)
             if "amp" in data and data["amp"]:
                 with SafetyNet():
-                    AMPArchive().archive(scene, temp)
+                    AMPArchive().archive(scene, todo)
                     print "Archiving to AMP"
                 progress += 10
                 callback(progress)
-        s.data[uid] = temp
         for i in range(20):  # Make marking off a todo look fancy
             progress += i*5
             if progress <= 100:
