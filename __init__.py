@@ -490,7 +490,7 @@ class MainWindow(object):
             s.removeTodo(uid)
         except RuntimeError as e:
             print "Warning:", e
-            s._buidTodoTasks()
+        s._buidTodoTasks()
 
     def performArchive(s, uid, callback):
         """
@@ -499,6 +499,8 @@ class MainWindow(object):
         data = s.data["todo_settings"]
         progress = 10
         callback(progress)
+        temp = s.data[uid]  # Hold file temporarally
+        del s.data[uid]  # Remove file before save
         scene = cmds.file(q=True, sn=True)
         base = os.path.splitext(os.path.basename(scene))
         if base[0] and os.path.isfile(scene):  # Check if the savepath exists (ie if we are not an untitled scene)
@@ -506,7 +508,7 @@ class MainWindow(object):
             if "archive" in data and data["archive"]:
                 if "archive_path" in data and data["archive_path"] and os.path.isdir(data["archive_path"]):
                     with SafetyNet():
-                        FileArchive().archive(scene, data["archive_path"], s.data[uid])
+                        FileArchive().archive(scene, data["archive_path"], temp)
                         print "Archiving to folder: %s" % data["archive_path"]
                 else:
                     cmds.confirmDialog(title="Uh oh...", message="Can't save file archive. You need to provide a folder.")
@@ -514,10 +516,11 @@ class MainWindow(object):
                 callback(progress)
             if "amp" in data and data["amp"]:
                 with SafetyNet():
-                    AMPArchive().archive(scene, s.data[uid])
+                    AMPArchive().archive(scene, temp)
                     print "Archiving to AMP"
                 progress += 10
                 callback(progress)
+        s.data[uid] = temp
         for i in range(20):  # Make marking off a todo look fancy
             progress += i*5
             if progress <= 100:
@@ -577,7 +580,7 @@ class AMPArchive(object):
         """
         Save off file.
         """
-        if s.manager and os.path.isfile(path) and s.root in path:
+        if s.manager and os.path.isfile(path) and any(p in path for p in s.working):
             if s._status(path):
                 s._checkIn(path, comment)
                 s._checkOut(path)
