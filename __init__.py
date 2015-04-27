@@ -543,8 +543,12 @@ class AMPArchive(object):
     def __init__(s):
         try:
             am = __import__("am")
-            s.config = am.cmclient.config.Configurator()
-            s.manager = am.cmclient.manager.getShotManager(s.config)
+            try:
+                s.config = am.cmclient.config.Configurator()
+                s.manager = am.cmclient.manager.getShotManager(s.config)
+            except ImportError:
+                s.config = am.client.cmclient.config.Configurator()
+                s.manager = am.client.cmclient.manager.getShotManager(s.config)
             s.root = s.manager.contentRoot
             s.working = s._walk(s.root, [], "working")
         except ImportError:
