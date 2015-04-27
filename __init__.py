@@ -1,3 +1,4 @@
+# coding: utf-8
 # TODO!!
 # jason.dixon.email@gmail.com
 from functools import wraps
@@ -347,7 +348,7 @@ class MainWindow(object):
         def build_reg():
             reg = "(\A\w+(?=:))?"  # Token
             reg += "((?<=#)\s?\w+)?"  # Hashtag
-            frr = "(?:(\d+)\s*(?:,|-|to|and)\s*(\d+))"  # Frame range
+            frr = "(?:(\d+)\s*(?:[^\d\s]|to|and)\s*(\d+))"  # Frame range
             fr = "(\d+)"  # Frame
             reg += "(?:%s|%s)?" % (frr, fr)
             return re.compile(reg)
@@ -389,7 +390,7 @@ class MainWindow(object):
             fn="fixedWidthFont",
             ann="Click to check off and save.",
             c=Call(s.activateTodo, todo["uid"], wrapper))
-        if todo["frame"]:
+        if todo["frame"] or todo["frame"] is 0:
             cmds.iconTextButton(
                 image="centerCurrentTime.png",
                 style="iconOnly",
@@ -543,12 +544,8 @@ class AMPArchive(object):
     def __init__(s):
         try:
             am = __import__("am")
-            try:
-                s.config = am.cmclient.config.Configurator()
-                s.manager = am.cmclient.manager.getShotManager(s.config)
-            except ImportError:
-                s.config = am.client.cmclient.config.Configurator()
-                s.manager = am.client.cmclient.manager.getShotManager(s.config)
+            s.config = am.client.cmclient.config.Configurator()
+            s.manager = am.client.cmclient.manager.getShotManager(config=s.config)
             s.root = s.manager.contentRoot
             s.working = s._walk(s.root, [], "working")
         except ImportError:
