@@ -317,7 +317,7 @@ class MainWindow(object):
         cmds.columnLayout(adjustableColumn=True, p=s.wrapper)
         cmds.iconTextButton(h=30, image="revealSelected.png", label="<- Todo", style="iconAndTextHorizontal", c=s._buildTodo)
         cmds.separator()
-        cmds.text(label="Settings are scene independent.", h=50)
+        cmds.text(label="Settings are unique to each Maya scene.", h=50)
         cmds.frameLayout(l="Archive options:")
         # Use File Archiving
         data["archive"] = data.get("archive", False)
@@ -435,9 +435,13 @@ class MainWindow(object):
         Change a todos information
         """
         def update(uid, label):
-            s.data[uid] = label
-            print "Updated Todo."
-            s._buidTodoTasks()
+            meta = s._parseTodo(label)
+            if meta["label"]:
+                s.data[uid] = label
+                print "Updated Todo."
+                s._buidTodoTasks()
+            else:
+                cmds.confirmDialog(title="Whoops...", message="You need to add some text for your Todo.")
 
         for ui in cmds.rowLayout(gui, q=True, ca=True):
             cmds.deleteUI(ui)
