@@ -626,7 +626,7 @@ class AMPArchive(object):
         """
         return os.access(path, os.W_OK)  # True = Checked out. False = Checked in.
 
-if cmds.window("todo_window", ex=True):  # Only allow one window at a time.
-    cmds.deleteUI("todo_window")
-
-MainWindow()
+try:
+    MainWindow()
+except RuntimeError:
+    print "Window exists already."
