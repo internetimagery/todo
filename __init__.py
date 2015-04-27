@@ -91,6 +91,7 @@ class SafetyNet(object):
         if s.cleanup:
             for clean in s.cleanup:
                 s.delete(clean)
+        return True
 
 
 class Scene(object):
@@ -265,6 +266,7 @@ class MainWindow(object):
         sort_data = {}
 
         def section(title):  # Build a section for each piece
+            title = title.strip()
             if title in sort_data:
                 return sort_data[title]
             else:
@@ -343,8 +345,8 @@ class MainWindow(object):
         """
         result = {"uid": uid}
         label = s.data[uid]
-        reg = "(\A\w+:)?"  # Token
-        reg += "(#\s?\w+)?"  # Hashtag
+        reg = "(\A\w+(?=:))?"  # Token
+        reg += "((?<=#)\s?\w+)?"  # Hashtag
         frr = "(?:(\d+)\s*(?:,|-|to|and)\s*(\d+))"  # Frame range
         fr = "(\d+)"  # Frame
         reg += "(?:%s|%s)?" % (frr, fr)
@@ -358,13 +360,16 @@ class MainWindow(object):
             for p in parse:
                 m = p.groups()
                 if m[0]:  # Match tokens
-                    result["token"] = m[0][0:-1]
+                    result["token"] = m[0]
                 if m[1]:
-                    result["hashtag"].append(m[1][1:])
+                    result["hashtag"].append(m[1].strip())
                 if m[2] and m[3]:
                     result["framerange"] = sorted([m[2], m[3]])
                 if m[4]:
                     result["frame"] = m[4]
+        # Clean out hashtags and tokens for nicer looking todos
+        reg = "(\A\w+:)?"
+        reg += "(#\s?\w+)?"
         result["label"] = re.sub(reg, "", label)
         return result
 
