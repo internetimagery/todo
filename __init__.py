@@ -7,6 +7,7 @@ import collections
 import traceback
 import datetime
 import shutil
+import random
 import json
 import time
 import sys
@@ -184,7 +185,15 @@ class MainWindow(object):
         s.basename = "TODO"  # Name for all todo's to derive from
         s.regex = {}  # Compiled regexes
 
-        title = "TODO:"
+        title = random.choice([
+            "Todo:",
+            "Going well.",
+            "Keep it up!",
+            "You can do it.",
+            "Good stuff.",
+            "Things to do...",
+            "Making progress.",
+            "Slow and steady"])
 
         window = cmds.window(title=title, rtf=True)
         s.container = cmds.columnLayout(adjustableColumn=True)
