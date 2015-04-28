@@ -26,7 +26,7 @@ def archive(mayaFile, todo, settings):
     amp = settings("AMPArchive.active", False)
     if amp:
         AMPArchive().archive(mayaFile, comment)
-        print "Committing file to AMP"
+        print "Checking file into AMP."
 
 
 # Cleanup stuff
