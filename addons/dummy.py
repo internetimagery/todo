@@ -27,5 +27,6 @@ def archive(mayaFile, todo, settings):
 def cleanup():
     """
     Run after any other action is taken. Use for cleaning up anything that may need it.
+    Delete temp files etc. This will run even if an error occurs.
     """
     pass
