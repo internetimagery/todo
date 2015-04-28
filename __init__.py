@@ -82,14 +82,16 @@ class Module(object):
         return s.mod
 
     def __exit__(s, errType, errVal, trace):
-        if errType:
+        if errType and hasattr(s.mod, "debug") and s.mod.debug:
             print "Uh oh... there was a problem. :("
             print "%s :: %s" % (errType.__name__, errVal)
-            print "\n".join(traceback.format_tb(trace))
+            for t in traceback.format_tb(trace):
+                print t
         try:
             s.mod.cleanup()
         except Exception as e:
-            print "Error", e
+            if hasattr(s.mod, "debug") and s.mod.debug:
+                print "Cleanup Error", e
         return True
 
 
