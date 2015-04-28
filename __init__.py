@@ -225,8 +225,8 @@ class MainWindow(object):
                     s.addTodo(v, section(v["token"], state[v["token"]]))
                 if v["hashtag"]:
                     for h in v["hashtag"]:
-                        state[v["hashtag"]] = s.sections[v["hashtag"]] if v["hashtag"] in s.sections else False
-                        s.addTodo(v, section(h, state[v["hashtag"]]))
+                        state[h] = s.sections[h] if h in s.sections else False
+                        s.addTodo(v, section(h, state[h]))
             else:  # Unsorted todos
                 s.addTodo(v, unsort)
         s.sections = state
