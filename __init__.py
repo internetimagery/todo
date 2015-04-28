@@ -9,6 +9,7 @@ import traceback
 import datetime
 import shutil
 import random
+import addons
 import json
 import time
 import sys
@@ -67,33 +68,28 @@ class FileInfo(collections.MutableMapping):
         return len(s.data)
 
 
-class SafetyNet(object):
+class Module(object):
     """
-    Keep archives running smoothly
+    Keep modules running smoothly
     """
-    def delete(s, path):
-        try:
-            if os.path.isfile(path):
-                os.remove(path)
-                print "Deleting file %s" % path
-            elif os.path.isdir(path):
-                shutil.rmtree(path)
-                print "Removing folder %s" % path
-        except OSError as e:
-            print e
+    def __init__(s, name):
+        if name in addons.modules:
+            s.mod = addons.modules[name]
+        else:
+            s.mod = False
 
     def __enter__(s):
-        s.cleanup = []
-        return s
+        return s.mod
 
     def __exit__(s, errType, errVal, trace):
         if errType:
             print "Uh oh... there was a problem. :("
             print "%s :: %s" % (errType.__name__, errVal)
             print "\n".join(traceback.format_tb(trace))
-        if s.cleanup:
-            for clean in s.cleanup:
-                s.delete(clean)
+        try:
+            s.mod.cleanup()
+        except Exception as e:
+            print "Error", e
         return True
 
 
@@ -315,11 +311,14 @@ class MainWindow(object):
         def colour(val):
             return [0.5, 0.5, 0.5] if val else [0.2, 0.2, 0.2]
 
-        def update(k, v):
+        def update(k, v):  # Allow module to set value
             if ready:
                 data[k] = v
                 s.data["todo_settings"] = data
                 s._buildSettings()
+
+        def get(k, default=None):  # Allow module to get value
+            return data.get(k, default)
 
         s._clear()
         cmds.columnLayout(adjustableColumn=True, p=s.wrapper)
@@ -327,37 +326,10 @@ class MainWindow(object):
         cmds.separator()
         cmds.text(label="Settings are unique to each Maya scene.", h=50)
         cmds.frameLayout(l="Archive options:")
-        # Use File Archiving
-        data["archive"] = data.get("archive", False)
-        cmds.columnLayout(
-            adjustableColumn=True,
-            bgc=colour(data["archive"]))
-        cmds.checkBox(
-            l="Use File Archive",
-            v=data["archive"],
-            cc=lambda x: update("archive", x))
-        # File archive path
-        cmds.rowLayout(nc=2, ad2=2)
-        cmds.text(label=" - ")
-        data["archive_path"] = data.get("archive_path", "")
-        cmds.iconTextButton(
-            en=data["archive"],
-            image="fileOpen.png",
-            l=data["archive_path"] if data["archive_path"] else "Pick archive folder.",
-            style="iconAndTextHorizontal",
-            c=lambda: update("archive_path", cmds.fileDialog2(ds=2, cap="Select a Folder.", fm=3, okc="Select")[0]))
-        cmds.setParent("..")
-        cmds.setParent("..")
-        # Use AMP
-        data["amp"] = data.get("amp", False)
-        cmds.columnLayout(
-            adjustableColumn=True,
-            bgc=colour(data["amp"]))
-        cmds.checkBox(
-            l="Use AMP archive",
-            v=data["amp"],
-            cc=lambda x: update("amp", x))
-        cmds.setParent("..")
+        # Settings module
+        for m in addons.modules:
+            with Module(m) as mod:
+                mod.settings_archive(get, update)
         cmds.setParent("..")
         ready = True
 
@@ -511,27 +483,24 @@ class MainWindow(object):
         Do the archive process
         """
         data = s.data["todo_settings"]
+
+        def getter(k, default):
+            return data.get(k, default)
+
         progress = 10
         callback(progress)
         scene = cmds.file(q=True, sn=True)
         base = os.path.splitext(os.path.basename(scene))
         if base[0] and os.path.isfile(scene):  # Check if the savepath exists (ie if we are not an untitled scene)
             cmds.file(save=True)  # Save the file regardless
-            if "archive" in data and data["archive"]:
-                if "archive_path" in data and data["archive_path"] and os.path.isdir(data["archive_path"]):
-                    with SafetyNet():
-                        FileArchive().archive(scene, data["archive_path"], todo)
-                        print "Archiving to folder: %s" % data["archive_path"]
-                else:
-                    cmds.confirmDialog(title="Uh oh...", message="Can't save file archive. You need to provide a folder.")
-                progress += 10
-                callback(progress)
-            if "amp" in data and data["amp"]:
-                with SafetyNet():
-                    AMPArchive().archive(scene, todo)
-                    print "Archiving to AMP"
-                progress += 10
-                callback(progress)
+            if addons.modules:
+                steps = len(addons.modules)  # Number of archives
+                for m in addons.modules:
+                    with Module(m) as mod:
+                        mod.archive(scene, todo, getter)
+                        progress += 50 / steps  # Progress bar up to halfway with real progress. Rest of the way fake. :P
+                        callback(progress)
+
         for i in range(20):  # Make marking off a todo look fancy
             progress += i*5
             if progress <= 100:
@@ -556,90 +525,7 @@ class MainWindow(object):
             print "Window closed."
 
 
-####### ARCHIVE METHODS
-class FileArchive(object):
-    """
-    Archive using zipfile
-    """
-    def __init__(s):
-        s.zip = __import__("zipfile")
-
-    def archive(s, src, dest, comment=""):
-        basename = os.path.basename(src)
-        name = "%s_%s_%s.zip" % (os.path.splitext(basename)[0], int(time.time() * 100), comment)
-        dest = os.path.join(dest, name)
-        z = s.zip.ZipFile(dest, "w")
-        z.write(src, basename)
-        z.close()
-
-
-class AMPArchive(object):
-    """
-    Archive using AMP
-    """
-    def __init__(s):
-        try:
-            am = __import__("am")
-            s.config = am.client.cmclient.config.Configurator()
-            s.manager = am.client.cmclient.manager.getShotManager(config=s.config)
-            s.root = s.manager.contentRoot
-            s.working = s._walk(s.root, [], "working")
-        except ImportError:
-            s.manager = False
-
-    def archive(s, path, comment):
-        """
-        Save off file.
-        """
-        if s.manager and os.path.isfile(path) and any(p in path for p in s.working):
-            if s._status(path):
-                s._checkIn(path, comment)
-                s._checkOut(path)
-                return True
-            elif "Confirm" == cmds.confirmDialog(title="Hold up...", message="You need to check out the file first.\nWould you like to do that now?"):
-                s._checkOut(path)
-                s._checkIn(path, comment)
-                s._checkOut(path)
-                return True
-        return False
-
-    def _walk(s, path, paths, stop):
-        """
-        Search files for working dir
-        """
-        for d in os.listdir(path):
-            p = os.path.join(path, d)
-            if os.path.isdir(p):
-                if d == stop:
-                    paths.append(p)
-                else:
-                    s._walk(p, paths, stop)
-        return paths
-
-    def _checkIn(s, path, comment):
-        """
-        Check in the file to lock in changes.
-        """
-        s.manager.checkinViewItemByPath(path, comment=comment)
-
-    def _checkOut(s, path):
-        """
-        Check out file for editing.
-        """
-        s.manager.checkoutViewItemByPath(path)
-
-    def _revert(s, path):
-        """
-        Revert file back to the most recent state.
-        """
-        s.manager.revertViewItemByPath(path)
-
-    def _status(s, path):
-        """
-        Check the locked status of a file.
-        """
-        return os.access(path, os.W_OK)  # True = Checked out. False = Checked in.
-
+reload(addons)
 try:
     MainWindow()
 except RuntimeError:
