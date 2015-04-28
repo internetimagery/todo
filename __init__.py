@@ -311,7 +311,7 @@ class MainWindow(object):
             style="iconAndTextHorizontal",
             label=todo["label"],
             fn="fixedWidthFont",
-            ann="Click to check off and save.",
+            ann="Click to check off and save.\nTODO: %s" % todo["label"],
             c=lambda: s.activateTodo(todo["uid"], wrapper))
         if todo["frame"] or todo["frame"] is 0:
             cmds.iconTextButton(
