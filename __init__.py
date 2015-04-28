@@ -123,7 +123,7 @@ class MainWindow(object):
             "Good stuff.",
             "Things to do...",
             "Making progress.",
-            "Slow and steady"])
+            "Slow and steady."])
 
         window = cmds.window(title=title, rtf=True)
         s.container = cmds.columnLayout(adjustableColumn=True)
@@ -422,7 +422,7 @@ class MainWindow(object):
 
         scene = cmds.file(q=True, sn=True)
         base = os.path.splitext(os.path.basename(scene))
-        if base[0] and os.path.isfile(scene):  # Check if the savepath exists (ie if we are not an untitled scene)
+        if os.path.isfile(scene) and base[0]:  # Check if the savepath exists (ie if we are not an untitled scene)
             cmds.file(save=True)  # Save the file regardless
             if addons.modules:
                 steps = len(addons.modules)  # Number of archives
