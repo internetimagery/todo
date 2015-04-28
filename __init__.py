@@ -456,8 +456,8 @@ class MainWindow(object):
             print "Window closed."
 
 
-reload(addons)
-try:
-    MainWindow()
-except RuntimeError:
-    print "Window exists already."
+def go():  # Run the main window
+    try:
+        MainWindow()
+    except RuntimeError:
+        print "Window exists already."
