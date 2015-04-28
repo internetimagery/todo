@@ -1,18 +1,13 @@
 # coding: utf-8
 # TODO!!
 # jason.dixon.email@gmail.com
-from functools import wraps
-import __builtin__ as GLOBAL
 import maya.cmds as cmds
 import collections
 import traceback
-import datetime
-import shutil
 import random
 import addons
 import json
 import time
-import sys
 import os
 import re
 
@@ -95,43 +90,6 @@ class Module(object):
         return True
 
 
-# class Scene(object):
-#     """
-#     Maya scene
-#     """
-#     def __init__(s):
-#         s.path = s._getPath()
-
-#     def _getPath(s):
-#         """
-#         Get scene location
-#         """
-#         path = re.findall("^((.+?)(\w*)(\.ma|\.mb))$", cmds.file(q=True, sn=True))
-#         if path:
-#             return path[0]  # (0 source, 1 path, 2 name, 3 extension)
-
-#     def save(s):
-#         """
-#         Save the scene
-#         """
-#         print "Saving scene."
-#         path = s._getPath()
-#         if path and path[2]:
-#             cmds.file(rename=path[0])
-#             cmds.file(save=True)
-#             s.path = path
-
-#     def archive(s, path, comment=""):
-#         """
-#         Save scene compressed with explicit name
-#         """
-#         if s.path and s.path[2]:
-#             name = "%s_%s_%s.ma" % (s.path[2], int(time.time()*100), comment)
-#             cmds.file(rename=os.path.join(path, name))
-#             cmds.file(save=True, compress=True)
-#             cmds.file(rename=s.path[0])
-
-
 class TimeSlider(object):
     """
     Timeslider functionality
@@ -146,35 +104,6 @@ class TimeSlider(object):
         cmds.playbackOptions(e=True, min=start, max=end)
 
 
-# class Call(object):
-#     """
-#     Generic callback
-#     """
-#     def __init__(self, func, *args, **kwargs):
-#         self.func = func
-#         self.args = args
-#         self.kwargs = kwargs
-
-#     def __call__(self, *args):
-#         return self.func(*self.args, **self.kwargs)
-
-
-# def unique(item):
-#     """
-#     Only allow one window
-#     """
-#     if not hasattr(GLOBAL, "unique_class"):
-#         GLOBAL.unique_class = {}
-
-#     @wraps(item)
-#     def UniqueItem(*args, **kwargs):
-#         if (item in GLOBAL.unique_class and sys.getrefcount(GLOBAL.unique_class[item]) < 3) or item not in GLOBAL.unique_class:
-#             GLOBAL.unique_class[item] = item(*args, **kwargs)
-#         return GLOBAL.unique_class[item]
-#     return UniqueItem
-
-
-# @unique
 class MainWindow(object):
     """
     Main GUI Window
