@@ -38,13 +38,13 @@ def settings_archive(getter, setter):
 
 
 # Archive file
-def archive(mayaFile, comment, settings):
+def archive(mayaFile, todo, settings):
     archive = settings("FileArchive.active", False)
     path = settings("FileArchive.path", "")
     if archive:
         if path and os.path.isdir(path):
             basename = os.path.basename(mayaFile)
-            name = "%s_%s_%s.zip" % (os.path.splitext(basename)[0], int(time.time() * 100), comment)
+            name = "%s_%s_%s.zip" % (os.path.splitext(basename)[0], int(time.time() * 100), todo["label"])
             dest = os.path.join(path, name)
             z = zipfile.ZipFile(dest, "w")
             z.write(mayaFile, basename)

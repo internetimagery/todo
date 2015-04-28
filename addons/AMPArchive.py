@@ -22,6 +22,7 @@ def settings_archive(getter, setter):
 
 # File Archive
 def archive(mayaFile, comment, settings):
+    comment = comment["label"]
     amp = settings("AMPArchive.active", False)
     if amp:
         AMPArchive().archive(mayaFile, comment)

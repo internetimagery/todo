@@ -483,12 +483,12 @@ class MainWindow(object):
         Do the archive process
         """
         data = s.data["todo_settings"]
+        progress = 10
+        callback(progress)
 
         def getter(k, default):
             return data.get(k, default)
 
-        progress = 10
-        callback(progress)
         scene = cmds.file(q=True, sn=True)
         base = os.path.splitext(os.path.basename(scene))
         if base[0] and os.path.isfile(scene):  # Check if the savepath exists (ie if we are not an untitled scene)
@@ -497,7 +497,7 @@ class MainWindow(object):
                 steps = len(addons.modules)  # Number of archives
                 for m in addons.modules:
                     with Module(m) as mod:
-                        mod.archive(scene, todo, getter)
+                        mod.archive(scene, s._parseTodo(todo), getter)
                         progress += 50 / steps  # Progress bar up to halfway with real progress. Rest of the way fake. :P
                         callback(progress)
 
