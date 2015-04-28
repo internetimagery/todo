@@ -4,7 +4,7 @@ import zipfile
 import time
 import os
 
-debug = True  # Reload module each time is is used.
+#debug = True  # Reload module each time is is used.
 
 
 # Settings

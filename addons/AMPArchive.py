@@ -4,7 +4,7 @@ import am.client.cmclient.manager as manager
 import maya.cmds as cmds
 import os
 
-debug = True
+#debug = True
 
 
 # Settings menu
