@@ -10,6 +10,7 @@ import random
 import addons
 import json
 import time
+import math
 import sys
 import os
 import re
@@ -414,7 +415,17 @@ class MainWindow(object):
         prog = cmds.progressBar(p=gui, pr=0)
 
         def update(p):
-            utils.executeDeferred(lambda: cmds.progressBar(prog, e=True, pr=p))
+            if cmds.progressBar(prog, ex=True):
+                time.sleep(1)
+                val = cmds.progressBar(prog, q=True, pr=True)
+                val += p
+                print val
+                if val <= 100:
+                    cmds.progressBar(prog, e=True, pr=val)
+                else:
+                    cmds.progressBar(prog, e=True, pr=100)
+                    cmds.refresh()
+                    print "DONE!"
 
         temp = s.data[uid]
         del s.data[uid]
@@ -423,36 +434,44 @@ class MainWindow(object):
         except RuntimeError as e:
             print "Warning:", e
             s.data[uid] = temp  # Rebuild todo
-        s._buidTodoTasks()
+            s._buidTodoTasks()
 
     def performArchive(s, todo, callback):
         """
         Do the archive process
         """
-        data = s.data["todo_settings"]
-        progress = 10
-        callback(progress)
+        data = s.data["todo_settings"]  # Info from settings menu
+        scene = cmds.file(q=True, sn=True)  # Current scene
+        base = os.path.splitext(os.path.basename(scene))  # scene name and extension
 
         def getter(k, default):
+            """
+            Grab items from settings if needed.
+            """
             return data.get(k, default)
 
-        scene = cmds.file(q=True, sn=True)
-        base = os.path.splitext(os.path.basename(scene))
+        def update():
+            """
+            Update the progress bar, with... progress.
+            """
+            utils.executeDeferred(lambda: callback(step))
+
+        def archive(m):
+            """
+            Run the archive module
+            """
+            with Module(m) as mod:
+                mod.archive(scene, s._parseTodo(todo), getter)
+            update()
+
+        step = int(math.ceil(100.0 / (len(addons.modules) + 1)))  # Work out our progress (plus 1 for initial scene save)
         if os.path.isfile(scene) and base[0]:  # Check if the savepath exists (ie if we are not an untitled scene)
+            update()
             cmds.file(save=True)  # Save the file regardless
             if addons.modules:
-                steps = len(addons.modules)  # Number of archives
                 for m in addons.modules:
-                    with Module(m) as mod:
-                        mod.archive(scene, s._parseTodo(todo), getter)
-                        progress += 50 / steps  # Progress bar up to halfway with real progress. Rest of the way fake. :P
-                        callback(progress)
-
-        for i in range(20):  # Make marking off a todo look fancy
-            progress += i*5
-            if progress <= 100:
-                callback(progress)
-                time.sleep(0.05)
+                    update()
+                    #archive(m)
 
     def moveDock(s):  # Update dock location information
         if cmds.dockControl(s.dock, q=True, fl=True):
