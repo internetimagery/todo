@@ -1,13 +1,16 @@
 # coding: utf-8
 # TODO!!
 # jason.dixon.email@gmail.com
+import maya.utils as utils
 import maya.cmds as cmds
 import collections
+import threading
 import traceback
 import random
 import addons
 import json
 import time
+import sys
 import os
 import re
 
@@ -104,6 +107,20 @@ class TimeSlider(object):
         cmds.playbackOptions(e=True, min=start, max=end)
 
 
+def unique(item):
+    """
+    Only keep one window open at a time
+    """
+    items = {}
+
+    def UniqueItem(*args, **kwargs):
+        if (item in items and sys.getrefcount(items[item]) < 3) or item not in items:
+            items[item] = item(*args, **kwargs)
+        return items[item]
+    return UniqueItem
+
+
+@unique
 class MainWindow(object):
     """
     Main GUI Window
@@ -397,8 +414,7 @@ class MainWindow(object):
         prog = cmds.progressBar(p=gui, pr=0)
 
         def update(p):
-            cmds.progressBar(prog, e=True, pr=p)
-            cmds.refresh(cv=True)
+            utils.executeDeferred(lambda: cmds.progressBar(prog, e=True, pr=p))
 
         temp = s.data[uid]
         del s.data[uid]
@@ -456,8 +472,4 @@ class MainWindow(object):
             print "Window closed."
 
 
-def go():  # Run the main window
-    try:
-        MainWindow()
-    except RuntimeError:
-        print "Window exists already."
+MainWindow()
