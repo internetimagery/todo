@@ -415,23 +415,25 @@ class MainWindow(object):
         prog = cmds.progressBar(p=gui, pr=0)
 
         def update(p):
+            """
+            Update the progress bar
+            """
             if cmds.progressBar(prog, ex=True):
-                time.sleep(1)
-                val = cmds.progressBar(prog, q=True, pr=True)
-                val += p
-                print val
+                val = cmds.progressBar(prog, q=True, pr=True) + p
                 if val <= 100:
                     cmds.progressBar(prog, e=True, pr=val)
+                    cmds.refresh()
                 else:
                     cmds.progressBar(prog, e=True, pr=100)
                     cmds.refresh()
-                    print "DONE!"
+                    time.sleep(0.1)
+                    s._buidTodoTasks()
 
         temp = s.data[uid]
         del s.data[uid]
         try:
             s.performArchive(temp, update)
-        except RuntimeError as e:
+        except RuntimeError as e:  # Was the save canceled?
             print "Warning:", e
             s.data[uid] = temp  # Rebuild todo
             s._buidTodoTasks()
@@ -450,28 +452,28 @@ class MainWindow(object):
             """
             return data.get(k, default)
 
-        def update():
-            """
-            Update the progress bar, with... progress.
-            """
-            utils.executeDeferred(lambda: callback(step))
-
         def archive(m):
             """
             Run the archive module
             """
+            print m
             with Module(m) as mod:
                 mod.archive(scene, s._parseTodo(todo), getter)
-            update()
+            callback(step)
 
         step = int(math.ceil(100.0 / (len(addons.modules) + 1)))  # Work out our progress (plus 1 for initial scene save)
         if os.path.isfile(scene) and base[0]:  # Check if the savepath exists (ie if we are not an untitled scene)
-            update()
+            callback(step)
             cmds.file(save=True)  # Save the file regardless
             if addons.modules:
+                def closure(mod):
+                    th = threading.Thread(  # Run our archives!
+                        target=utils.executeDeferred,
+                        args=(lambda: archive(mod),))
+                    th.daemon = True
+                    th.start()
                 for m in addons.modules:
-                    update()
-                    #archive(m)
+                    closure(m)
 
     def moveDock(s):  # Update dock location information
         if cmds.dockControl(s.dock, q=True, fl=True):
