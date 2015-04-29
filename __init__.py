@@ -148,7 +148,7 @@ class MainWindow(object):
         s.wrapper = ""
 
         allowed_areas = ['right', 'left']
-        s.dock = cmds.dockControl("todo_window", a='left', content=window, aa=allowed_areas, fl=True, l=title, fcc=s.moveDock, vcc=s.closeDock)
+        s.dock = cmds.dockControl(a='left', content=window, aa=allowed_areas, fl=True, l=title, fcc=s.moveDock, vcc=s.closeDock)
 
         s._buildTodo()
 
@@ -420,14 +420,15 @@ class MainWindow(object):
             """
             if cmds.progressBar(prog, ex=True):
                 val = cmds.progressBar(prog, q=True, pr=True) + p
-                if val <= 100:
+                if val < 100:
                     cmds.progressBar(prog, e=True, pr=val)
                     cmds.refresh()
                 else:
-                    cmds.progressBar(prog, e=True, pr=100)
+                    cmds.progressBar(prog, e=True, pr=100)  # People like seeing a bar at 100%
                     cmds.refresh()
-                    time.sleep(0.1)
+                    time.sleep(0.3)
                     s._buidTodoTasks()
+                    print "Archive Done"
 
         temp = s.data[uid]
         del s.data[uid]
@@ -456,24 +457,25 @@ class MainWindow(object):
             """
             Run the archive module
             """
-            print m
             with Module(m) as mod:
                 mod.archive(scene, s._parseTodo(todo), getter)
-            callback(step)
+            utils.executeDeferred(lambda: callback(step))
 
         step = int(math.ceil(100.0 / (len(addons.modules) + 1)))  # Work out our progress (plus 1 for initial scene save)
         if os.path.isfile(scene) and base[0]:  # Check if the savepath exists (ie if we are not an untitled scene)
             callback(step)
             cmds.file(save=True)  # Save the file regardless
             if addons.modules:
-                def closure(mod):
+                for mod in addons.modules:
                     th = threading.Thread(  # Run our archives!
-                        target=utils.executeDeferred,
-                        args=(lambda: archive(mod),))
+                        target=archive,
+                        args=(mod,))
                     th.daemon = True
                     th.start()
-                for m in addons.modules:
-                    closure(m)
+        else:
+            for i in range(25):
+                time.sleep(0.01)
+                callback(4)
 
     def moveDock(s):  # Update dock location information
         if cmds.dockControl(s.dock, q=True, fl=True):
