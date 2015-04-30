@@ -25,8 +25,8 @@ def archive(mayaFile, todo, settings):
     comment = todo["label"]
     amp = settings("AMPArchive.active", False)
     if amp:
-        AMPArchive().archive(mayaFile, comment)
-        print "Checking file into AMP."
+        if AMPArchive().archive(mayaFile, comment):
+            print "Checking file into AMP."
 
 
 # Cleanup stuff

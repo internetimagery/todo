@@ -76,7 +76,7 @@ class Module(object):
             s.mod = addons.modules[name]
             s.mod.cmds = dummyCMD()
         else:
-            s.mod = False
+            raise Exception
         s.oldOut = sys.stdout
         sys.stdout = s
 
