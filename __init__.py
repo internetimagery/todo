@@ -76,14 +76,20 @@ class Module(object):
             s.mod = addons.modules[name]
         else:
             s.mod = False
+        s.oldOut = sys.stdout
+        sys.stdout = s
 
-    def write(s, t):
-        utils.executeDeferred("print \"%s\"" % t)
+    def write(s, *t):
+        t = "".join(t)
+        if len(t.rstrip()):
+            utils.executeDeferred(lambda: s.oldOut.write("%s\n" % t))
 
     def __enter__(s):
         return s.mod
 
     def __exit__(s, errType, errVal, trace):
+        sys.stdout = s.oldOut
+        s.mod.cmds = cmds
         if errType and hasattr(s.mod, "debug") and s.mod.debug:
             s.write("Uh oh... there was a problem. :(")
             s.write("%s :: %s" % (errType.__name__, errVal))
@@ -95,6 +101,17 @@ class Module(object):
             if hasattr(s.mod, "debug") and s.mod.debug:
                 s.write("Cleanup Error", e)
         return True
+
+
+class dummyCMD(object):
+    """
+    Prevent usage of cmds
+    """
+    def __getattr__(s, n):
+        def dummy(*args, **kwargs):
+            print "You tried to use cmds.%s()\nYou cannot use \"cmds\" during archive." % n
+            return ""
+        return dummy
 
 
 class TimeSlider(object):
@@ -431,7 +448,6 @@ class MainWindow(object):
                     cmds.refresh()
                     time.sleep(0.3)
                     s._buidTodoTasks()
-                    print "File archived."
 
         scene = cmds.file(q=True, sn=True)  # Scene name
         temp = s.data[uid]  # hold onto todo data
@@ -467,7 +483,10 @@ class MainWindow(object):
             Run archives
             """
             with Module(m) as mod:
+                if hasattr(mod, "cmds"):
+                    mod.cmds = dummyCMD()
                 mod.archive(mayaFile, s._parseTodo(todo), getter)
+                mod.cmds = cmds
             utils.executeDeferred(lambda: callback(step))
 
         data = s.data["todo_settings"]  # settings information

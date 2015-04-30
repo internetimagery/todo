@@ -49,9 +49,9 @@ def archive(mayaFile, todo, settings):
             z = zipfile.ZipFile(dest, "w")
             z.write(mayaFile, basename)
             z.close()
-            print "Saving archive.\n"
+            print "File archived."
         else:
-            cmds.confirmDialog(title="Uh oh...", message="Can't save file archive. You need to provide a folder.")
+            print "Can't save file archive. You need to provide a folder."
 
 
 # Clean up anything that needs cleaning
