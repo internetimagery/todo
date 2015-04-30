@@ -105,13 +105,12 @@ class Module(object):
 
 class dummyCMD(object):
     """
-    Prevent usage of cmds
+    Allow usage of cmds
     """
     def __getattr__(s, n):
-        def dummy(*args, **kwargs):
-            print "You tried to use cmds.%s()\nYou cannot use \"cmds\" during archive." % n
-            return ""
-        return dummy
+        if hasattr(cmds, n):
+            at = getattr(cmds, n)
+            return lambda *a, **kw: utils.executeInMainThreadWithResult(lambda: at(*a, **kw))
 
 
 class TimeSlider(object):
@@ -464,7 +463,7 @@ class MainWindow(object):
         else:
             for i in range(25):  # The scene is untitled. Run a dummy progress bar to look nice
                 time.sleep(0.01)
-                callback(4)
+                update(4)
             s._buidTodoTasks()
 
     def performArchive(s, mayaFile, todo, callback):

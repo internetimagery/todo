@@ -51,7 +51,7 @@ def archive(mayaFile, todo, settings):
             z.close()
             print "File archived."
         else:
-            print "Can't save file archive. You need to provide a folder."
+            cmds.confirmDialog(title="Uh oh...", message="Can't save file archive. You need to provide a folder.")
 
 
 # Clean up anything that needs cleaning
