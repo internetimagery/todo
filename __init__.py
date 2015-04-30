@@ -74,6 +74,7 @@ class Module(object):
     def __init__(s, name):
         if name in addons.modules:
             s.mod = addons.modules[name]
+            s.mod.cmds = dummyCMD()
         else:
             s.mod = False
         s.oldOut = sys.stdout
@@ -482,10 +483,7 @@ class MainWindow(object):
             Run archives
             """
             with Module(m) as mod:
-                if hasattr(mod, "cmds"):
-                    mod.cmds = dummyCMD()
                 mod.archive(mayaFile, s._parseTodo(todo), getter)
-                mod.cmds = cmds
             utils.executeDeferred(lambda: callback(step))
 
         data = s.data["todo_settings"]  # settings information
