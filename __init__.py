@@ -444,9 +444,9 @@ class MainWindow(object):
                     cmds.progressBar(prog, e=True, pr=val)
                     cmds.refresh()
                 else:
-                    cmds.progressBar(prog, e=True, pr=100)  # People like seeing a bar at 100%
+                    cmds.progressBar(prog, e=True, pr=100)
                     cmds.refresh()
-                    time.sleep(0.3)
+                    time.sleep(0.3)  # Pause on 100 for dramatic effect!
                     s._buidTodoTasks()
 
         scene = cmds.file(q=True, sn=True)  # Scene name
