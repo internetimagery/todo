@@ -69,7 +69,7 @@ class FileInfo(collections.MutableMapping):
 
 class Module(object):
     """
-    Keep modules running smoothly
+    Keep modules running smoothly. Make them threadsafe.
     """
     def __init__(s, name):
         if name in addons.modules:
@@ -106,7 +106,7 @@ class Module(object):
 
 class dummyCMD(object):
     """
-    Allow usage of cmds
+    Allow usage of cmds in threads.
     """
     def __getattr__(s, n):
         if hasattr(cmds, n):

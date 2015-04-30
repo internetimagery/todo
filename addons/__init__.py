@@ -5,7 +5,7 @@ import re
 
 path = os.path.dirname(__file__)
 sys.path.append(path)
-reg = re.compile("^([^_\.]\w*?)(?:\.py)$")
+reg = re.compile("^([^_\.]\w*?)(?:\.py)$")  # allow modules with no . or _ as first letter, and no spaces
 
 modules = {}
 for f in [reg.match(m).group(1) for m in os.listdir(path) if reg.match(m)]:
