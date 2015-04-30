@@ -77,20 +77,23 @@ class Module(object):
         else:
             s.mod = False
 
+    def write(s, t):
+        utils.executeDeferred("print \"%s\"" % t)
+
     def __enter__(s):
         return s.mod
 
     def __exit__(s, errType, errVal, trace):
         if errType and hasattr(s.mod, "debug") and s.mod.debug:
-            print "Uh oh... there was a problem. :("
-            print "%s :: %s" % (errType.__name__, errVal)
+            s.write("Uh oh... there was a problem. :(")
+            s.write("%s :: %s" % (errType.__name__, errVal))
             for t in traceback.format_tb(trace):
-                print t
+                s.write(t)
         try:
             s.mod.cleanup()
         except Exception as e:
             if hasattr(s.mod, "debug") and s.mod.debug:
-                print "Cleanup Error", e
+                s.write("Cleanup Error", e)
         return True
 
 
@@ -428,54 +431,53 @@ class MainWindow(object):
                     cmds.refresh()
                     time.sleep(0.3)
                     s._buidTodoTasks()
-                    print "Archive Done"
+                    print "File archived."
 
-        temp = s.data[uid]
-        del s.data[uid]
-        try:
-            s.performArchive(temp, update)
-        except RuntimeError as e:  # Was the save canceled?
-            print "Warning:", e
-            s.data[uid] = temp  # Rebuild todo
+        scene = cmds.file(q=True, sn=True)  # Scene name
+        temp = s.data[uid]  # hold onto todo data
+        del s.data[uid]  # Remove todo from memory
+        if os.path.splitext(os.path.basename(scene))[0] and os.path.isfile(scene):  # Check the scene is not untitled and still exists
+            process = cmds.scriptJob(e=['SceneSaved', lambda: s.performArchive(scene, temp, update)], ro=True)
+            try:
+                cmds.file(save=True)  # Save the scene
+            except RuntimeError:  # If scene save was canceled or failed. Reset everything
+                if cmds.scriptJob(ex=process):
+                    cmds.scriptJob(kill=process)
+                s.data[uid] = temp
+                s._buidTodoTasks()
+        else:
+            for i in range(25):  # The scene is untitled. Run a dummy progress bar to look nice
+                time.sleep(0.01)
+                callback(4)
             s._buidTodoTasks()
 
-    def performArchive(s, todo, callback):
+    def performArchive(s, mayaFile, todo, callback):
         """
-        Do the archive process
+        Process the archving of the scene.
         """
-        data = s.data["todo_settings"]  # Info from settings menu
-        scene = cmds.file(q=True, sn=True)  # Current scene
-        base = os.path.splitext(os.path.basename(scene))  # scene name and extension
 
         def getter(k, default):
             """
-            Grab items from settings if needed.
+            Grab setting entry
             """
             return data.get(k, default)
 
         def archive(m):
             """
-            Run the archive module
+            Run archives
             """
             with Module(m) as mod:
-                mod.archive(scene, s._parseTodo(todo), getter)
+                mod.archive(mayaFile, s._parseTodo(todo), getter)
             utils.executeDeferred(lambda: callback(step))
 
-        step = int(math.ceil(100.0 / (len(addons.modules) + 1)))  # Work out our progress (plus 1 for initial scene save)
-        if os.path.isfile(scene) and base[0]:  # Check if the savepath exists (ie if we are not an untitled scene)
-            callback(step)
-            cmds.file(save=True)  # Save the file regardless
-            if addons.modules:
-                for mod in addons.modules:
-                    th = threading.Thread(  # Run our archives!
-                        target=archive,
-                        args=(mod,))
-                    th.daemon = True
-                    th.start()
-        else:
-            for i in range(25):
-                time.sleep(0.01)
-                callback(4)
+        data = s.data["todo_settings"]  # settings information
+        step = int(math.ceil(100.0 / (len(addons.modules) + 1)))
+        callback(step)  # One for the scene save!
+        if addons.modules:
+            for m in addons.modules:
+                th = threading.Thread(target=archive, args=(m,))
+                th.daemon = True
+                th.start()
 
     def moveDock(s):  # Update dock location information
         if cmds.dockControl(s.dock, q=True, fl=True):
@@ -493,6 +495,3 @@ class MainWindow(object):
         elif not visible:
             cmds.deleteUI(s.dock, ctl=True)
             print "Window closed."
-
-
-MainWindow()
