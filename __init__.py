@@ -172,12 +172,10 @@ class MainWindow(object):
 
         s._buildTodo()
 
-        if s.data["todo_location"] == 'float':
+        if s.location == 'float':
             cmds.dockControl(s.dock, e=True, fl=True)
-        elif s.data["todo_location"] in allowed_areas:
-            cmds.dockControl(s.dock, e=True, a=s.data["todo_location"], fl=False)
-        else:
-            s.data["todo_location"] = "float"
+        elif s.location in allowed_areas:
+            cmds.dockControl(s.dock, e=True, a=s.location, fl=False)
 
         cmds.scriptJob(e=["PostSceneRead", s._refresh], p=s.dock)
         cmds.scriptJob(e=["NewSceneOpened", s._refresh], p=s.dock)
@@ -404,15 +402,8 @@ class MainWindow(object):
         """
         meta = s._parseTodo(txt)
         if meta["label"]:
-            def name(i):
-                return "%s_%s" % (s.basename, i)
-
-            i = 0
-            n = name(i)
-            while n in s.data.keys():
-                i += 1
-                n = name(i)
-            s.data[n] = txt
+            name = "%s_%s" % (s.basename, int(time.time() * 100))
+            s.data[name] = txt
             s._buidTodoTasks()
             return True  # Return True to retain input
         else:
@@ -497,11 +488,11 @@ class MainWindow(object):
 
     def moveDock(s):  # Update dock location information
         if cmds.dockControl(s.dock, q=True, fl=True):
-            s.data["todo_location"] = "float"
+            s.location = "float"
             print "Floating Dock."
         else:
             area = cmds.dockControl(s.dock, q=True, a=True)
-            s.data["todo_location"] = area
+            s.location = area
             print "Docking %s." % area
 
     def closeDock(s, *loop):
@@ -511,3 +502,20 @@ class MainWindow(object):
         elif not visible:
             cmds.deleteUI(s.dock, ctl=True)
             print "Window closed."
+
+    def location():
+        """
+        Window location
+        """
+        def fget(s):
+            if cmds.optionVar(ex="todo_window_location"):
+                return cmds.optionVar(q="todo_window_location")
+            else:
+                return "float"
+        def fset(s, value):
+            cmds.optionVar(sv=["todo_window_location", value])
+        def fdel(s):
+            if cmds.optionVar(ex="todo_window_location"):
+                cmds.optionVar(rm="todo_window_location")
+        return locals()
+    location = property(**location())
