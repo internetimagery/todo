@@ -1,7 +1,9 @@
 # Import AMP support
 import am.client.cmclient.config as config
 import am.client.cmclient.manager as manager
+import am.client.gui.utils as utils
 import maya.cmds as cmds
+import maya.utils as Mutil
 import os
 
 #debug = True
@@ -25,8 +27,10 @@ def archive(mayaFile, todo, settings):
     comment = todo["label"]
     amp = settings("AMPArchive.active", False)
     if amp:
-        if AMPArchive().archive(mayaFile, comment):
+        if Mutil.executeInMainThreadWithResult(lambda: AMPArchive().archive(mayaFile, comment)):
             print "Checking file into AMP."
+        else:
+            print "Couldn't check in file to AMP."
 
 
 # Cleanup stuff
@@ -47,7 +51,7 @@ class AMPArchive(object):
         """
         Save off file.
         """
-        if os.path.isfile(path) and s.manager.isClientPathManaged(path):
+        if os.path.isfile(path) and s.login() and s.manager.isClientPathManaged(path):
             if s._status(path):
                 s._checkIn(path, comment)
                 s._checkOut(path)
@@ -58,14 +62,6 @@ class AMPArchive(object):
                 s._checkOut(path)
                 return True
         return False
-
-    def login(s):
-        """
-        Log into AMP
-        """
-        username = ""
-        password = ""
-        s.manager.login(username, password)
 
     def _checkLogin(s):
         """
@@ -97,3 +93,38 @@ class AMPArchive(object):
         Check the locked status of a file.
         """
         return os.access(path, os.W_OK)  # True = Checked out. False = Checked in.
+
+    def login(s):
+        """
+        Check if we are logged in. If not, try to log in.
+        """
+        s.loggingin = True
+        def cancel():
+            """
+            Cancel out of the login loop
+            """
+            s.loggingin = False
+
+        def ok():
+            """
+            Try to sign in
+            """
+            s.config.setDefaultServer(d.server_name)
+            s.manager.login(unicode(d.username), unicode(d.password))
+
+        for i in range(10):
+            if s.manager.checkSessionToken():  # Check if we are logged in.
+                print "Signed into AMP."
+                return True
+            elif not s.loggingin:
+                break
+            else:
+                print "Login attempt %s of 10." % str(i + 1)
+                d = utils.LoginDialog(
+                    message_to_user="Can't archive your file to AMP.\nYou are not logged in.\nLets log in now. :)",
+                    server_config=s.config)
+                d.set_click_handler("ok", ok)
+                d.set_click_handler("cancel", cancel)
+                d.draw()
+                d.exec_()
+        return False
