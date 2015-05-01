@@ -85,13 +85,26 @@ class Popup(object):
         s.job = cmds.scriptNode(n=s.uid, st=2, bs="")
         s.code = """
 import maya.cmds as cmds
-uid = cmds.fileInfo("%s", q=True)
-uid = uid[0] if uid else ""
-if uid == "ok":
-    cmds.confirmDialog(title="Quick Update", icn="information", b="Thanks", message=\"\"\"%s\"\"\")
-if cmds.objExists("%s"):
-    cmds.delete("%s")
-""" % (s.uid, s.message, s.job, s.job)
+uid = "%s"
+job = "%s"
+load = cmds.fileInfo(uid, q=True)
+load = load[0] if load else ""
+if load == "ok":
+    def makepopup():
+        p = cmds.setParent(q=True)
+        cmds.rowLayout(nc=2, ad2=2, p=p)
+        cmds.columnLayout()
+        cmds.iconTextStaticLabel(image="defaultCustomLayout.png", h=30, w=30)
+        cmds.setParent("..")
+        cmds.columnLayout(adj=True)
+        cmds.text(al="left", hl=True, l=\"\"\"%s\"\"\")
+        cmds.button(l="Thanks", c="cmds.layoutDialog(dismiss=\\"gone\\")")
+        cmds.setParent("..")
+    cmds.layoutDialog(ui=makepopup, t="A Quick Update")
+if cmds.objExists(job):
+    cmds.delete(job)
+cmds.fileInfo(rm=uid)
+""" % (s.uid, s.job, s.message)
         cmds.scriptNode(s.job, e=True, bs=s.stringify(s.code))
         cmds.fileInfo(s.uid, "ok")
         return s
@@ -547,9 +560,9 @@ class MainWindow(object):
             process = cmds.scriptJob(e=['SceneSaved', lambda: s.performArchive(scene, temp, update)], ro=True)
             try:
                 message = """
-This scene was last saved on %s.
-This completed the task, "%s".
-The file has not been modified since.
+<div>- This Scene was last saved on <em>%s</em>.</div>
+<div>- Completing the task: <code>%s</code></div>
+<div>- The file has <strong>not</strong> been modified since.</div><br>
 """ % (time.ctime(), s._parseTodo(temp)["label"])
                 with Popup(message):
                     cmds.file(save=True)  # Save the scene
