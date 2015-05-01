@@ -42,13 +42,12 @@ class AMPArchive(object):
         s.config = config.Configurator()
         s.manager = manager.getShotManager(config=s.config)
         s.root = s.manager.contentRoot
-        s.working = s._walk(s.root, [], "working")
 
     def archive(s, path, comment):
         """
         Save off file.
         """
-        if os.path.isfile(path) and any(p in path for p in s.working):
+        if os.path.isfile(path) and s.manager.isClientPathManaged(path):
             if s._status(path):
                 s._checkIn(path, comment)
                 s._checkOut(path)
@@ -60,24 +59,26 @@ class AMPArchive(object):
                 return True
         return False
 
-    def _walk(s, path, paths, stop):
+    def login(s):
         """
-        Search files for working dir
+        Log into AMP
         """
-        for d in os.listdir(path):
-            p = os.path.join(path, d)
-            if os.path.isdir(p):
-                if d == stop:
-                    paths.append(p)
-                else:
-                    s._walk(p, paths, stop)
-        return paths
+        username = ""
+        password = ""
+        s.manager.login(username, password)
+
+    def _checkLogin(s):
+        """
+        Check login status. Return True for logged in.
+        """
+        return s.manager.checkSessionToken()
 
     def _checkIn(s, path, comment):
         """
         Check in the file to lock in changes.
         """
-        s.manager.checkinViewItemByPath(path, comment=comment)
+        if not s.manager.checkinViewItemByPath(path, comment=comment):
+            s.manager.addViewItemByPath(path, comment=comment)
 
     def _checkOut(s, path):
         """
