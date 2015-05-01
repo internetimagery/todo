@@ -553,7 +553,7 @@ class MainWindow(object):
                     time.sleep(0.3)  # Pause on 100 for dramatic effect!
                     s._buidTodoTasks()
 
-        scene = cmds.file(q=True, sn=True)  # Scene name
+        scene = os.path.realpath(cmds.file(q=True, sn=True))  # Scene name
         temp = s.data[uid]  # hold onto todo data
         del s.data[uid]  # Remove todo from memory
         if os.path.splitext(os.path.basename(scene))[0] and os.path.isfile(scene):  # Check the scene is not untitled and still exists
