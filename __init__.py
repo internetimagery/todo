@@ -1,6 +1,8 @@
 # coding: utf-8
-# TODO!!
-# jason.dixon.email@gmail.com
+# Todo script for Maya
+# Created by Jason Dixon.
+# 02.05.15
+
 import maya.utils as utils
 import maya.cmds as cmds
 import collections

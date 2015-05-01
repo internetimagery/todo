@@ -1,4 +1,8 @@
 # File Archiving
+#
+# Created by Jason Dixon
+# 02/05/15
+
 import maya.cmds as cmds
 import zipfile
 import time
