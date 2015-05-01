@@ -88,7 +88,7 @@ import maya.cmds as cmds
 uid = cmds.fileInfo("%s", q=True)
 uid = uid[0] if uid else ""
 if uid == "ok":
-    cmds.confirmDialog(title="A quick note.", message=\"\"\"%s\"\"\")
+    cmds.confirmDialog(title="Quick Update", icn="information", b="Thanks", message=\"\"\"%s\"\"\")
 if cmds.objExists("%s"):
     cmds.delete("%s")
 """ % (s.uid, s.message, s.job, s.job)
@@ -546,7 +546,12 @@ class MainWindow(object):
         if os.path.splitext(os.path.basename(scene))[0] and os.path.isfile(scene):  # Check the scene is not untitled and still exists
             process = cmds.scriptJob(e=['SceneSaved', lambda: s.performArchive(scene, temp, update)], ro=True)
             try:
-                with Popup("code"):
+                message = """
+This scene was last saved on %s.
+This completed the task, "%s".
+The file has not been modified since.
+""" % (time.ctime(), s._parseTodo(temp)["label"])
+                with Popup(message):
                     cmds.file(save=True)  # Save the scene
             except RuntimeError:  # If scene save was canceled or failed. Reset everything
                 if cmds.scriptJob(ex=process):
