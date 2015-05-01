@@ -67,6 +67,43 @@ class FileInfo(collections.MutableMapping):
         return len(s.data)
 
 
+class Popup(object):
+    """
+    Create a one time popup
+    """
+    def __init__(s, message):
+        s.uid = "shot_unique_id_%s" % int((time.time() * 100))  # Generate unique ID
+        s.message = message
+
+    def stringify(s, data):
+        return "python(\"%s\");" % data.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", r"\n")
+
+    def __enter__(s):
+        """
+        Add things to the scene
+        """
+        s.job = cmds.scriptNode(n=s.uid, st=2, bs="")
+        s.code = """
+import maya.cmds as cmds
+uid = cmds.fileInfo("%s", q=True)
+uid = uid[0] if uid else ""
+if uid == "ok":
+    cmds.confirmDialog(title="A quick note.", message=\"\"\"%s\"\"\")
+if cmds.objExists("%s"):
+    cmds.delete("%s")
+""" % (s.uid, s.message, s.job, s.job)
+        cmds.scriptNode(s.job, e=True, bs=s.stringify(s.code))
+        cmds.fileInfo(s.uid, "ok")
+        return s
+
+    def __exit__(s, err, val, trace):
+        """
+        Remove those things from the scene
+        """
+        cmds.fileInfo(rm=s.uid)
+        cmds.delete(s.job)
+
+
 class Module(object):
     """
     Keep modules running smoothly. Make them threadsafe.
@@ -152,9 +189,8 @@ class MainWindow(object):
         s.basename = "TODO"  # Name for all todo's to derive from
         s.regex = {}  # Compiled regexes
         s.sections = {}  # Closed / Open state of todo sections
-
         title = random.choice([
-            "Todo:", "Doing well.", "Keep it up!", "You can do it.",
+            "Todo:", "Tasks:", "Doing well.", "Keep it up!", "You can do it.",
             "Good stuff.", "Make it happen!", ":D", "Nicely done.",
             "Things to do...", "Plan it. Do it. Succeed.", "Forward momentum.",
             "Making progress.", "I am a todo window?! How did I get in this strange place?",
@@ -510,7 +546,8 @@ class MainWindow(object):
         if os.path.splitext(os.path.basename(scene))[0] and os.path.isfile(scene):  # Check the scene is not untitled and still exists
             process = cmds.scriptJob(e=['SceneSaved', lambda: s.performArchive(scene, temp, update)], ro=True)
             try:
-                cmds.file(save=True)  # Save the scene
+                with Popup("code"):
+                    cmds.file(save=True)  # Save the scene
             except RuntimeError:  # If scene save was canceled or failed. Reset everything
                 if cmds.scriptJob(ex=process):
                     cmds.scriptJob(kill=process)
