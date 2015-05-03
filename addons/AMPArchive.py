@@ -1,5 +1,4 @@
 # Import AMP support
-#
 # Created by Jason Dixon
 # 02/05/15
 # AMP Pipeline is copywrite Animation Mentor
@@ -103,34 +102,31 @@ class AMPArchive(object):
         """
         Check if we are logged in. If not, try to log in.
         """
-        s.loggingin = True
+        s.again = True
+        def stop():
+            s.again = False
 
-        def cancel():
-            """
-            Cancel out of the login loop
-            """
-            s.loggingin = False
-
-        def ok():
-            """
-            Try to sign in
-            """
-            s.config.setDefaultServer(d.server_name)
-            s.manager.login(unicode(d.username), unicode(d.password))
-
-        for i in range(10):
-            if s.manager.checkSessionToken():  # Check if we are logged in.
-                print "Signed into AMP."
-                return True
-            elif not s.loggingin:
-                break
-            else:
-                print "Login attempt %s of 10." % str(i + 1)
-                d = AMutils.LoginDialog(
+        def login_window():
+            d = AMutils.LoginDialog(
                     message_to_user="Can't archive your file to AMP.\nYou are not logged in.\nLets log in now. :)",
                     server_config=s.config)
-                d.set_click_handler("ok", ok)
-                d.set_click_handler("cancel", cancel)
-                d.draw()
-                d.exec_()
+            d.set_click_handler("ok", lambda: (s.config.setDefaultServer(d.server_name), s.manager.login(unicode(d.username), unicode(d.password))))
+            d.set_click_handler("cancel", stop)
+            d.draw()
+            d.exec_()
+
+        for i in range(10):
+            if s.again:
+                if s.manager.checkSessionToken():  # Check if we are logged in.
+                    print "Signed into AMP."
+                    return True
+                else:
+                    print "Login attempt %s of 10." % str(i + 1)
+                    d = AMutils.LoginDialog(
+                        message_to_user="Can't archive your file to AMP.\nYou are not logged in.\nLets log in now. :)",
+                        server_config=s.config)
+                    d.set_click_handler("ok", ok)
+                    d.set_click_handler("cancel", cancel)
+                    d.draw()
+                    d.exec_()
         return False
