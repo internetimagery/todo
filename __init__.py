@@ -11,7 +11,6 @@ import random
 import addons
 import json
 import time
-import math
 import sys
 import os
 import re
@@ -28,6 +27,7 @@ def unique(item):
             items[item] = item(*args, **kwargs)
         return items[item]
     return UniqueItem
+
 
 class FileInfo(dict):
     """
@@ -94,11 +94,11 @@ if load == "ok":
         p = cmds.setParent(q=True)
         cmds.rowLayout(nc=2, ad2=2, p=p)
         cmds.columnLayout()
-        cmds.iconTextStaticLabel(image="defaultCustomLayout.png", h=30, w=30)
+        cmds.iconTextStaticLabel(image="fluidShape.svg", h=100, w=100)
         cmds.setParent("..")
         cmds.columnLayout(adj=True)
-        cmds.text(al="left", hl=True, l=\"\"\"%s\"\"\")
-        cmds.button(l="Thanks", c="cmds.layoutDialog(dismiss=\\"gone\\")")
+        cmds.text(al="left", hl=True, l=\"\"\"%s\"\"\", h=70)
+        cmds.button(l="Thanks", c="cmds.layoutDialog(dismiss=\\"gone\\")", h=30)
         cmds.setParent("..")
     cmds.layoutDialog(ui=makepopup, t="A Quick Update")
 if cmds.objExists(job):
@@ -437,6 +437,7 @@ class MainWindow(object):
         def performArchive():
             s.settings.update = None  # Nothing to update
             s.fireHook("archive", todo=tempmeta, faf=True)
+            closeTodo()
 
         def closeTodo():  # Animate todo closed. Fancy.
             height = cmds.layout(gui, q=True, h=True)
@@ -444,7 +445,8 @@ class MainWindow(object):
                 i = (100 - i*5) / 100.0
                 cmds.layout(gui, e=True, h=height * i)
                 cmds.refresh()
-                time.sleep(0.01)
+                time.sleep(0.01) # 0.01
+            s._buidTodoTasks()
 
         temp = s.data[uid]  # hold onto todo data
         tempmeta = s._parseTodo(temp)
@@ -459,8 +461,6 @@ class MainWindow(object):
 """ % (time.ctime(), tempmeta["label"])
                 with Popup(message):
                     cmds.file(save=True)  # Save the scene
-                closeTodo()
-                s._buidTodoTasks()
             except RuntimeError:  # If scene save was canceled or failed. Reset everything
                 if cmds.scriptJob(ex=process):
                     cmds.scriptJob(kill=process)
@@ -468,7 +468,6 @@ class MainWindow(object):
                 s._buidTodoTasks()
         else:
             closeTodo()
-            s._buidTodoTasks()
 
     def moveDock(s):  # Update dock location information
         if cmds.dockControl(s.dock, q=True, fl=True):
@@ -542,8 +541,10 @@ class MainWindow(object):
                 return cmds.optionVar(q="todo_window_location")
             else:
                 return "float"
+
         def fset(s, value):
             cmds.optionVar(sv=["todo_window_location", value])
+
         def fdel(s):
             if cmds.optionVar(ex="todo_window_location"):
                 cmds.optionVar(rm="todo_window_location")
