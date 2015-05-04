@@ -4,9 +4,9 @@
 # 02.05.15
 
 import maya.utils as utils
+import maya.cmds as cmds
 import threading
 import traceback
-import maya.cmds
 import random
 import addons
 import json
@@ -148,10 +148,9 @@ class safeCMDS(object):
     Protect usage of cmds in threads.
     """
     def __getattr__(s, n):
-        if hasattr(maya.cmds, n):
-            at = getattr(maya.cmds, n)
+        if hasattr(cmds, n):
+            at = getattr(cmds, n)
             return lambda *a, **kw: utils.executeInMainThreadWithResult(lambda: at(*a, **kw))
-cmds = safeCMDS()  # Override maya.cmds
 
 
 class TimeSlider(object):
@@ -175,8 +174,7 @@ class MainWindow(object):
     """
     def __init__(s):
         s.page = ""  # Page we are on.
-        s.data = FileInfo()  # Scene stored data
-        s.settings = Settings()  # Todo app settings
+        s._refresh()  # Initialize saved data
         s.registerHooks()  # Load our hooks
         s.basename = "TODO"  # Name for all todo's to derive from
         s.regex = {}  # Compiled regexes
@@ -214,7 +212,8 @@ class MainWindow(object):
         """
         Refresh the data
         """
-        s.data = FileInfo()
+        s.data = FileInfo()  # scene stored data
+        s.settings = Settings()  # Settings wrapper for data
         if s.page == "todo":
             s._buildTodo()
         if s.page == "settings":
