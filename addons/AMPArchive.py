@@ -30,7 +30,7 @@ def settings_archive(mayaFile, todo, gui, settings):
 def archive(mayaFile, todo, gui, settings):
     comment = todo["label"]
     amp = settings.get("AMPArchive.active", False)
-    if amp:
+    if amp and mayaFile:
         if Mutils.executeInMainThreadWithResult(lambda: AMPArchive().archive(mayaFile, comment)):
             print "Checking file into AMP."
         else:

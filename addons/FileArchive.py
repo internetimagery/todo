@@ -45,7 +45,7 @@ def settings_archive(mayaFile, todo, gui, settings):
 def archive(mayaFile, todo, gui, settings):
     archive = settings.get("FileArchive.active", False)
     path = settings.get("FileArchive.path", False)
-    if archive:
+    if archive and mayaFile:
         if path and os.path.isdir(path):
             basename = os.path.basename(mayaFile)
             name = "%s_%s_%s.zip" % (os.path.splitext(basename)[0], int(time.time() * 100), todo["label"])

@@ -469,7 +469,7 @@ class MainWindow(object):
                 s.data[uid] = temp
                 s._buidTodoTasks()
         else:
-            closeTodo()
+            performArchive()
 
     def moveDock(s):  # Update dock location information
         """
