@@ -168,12 +168,14 @@ class TimeSlider(object):
         cmds.playbackOptions(e=True, min=start, max=end)
 
 
-@unique
+#@unique
 class MainWindow(object):
     """
     Main GUI Window
     """
     def __init__(s):
+        if cmds.dockControl("TODO_WINDOW", ex=True):
+            cmds.deleteUI("TODO_WINDOW")
         s.page = ""  # Page we are on.
         s._refresh()  # Initialize saved data
         s.registerHooks()  # Load our hooks
@@ -189,7 +191,7 @@ class MainWindow(object):
         s.wrapper = ""
 
         allowed_areas = ['right', 'left']
-        s.dock = cmds.dockControl(a='left', content=window, aa=allowed_areas, fl=True, l=title, fcc=s.moveDock, vcc=s.closeDock)
+        s.dock = cmds.dockControl("TODO_WINDOW", a='left', content=window, aa=allowed_areas, fl=True, l=title, fcc=s.moveDock, vcc=s.closeDock)
 
         s._buildTodo()
 
