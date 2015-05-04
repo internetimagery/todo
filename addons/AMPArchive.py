@@ -2,7 +2,7 @@
 # Created by Jason Dixon
 # 02/05/15
 # AMP Pipeline is copywrite Animation Mentor
-
+import am.client.bootstrap.clientVersion as version
 import am.client.cmclient.manager as manager
 import am.client.cmclient.config as config
 import am.client.gui.utils as AMutils
@@ -23,6 +23,9 @@ def settings_archive(mayaFile, todo, gui, settings):
         l="Use AMP archive",
         v=amp,
         cc=lambda x: settings.set("AMPArchive.active", x))
+    cmds.text(
+        en=amp,
+        l="AMP version %s found." % version.version)
     cmds.setParent("..")
 
 

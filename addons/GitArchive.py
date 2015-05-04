@@ -9,7 +9,8 @@ import os
 
 # Settings menu
 def settings_archive(mayaFile, todo, gui, settings):
-    if not Git().version()[1]:
+    version = Git().version()
+    if not version[1]:
         git = settings.get("GitArchive.active", False)
         cmds.columnLayout(
             adjustableColumn=True,
@@ -18,6 +19,9 @@ def settings_archive(mayaFile, todo, gui, settings):
             l="Use Git archive",
             v=git,
             cc=lambda x: settings.set("GitArchive.active", x))
+        cmds.text(
+            en=git,
+            l="%s found." % version[0].capitalize().replace("\n", ""))
         cmds.setParent("..")
 
 

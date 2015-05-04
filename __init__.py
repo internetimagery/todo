@@ -2,6 +2,7 @@
 # Todo script for Maya
 # Created by Jason Dixon.
 # 02.05.15
+# https://github.com/internetimagery/todo
 
 import maya.utils as utils
 import maya.cmds as cmds
