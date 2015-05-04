@@ -72,7 +72,7 @@ class Popup(object):
     Create a one time popup
     """
     def __init__(s, message):
-        s.uid = "shot_unique_id_%s" % int((time.time() * 100))  # Generate unique ID
+        s.uid = "TODO_POPUP_%s" % int((time.time() * 100))  # Generate unique ID
         s.message = message
 
     def stringify(s, data):
@@ -119,7 +119,7 @@ cmds.fileInfo(rm=uid)
 
 class safeOut(object):
     """
-    Keep modules running smoothly. Make them threadsafe.
+    Protect output from threads
     """
     def __init__(s):
         s.oldOut = sys.stdout
@@ -145,7 +145,7 @@ class safeOut(object):
 
 class safeCMDS(object):
     """
-    Allow usage of cmds in threads.
+    Protect usage of cmds in threads.
     """
     def __getattr__(s, n):
         if hasattr(maya.cmds, n):
@@ -455,7 +455,7 @@ class MainWindow(object):
                 message = """
 <div>- This Scene was last saved on <em>%s</em>.</div>
 <div>- Completing the task: <code>%s</code></div>
-<div>- The file has <strong>not</strong> been modified since.</div><br>
+<div>- The file <strong>has not been modified</strong> since.</div><br>
 """ % (time.ctime(), tempmeta["label"])
                 with Popup(message):
                     cmds.file(save=True)  # Save the scene
@@ -488,6 +488,9 @@ class MainWindow(object):
             print "Window closed."
 
     def registerHooks(s):
+        """
+        Grab any hooks
+        """
         s.hooks = {}
         if addons.modules:
             for name in addons.modules:

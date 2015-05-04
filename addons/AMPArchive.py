@@ -37,6 +37,13 @@ def archive(mayaFile, todo, gui, settings):
             print "Couldn't check in file to AMP."
 
 
+def hooks():
+    return {
+        "settings.archive": settings_archive,
+        "archive": archive
+        }
+
+
 class AMPArchive(object):
     """
     Archive using AMP
@@ -120,10 +127,3 @@ class AMPArchive(object):
                     d.draw()
                     d.exec_()
         return False
-
-
-def hooks():
-    return {
-        "settings.archive": settings_archive,
-        "archive": archive
-        }
