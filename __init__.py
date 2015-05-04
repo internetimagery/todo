@@ -276,7 +276,7 @@ class MainWindow(object):
                 return sort_data[title]
 
         state = {}
-        for v in sorted([dict({"uid": k}, **s._parseTodo(s.data[k])) for k in s.data.keys() if k and s.regex["uid"].match(k)], key=lambda x: x["label"]):
+        for v in sorted([s._parseTodo(s.data[k], uid=k) for k in s.data.keys() if k and s.regex["uid"].match(k)], key=lambda x: x["label"]):
             if v["token"] or v["hashtag"]:
                 if v["token"]:
                     state[v["token"]] = s.sections[v["token"]] if v["token"] in s.sections else False
@@ -293,7 +293,6 @@ class MainWindow(object):
         """
         Load the settings page
         """
-        ready = False  # Bug fix. Trigger updates when page is built
         s.page = "settings"
 
         s._clear()
@@ -303,15 +302,11 @@ class MainWindow(object):
         cmds.text(label="Settings are unique to each Maya scene.", h=50)
         lay_arch = cmds.frameLayout(l="Archive options:")
         # Settings module
-        # for m in addons.modules:
         s.settings.update = s._buildSettings
         s.fireHook("settings.archive", gui=lay_arch)
-            # with Module(m) as mod:
-            #     mod.settings_archive(s.settings)
         cmds.setParent("..")
-        ready = True
 
-    def _parseTodo(s, label):
+    def _parseTodo(s, label, **kwargs):
         """
         Parse out metadata from Todo
         """
@@ -325,7 +320,7 @@ class MainWindow(object):
 
         s.regex["label"] = s.regex.get("label", build_reg())
         parse = s.regex["label"].finditer(label)
-        result = {}
+        result = kwargs
         result["token"] = ""
         result["hashtag"] = []
         result["frame"] = None
@@ -393,10 +388,12 @@ class MainWindow(object):
         Change a todos information
         """
         def update(uid, label):
-            meta = s._parseTodo(label)
+            meta = s._parseTodo(label, uid=uid)
             if meta["label"]:
                 s.data[uid] = label
                 print "Updated Todo."
+                s.settings.update = None
+                s.fireHook("todo.edit", meta, faf=True)
                 s._buidTodoTasks()
             else:
                 cmds.confirmDialog(title="Whoops...", message="You need to add some text for your Todo.")
@@ -411,10 +408,13 @@ class MainWindow(object):
         """
         Create a new Todo
         """
-        meta = s._parseTodo(txt)
+        name = "%s_%s" % (s.basename, int(time.time() * 100))
+        meta = s._parseTodo(txt, uid=name)
         if meta["label"]:
             name = "%s_%s" % (s.basename, int(time.time() * 100))
             s.data[name] = txt
+            s.settings.update = None
+            s.fireHook("todo.create", meta, faf=True)
             s._buidTodoTasks()
             return True  # Return True to retain input
         else:
@@ -425,6 +425,9 @@ class MainWindow(object):
         """
         Remove a Todo
         """
+        meta = s._parseTodo(s.data[uid], uid=uid)
+        s.settings.update = None
+        s.fireHook("todo.delete", meta, faf=True)
         del s.data[uid]
         s._buidTodoTasks()
 
@@ -445,11 +448,11 @@ class MainWindow(object):
                 i = (100 - i*5) / 100.0
                 cmds.layout(gui, e=True, h=height * i)
                 cmds.refresh()
-                time.sleep(0.01) # 0.01
+                time.sleep(0.01)
             s._buidTodoTasks()
 
         temp = s.data[uid]  # hold onto todo data
-        tempmeta = s._parseTodo(temp)
+        tempmeta = s._parseTodo(temp, uid=uid)
         del s.data[uid]  # Remove todo from memory
         if os.path.isfile(cmds.file(q=True, sn=True)):  # Check the scene is not untitled and still exists
             process = cmds.scriptJob(e=['SceneSaved', performArchive], ro=True)
@@ -470,6 +473,9 @@ class MainWindow(object):
             closeTodo()
 
     def moveDock(s):  # Update dock location information
+        """
+        Track dock movement
+        """
         if cmds.dockControl(s.dock, q=True, fl=True):
             s.location = "float"
             print "Floating Dock."
@@ -479,6 +485,9 @@ class MainWindow(object):
             print "Docking %s." % area
 
     def closeDock(s, *loop):
+        """
+        Gracefully close window
+        """
         visible = cmds.dockControl(s.dock, q=True, vis=True)
         if not visible and loop:
             cmds.scriptJob(ie=s.closeDock, p=s.dock, ro=True)
@@ -503,6 +512,7 @@ class MainWindow(object):
     def fireHook(s, hook, todo=None, gui=None, faf=False, callback=None):
         """
         Use a hook
+        hook = hookname, gui = parent gui element, faf = fire and forget the tasks, callback = run after each task has completed.
         """
         def fire(func):
             result = None
