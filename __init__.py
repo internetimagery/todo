@@ -411,7 +411,6 @@ class MainWindow(object):
         name = "%s_%s" % (s.basename, int(time.time() * 100))
         meta = s._parseTodo(txt, uid=name)
         if meta["label"]:
-            name = "%s_%s" % (s.basename, int(time.time() * 100))
             s.data[name] = txt
             s.settings.update = None
             s.fireHook("todo.create", meta, faf=True)
@@ -439,7 +438,7 @@ class MainWindow(object):
 
         def performArchive():
             s.settings.update = None  # Nothing to update
-            s.fireHook("archive", todo=tempmeta, faf=True)
+            s.fireHook("todo.complete", todo=tempmeta, faf=True)
             closeTodo()
 
         def closeTodo():  # Animate todo closed. Fancy.

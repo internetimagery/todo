@@ -20,8 +20,8 @@ def run_hook(mayaFile, todo, gui, settings):
 def hooks():
     return {
         "settings.archive": run_hook,
+        "todo.complete": run_hook,
         "todo.delete": run_hook,
         "todo.create": run_hook,
-        "todo.edit": run_hook,
-        "archive": run_hook
+        "todo.edit": run_hook
         }

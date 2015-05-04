@@ -40,7 +40,7 @@ def archive(mayaFile, todo, gui, settings):
 def hooks():
     return {
         "settings.archive": settings_archive,
-        "archive": archive
+        "todo.complete": archive
         }
 
 
