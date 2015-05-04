@@ -4,10 +4,9 @@
 # 02.05.15
 
 import maya.utils as utils
-import maya.cmds as cmds
-import collections
 import threading
 import traceback
+import maya.cmds
 import random
 import addons
 import json
@@ -29,57 +28,6 @@ def unique(item):
             items[item] = item(*args, **kwargs)
         return items[item]
     return UniqueItem
-
-
-# class FileInfo(collections.MutableMapping):
-#     """
-#     Dictionary style interface for fileInfo
-#     """
-#     def _encode(s, txt):
-#         return json.dumps(txt)
-
-#     def _decode(s, u):
-#         u = u.decode("unicode_escape")
-#         try:
-#             return json.loads(u)
-#         except ValueError as e:
-#             print "ERR: %s" % e, u
-#             return u
-
-#     def _key(s, k):
-#         if k in s.blacklist:
-#             return "%s_" % k
-#         return k
-
-#     def __init__(s):
-#         s.blacklist = ["application", "product", "version", "cutIdentifier", "osv", "license"]
-#         s.data = dict()
-#         init = cmds.fileInfo(q=True)
-#         if init:
-#             s.data = dict((k, s._decode(v)) for k, v in (lambda x: zip(x[::2], x[1::2]))(cmds.fileInfo(q=True)) if k not in s.blacklist)
-
-#     def __getitem__(s, k):
-#         k = s._key(k)
-#         i = cmds.fileInfo(k, q=True)
-#         s.data[k] = s._decode(i[0] if i else '""')
-#         return s.data[k]
-
-#     def __setitem__(s, k, v):
-#         k = s._key(k)
-#         cmds.fileInfo(k, s._encode(v))
-#         s.data[k] = v
-
-#     def __delitem__(s, k):
-#         k = s._key(k)
-#         cmds.fileInfo(rm=k)
-#         del s.data[k]
-
-#     def __iter__(s):
-#         return iter(s.data)
-
-#     def __len__(s):
-#         return len(s.data)
-
 
 class FileInfo(dict):
     """
@@ -206,14 +154,15 @@ class Module(object):
         return True
 
 
-class dummyCMD(object):
+class safeCMDS(object):
     """
     Allow usage of cmds in threads.
     """
     def __getattr__(s, n):
-        if hasattr(cmds, n):
-            at = getattr(cmds, n)
+        if hasattr(maya.cmds, n):
+            at = getattr(maya.cmds, n)
             return lambda *a, **kw: utils.executeInMainThreadWithResult(lambda: at(*a, **kw))
+cmds = safeCMDS()  # Override maya.cmds
 
 
 class TimeSlider(object):
@@ -494,76 +443,44 @@ class MainWindow(object):
         """
         Trigger the todo archive process
         """
-        for ui in cmds.rowLayout(gui, q=True, ca=True):
-            cmds.deleteUI(ui)
-        prog = cmds.progressBar(p=gui, pr=0)
+        cmds.rowLayout(gui, e=True, en=False)
 
-        def update(p):
-            """
-            Update the progress bar
-            """
-            if cmds.progressBar(prog, ex=True):
-                val = cmds.progressBar(prog, q=True, pr=True) + p
-                if val < 100:
-                    cmds.progressBar(prog, e=True, pr=val)
-                    cmds.refresh()
-                else:
-                    cmds.progressBar(prog, e=True, pr=100)
-                    cmds.refresh()
-                    time.sleep(0.3)  # Pause on 100 for dramatic effect!
-                    s._buidTodoTasks()
+        def performArchive():
+            print "trying to archive"
+            s.settings.update = None  # Nothing to update
+            s.fireHook("archive", todo=tempmeta, faf=True)
 
-        scene = os.path.realpath(cmds.file(q=True, sn=True))  # Scene name
+        def closeTodo():  # Animate todo closed. Fancy.
+            height = cmds.layout(gui, q=True, h=True)
+            for i in range(20):
+                i = (100 - i*5) / 100.0
+                cmds.layout(gui, e=True, h=height * i)
+                cmds.refresh()
+                time.sleep(0.01)
+
         temp = s.data[uid]  # hold onto todo data
+        tempmeta = s._parseTodo(temp)
         del s.data[uid]  # Remove todo from memory
-        if os.path.splitext(os.path.basename(scene))[0] and os.path.isfile(scene):  # Check the scene is not untitled and still exists
-            process = cmds.scriptJob(e=['SceneSaved', lambda: s.performArchive(scene, temp, update)], ro=True)
+        if os.path.isfile(cmds.file(q=True, sn=True)):  # Check the scene is not untitled and still exists
+            process = cmds.scriptJob(e=['SceneSaved', performArchive], ro=True)
             try:
                 message = """
 <div>- This Scene was last saved on <em>%s</em>.</div>
 <div>- Completing the task: <code>%s</code></div>
 <div>- The file has <strong>not</strong> been modified since.</div><br>
-""" % (time.ctime(), s._parseTodo(temp)["label"])
+""" % (time.ctime(), tempmeta["label"])
                 with Popup(message):
                     cmds.file(save=True)  # Save the scene
+                closeTodo()
+                s._buidTodoTasks()
             except RuntimeError:  # If scene save was canceled or failed. Reset everything
                 if cmds.scriptJob(ex=process):
                     cmds.scriptJob(kill=process)
                 s.data[uid] = temp
                 s._buidTodoTasks()
         else:
-            for i in range(25):  # The scene is untitled. Run a dummy progress bar to look nice
-                time.sleep(0.01)
-                update(4)
+            closeTodo()
             s._buidTodoTasks()
-
-    def performArchive(s, mayaFile, todo, callback):
-        """
-        Process the archving of the scene.
-        """
-
-        def getter(k, default):
-            """
-            Grab setting entry
-            """
-            return data.get(k, default)
-
-        def archive(m):
-            """
-            Run archives
-            """
-            with Module(m) as mod:
-                mod.archive(mayaFile, s._parseTodo(todo), getter)
-            utils.executeDeferred(lambda: callback(step))
-
-        data = s.data["todo_settings"]  # settings information
-        step = int(math.ceil(100.0 / (len(addons.modules) + 1)))
-        callback(step)  # One for the scene save!
-        if addons.modules:
-            for m in addons.modules:
-                th = threading.Thread(target=archive, args=(m,))
-                th.daemon = True
-                th.start()
 
     def moveDock(s):  # Update dock location information
         if cmds.dockControl(s.dock, q=True, fl=True):
@@ -587,6 +504,7 @@ class MainWindow(object):
         if addons.modules:
             for name in addons.modules:
                 mod = addons.modules[name]
+                mod.cmds = safeCMDS()
                 if hasattr(mod, "hooks") and callable(mod.hooks):
                     hooks = mod.hooks()
                     for hook in hooks:
@@ -600,12 +518,18 @@ class MainWindow(object):
             return h(mayaFile, todo, gui, s.settings)
 
         result = []
+        threads = []
         if hook in s.hooks:
             path = os.path.realpath(cmds.file(q=True, sn=True))  # Scene name
             mayaFile = os.path.realpath(path) if os.path.isfile(path) else None
             for h in s.hooks[hook]:
                 if faf:
-                    (lambda x: result.append(fire(x)))(h)
+                    th = threading.Thread(
+                        target=lambda x: result.append(fire(x)),
+                        args=(h,))
+                    th.daemon = True
+                    th.start()
+                    threads.append(th)
                 else:
                     result.append(fire(h))
         return result

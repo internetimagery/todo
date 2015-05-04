@@ -15,8 +15,8 @@ import os
 def settings_archive(mayaFile, todo, gui, settings):
 
     def filepicker():
-        result = "".join(cmds.fileDialog2(ds=2, cap="Select a Folder.", fm=3, okc="Select"))
-        return result[0] if result else None
+        result = cmds.fileDialog2(ds=2, cap="Select a Folder.", fm=3, okc="Select")
+        return result[0] if result else ""
 
     archive = settings.get("FileArchive.active", False)
     path = settings.get("FileArchive.path")
@@ -42,9 +42,9 @@ def settings_archive(mayaFile, todo, gui, settings):
 
 
 # Archive file
-def archive(mayaFile, todo, settings):
-    archive = settings("FileArchive.active", False)
-    path = settings("FileArchive.path", "")
+def archive(mayaFile, todo, gui, settings):
+    archive = settings.get("FileArchive.active", False)
+    path = settings.get("FileArchive.path", False)
     if archive:
         if path and os.path.isdir(path):
             basename = os.path.basename(mayaFile)
@@ -64,4 +64,7 @@ def cleanup():
 
 
 def hooks():
-    return {"settings.archive": settings_archive}
+    return {
+        "settings.archive": settings_archive,
+        "archive": archive
+        }
