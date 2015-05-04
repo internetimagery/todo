@@ -117,16 +117,11 @@ cmds.fileInfo(rm=uid)
         cmds.delete(s.job)
 
 
-class Module(object):
+class safeOut(object):
     """
     Keep modules running smoothly. Make them threadsafe.
     """
-    def __init__(s, name):
-        if name in addons.modules:
-            s.mod = addons.modules[name]
-            s.mod.cmds = dummyCMD()
-        else:
-            raise Exception
+    def __init__(s):
         s.oldOut = sys.stdout
         sys.stdout = s
 
@@ -136,21 +131,15 @@ class Module(object):
             utils.executeDeferred(lambda: s.oldOut.write("%s\n" % t))
 
     def __enter__(s):
-        return s.mod
+        return s
 
     def __exit__(s, errType, errVal, trace):
         sys.stdout = s.oldOut
-        s.mod.cmds = cmds
-        if errType and hasattr(s.mod, "debug") and s.mod.debug:
+        if errType:
             s.write("Uh oh... there was a problem. :(")
             s.write("%s :: %s" % (errType.__name__, errVal))
             for t in traceback.format_tb(trace):
                 s.write(t)
-        try:
-            s.mod.cleanup()
-        except Exception as e:
-            if hasattr(s.mod, "debug") and s.mod.debug:
-                s.write("Cleanup Error", e)
         return True
 
 
@@ -446,7 +435,6 @@ class MainWindow(object):
         cmds.rowLayout(gui, e=True, en=False)
 
         def performArchive():
-            print "trying to archive"
             s.settings.update = None  # Nothing to update
             s.fireHook("archive", todo=tempmeta, faf=True)
 
@@ -510,12 +498,17 @@ class MainWindow(object):
                     for hook in hooks:
                         s.hooks[hook] = s.hooks.get(hook, []) + [hooks[hook]]
 
-    def fireHook(s, hook, todo=None, gui=None, faf=False):
+    def fireHook(s, hook, todo=None, gui=None, faf=False, callback=None):
         """
         Use a hook
         """
         def fire(func):
-            return h(mayaFile, todo, gui, s.settings)
+            result = None
+            with safeOut():
+                result = func(mayaFile, todo, gui, s.settings)
+            if callback:
+                callback(result)
+            return result
 
         result = []
         threads = []
@@ -532,6 +525,9 @@ class MainWindow(object):
                     threads.append(th)
                 else:
                     result.append(fire(h))
+        if threads and False:  # Block threads? TODO: stop maya from crashing...
+            for th in threads:
+                th.join()
         return result
 
     def location():

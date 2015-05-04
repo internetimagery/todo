@@ -58,11 +58,6 @@ def archive(mayaFile, todo, gui, settings):
             cmds.confirmDialog(title="Uh oh...", message="Can't save file archive. You need to provide a folder.")
 
 
-# Clean up anything that needs cleaning
-def cleanup():
-    pass
-
-
 def hooks():
     return {
         "settings.archive": settings_archive,

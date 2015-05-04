@@ -3,43 +3,38 @@
 # 02/05/15
 # AMP Pipeline is copywrite Animation Mentor
 
-import am.client.cmclient.config as config
 import am.client.cmclient.manager as manager
+import am.client.cmclient.config as config
 import am.client.gui.utils as AMutils
-import maya.cmds as cmds
 import maya.utils as Mutils
+import maya.cmds as cmds
 import os
 
 #debug = True
 
 
 # Settings menu
-def settings_archive(getter, setter):
-    amp = getter("AMPArchive.active", False)
+def settings_archive(mayaFile, todo, gui, settings):
+    amp = settings.get("AMPArchive.active", False)
     cmds.columnLayout(
         adjustableColumn=True,
         bgc=[0.5, 0.5, 0.5] if amp else [0.2, 0.2, 0.2])
     cmds.checkBox(
         l="Use AMP archive",
         v=amp,
-        cc=lambda x: setter("AMPArchive.active", x))
+        cc=lambda x: settings.set("AMPArchive.active", x))
     cmds.setParent("..")
 
 
 # File Archive
-def archive(mayaFile, todo, settings):
+def archive(mayaFile, todo, gui, settings):
     comment = todo["label"]
-    amp = settings("AMPArchive.active", False)
+    amp = settings.get("AMPArchive.active", False)
     if amp:
         if Mutils.executeInMainThreadWithResult(lambda: AMPArchive().archive(mayaFile, comment)):
             print "Checking file into AMP."
         else:
             print "Couldn't check in file to AMP."
-
-
-# Cleanup stuff
-def cleanup():
-    pass
 
 
 class AMPArchive(object):
@@ -102,18 +97,13 @@ class AMPArchive(object):
         """
         Check if we are logged in. If not, try to log in.
         """
-        s.again = True
-        def stop():
+        def cancel():
             s.again = False
+        s.again = True
 
-        def login_window():
-            d = AMutils.LoginDialog(
-                    message_to_user="Can't archive your file to AMP.\nYou are not logged in.\nLets log in now. :)",
-                    server_config=s.config)
-            d.set_click_handler("ok", lambda: (s.config.setDefaultServer(d.server_name), s.manager.login(unicode(d.username), unicode(d.password))))
-            d.set_click_handler("cancel", stop)
-            d.draw()
-            d.exec_()
+        def ok():
+            s.config.setDefaultServer(d.server_name)
+            s.manager.login(unicode(d.username), unicode(d.password))
 
         for i in range(10):
             if s.again:
@@ -130,3 +120,10 @@ class AMPArchive(object):
                     d.draw()
                     d.exec_()
         return False
+
+
+def hooks():
+    return {
+        "settings.archive": settings_archive,
+        "archive": archive
+        }
