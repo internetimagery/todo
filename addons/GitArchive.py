@@ -56,7 +56,7 @@ class Git(object):
 
     def commit(s, path, comment):
         if not s._git("add", os.path.basename(path), cwd=os.path.dirname(path))[1]:
-            if not s._git("commit", "--only", "--quiet", "--message", comment, os.path.basename(path), cwd=os.path.dirname(path))[1]:
+            if not s._git("commit", "--quiet", "--message", comment, "--only", os.path.basename(path), cwd=os.path.dirname(path))[1]:
                 print "File committed"
 
     def status(s, path):
