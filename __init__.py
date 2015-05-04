@@ -94,7 +94,7 @@ if load == "ok":
         p = cmds.setParent(q=True)
         cmds.rowLayout(nc=2, ad2=2, p=p)
         cmds.columnLayout()
-        cmds.iconTextStaticLabel(image="fluidShape.svg", h=100, w=100)
+        cmds.iconTextStaticLabel(image="envChrome.svg", h=100, w=100)  # file.svg looks nice too
         cmds.setParent("..")
         cmds.columnLayout(adj=True)
         cmds.text(al="left", hl=True, l=\"\"\"%s\"\"\", h=70)
@@ -457,7 +457,7 @@ class MainWindow(object):
                 message = """
 <div>- This Scene was last saved on <em>%s</em>.</div>
 <div>- Completing the task: <code>%s</code></div>
-<div>- The file <strong>has not been modified</strong> since.</div><br>
+<div>- The file <strong>has not been modified since.</strong></div><br>
 """ % (time.ctime(), tempmeta["label"])
                 with Popup(message):
                     cmds.file(save=True)  # Save the scene
