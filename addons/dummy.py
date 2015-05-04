@@ -3,7 +3,7 @@
 debug = True  # Add this to override caching. So changes can be observed while testing.
 
 
-def settings_archive(settings):
+def settings_archive(mayaFile, todo, gui, settings):
     """
     Create some GUI elements that will be placed in the settings window.
     Use the getter and setter to get and retrieve settings info ie:
@@ -30,3 +30,7 @@ def cleanup():
     Delete temp files etc. This will run even if an error occurs.
     """
     pass
+
+
+def hooks():
+    return {"settings.archive": settings_archive}

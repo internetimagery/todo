@@ -103,6 +103,7 @@ class Settings(object):
     """
     def __init__(s):
         s.info = FileInfo()
+        s.update = None  # command to update on settings change
         try:
             s.data = json.loads(s.info["TODO_SETTINGS"])
         except (ValueError, KeyError):
@@ -114,6 +115,8 @@ class Settings(object):
     def set(s, k, v):
         s.data[k] = v
         s.info["TODO_SETTINGS"] = json.dumps(s.data)
+        if s.update:
+            s.update()
 
 
 class Popup(object):
@@ -236,6 +239,8 @@ class MainWindow(object):
         s.page = ""  # Page we are on.
         s.data = FileInfo()  # Scene stored data
         s.settings = Settings()  # Todo app settings
+        s.registerHooks()  # Load our hooks
+        s.fireHook("test")
         s.basename = "TODO"  # Name for all todo's to derive from
         s.regex = {}  # Compiled regexes
         s.sections = {}  # Closed / Open state of todo sections
@@ -429,11 +434,13 @@ class MainWindow(object):
         cmds.iconTextButton(h=30, image="revealSelected.png", label="<- Todo", style="iconAndTextHorizontal", c=s._buildTodo)
         cmds.separator()
         cmds.text(label="Settings are unique to each Maya scene.", h=50)
-        cmds.frameLayout(l="Archive options:")
+        lay_arch = cmds.frameLayout(l="Archive options:")
         # Settings module
-        for m in addons.modules:
-            with Module(m) as mod:
-                mod.settings_archive(s.settings)
+        # for m in addons.modules:
+        s.settings.update = s._buildSettings
+        s.fireHook("settings.archive", gui=lay_arch)
+            # with Module(m) as mod:
+            #     mod.settings_archive(s.settings)
         cmds.setParent("..")
         ready = True
 
@@ -645,6 +652,34 @@ class MainWindow(object):
         elif not visible:
             cmds.deleteUI(s.dock, ctl=True)
             print "Window closed."
+
+    def registerHooks(s):
+        s.hooks = {}
+        if addons.modules:
+            for name in addons.modules:
+                mod = addons.modules[name]
+                if hasattr(mod, "hooks") and callable(mod.hooks):
+                    hooks = mod.hooks()
+                    for hook in hooks:
+                        s.hooks[hook] = s.hooks.get(hook, []) + [hooks[hook]]
+
+    def fireHook(s, hook, todo=None, gui=None, faf=False):
+        """
+        Use a hook
+        """
+        def fire(func):
+            return h(mayaFile, todo, gui, s.settings)
+
+        result = []
+        if hook in s.hooks:
+            path = os.path.realpath(cmds.file(q=True, sn=True))  # Scene name
+            mayaFile = os.path.realpath(path) if os.path.isfile(path) else None
+            for h in s.hooks[hook]:
+                if faf:
+                    (lambda x: result.append(fire(x)))(h)
+                else:
+                    result.append(fire(h))
+        return result
 
     def location():
         """
