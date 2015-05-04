@@ -12,13 +12,14 @@ import os
 
 
 # Settings
-def settings_archive(getter, setter):
+def settings_archive(settings):
 
     def filepicker():
         result = cmds.fileDialog2(ds=2, cap="Select a Folder.", fm=3, okc="Select")
         return result[0] if result else ""
 
-    archive = getter("FileArchive.active", False)
+    archive = settings.get("FileArchive.active", False)
+    path = settings.get("FileArchive.path", "")
     # Use File Archiving
     cmds.columnLayout(
         adjustableColumn=True,
@@ -26,7 +27,7 @@ def settings_archive(getter, setter):
     cmds.checkBox(
         l="Use File Archive",
         v=archive,
-        cc=lambda x: setter("FileArchive.active", x))
+        cc=lambda x: settings.set("FileArchive.active", x))
     # File archive path
     cmds.rowLayout(nc=2, ad2=2)
     cmds.text(label=" - ")
@@ -36,7 +37,7 @@ def settings_archive(getter, setter):
         image="fileOpen.png",
         l=path if path else "Pick archive folder.",
         style="iconAndTextHorizontal",
-        c=lambda: setter("FileArchive.path", filepicker()))  # TODO errors when no folder is chosen because of 0 index
+        c=lambda: settings.set("FileArchive.path", filepicker()))  # TODO errors when no folder is chosen because of 0 index
     cmds.setParent("..")
     cmds.setParent("..")
 

@@ -3,7 +3,7 @@
 debug = True  # Add this to override caching. So changes can be observed while testing.
 
 
-def settings_archive(getter, setter):
+def settings_archive(settings):
     """
     Create some GUI elements that will be placed in the settings window.
     Use the getter and setter to get and retrieve settings info ie:

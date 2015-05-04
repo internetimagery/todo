@@ -18,55 +18,102 @@ import os
 import re
 
 
-class FileInfo(collections.MutableMapping):
+def unique(item):
     """
-    Dictionary style interface for fileInfo
+    Only keep one instance open at a time
     """
-    def _encode(s, txt):
-        return json.dumps(txt)
+    items = {}
 
-    def _decode(s, u):
-        u = u.decode("unicode_escape")
-        try:
-            return json.loads(u)
-        except ValueError as e:
-            print "ERR: %s" % e, u
-            return u
+    def UniqueItem(*args, **kwargs):
+        if (item in items and sys.getrefcount(items[item]) < 3) or item not in items:
+            items[item] = item(*args, **kwargs)
+        return items[item]
+    return UniqueItem
 
-    def _key(s, k):
-        if k in s.blacklist:
-            return "%s_" % k
-        return k
 
+# class FileInfo(collections.MutableMapping):
+#     """
+#     Dictionary style interface for fileInfo
+#     """
+#     def _encode(s, txt):
+#         return json.dumps(txt)
+
+#     def _decode(s, u):
+#         u = u.decode("unicode_escape")
+#         try:
+#             return json.loads(u)
+#         except ValueError as e:
+#             print "ERR: %s" % e, u
+#             return u
+
+#     def _key(s, k):
+#         if k in s.blacklist:
+#             return "%s_" % k
+#         return k
+
+#     def __init__(s):
+#         s.blacklist = ["application", "product", "version", "cutIdentifier", "osv", "license"]
+#         s.data = dict()
+#         init = cmds.fileInfo(q=True)
+#         if init:
+#             s.data = dict((k, s._decode(v)) for k, v in (lambda x: zip(x[::2], x[1::2]))(cmds.fileInfo(q=True)) if k not in s.blacklist)
+
+#     def __getitem__(s, k):
+#         k = s._key(k)
+#         i = cmds.fileInfo(k, q=True)
+#         s.data[k] = s._decode(i[0] if i else '""')
+#         return s.data[k]
+
+#     def __setitem__(s, k, v):
+#         k = s._key(k)
+#         cmds.fileInfo(k, s._encode(v))
+#         s.data[k] = v
+
+#     def __delitem__(s, k):
+#         k = s._key(k)
+#         cmds.fileInfo(rm=k)
+#         del s.data[k]
+
+#     def __iter__(s):
+#         return iter(s.data)
+
+#     def __len__(s):
+#         return len(s.data)
+
+
+class FileInfo(dict):
+    """
+    Fileinfo interface
+    """
     def __init__(s):
-        s.blacklist = ["application", "product", "version", "cutIdentifier", "osv", "license"]
-        s.data = dict()
-        init = cmds.fileInfo(q=True)
-        if init:
-            s.data = dict((k, s._decode(v)) for k, v in (lambda x: zip(x[::2], x[1::2]))(cmds.fileInfo(q=True)) if k not in s.blacklist)
-        s.update(dict())
-
-    def __getitem__(s, k):
-        k = s._key(k)
-        i = cmds.fileInfo(k, q=True)
-        s.data[k] = s._decode(i[0] if i else '""')
-        return s.data[k]
+        s.update(dict((k, v.decode("unicode_escape")) for k, v in (lambda x: zip(x[::2], x[1::2]))(cmds.fileInfo(q=True))))
 
     def __setitem__(s, k, v):
-        k = s._key(k)
-        cmds.fileInfo(k, s._encode(v))
-        s.data[k] = v
+        cmds.fileInfo(k, v)
+        super(FileInfo, s).__setitem__(k, v)
 
     def __delitem__(s, k):
-        k = s._key(k)
         cmds.fileInfo(rm=k)
-        del s.data[k]
+        super(FileInfo, s).__delitem__(k)
 
-    def __iter__(s):
-        return iter(s.data)
 
-    def __len__(s):
-        return len(s.data)
+class Settings(object):
+    """
+    Settings interface
+    """
+    def __init__(s):
+        s.info = FileInfo()
+        try:
+            s.data = json.loads(s.info["TODO_SETTINGS"])
+        except (ValueError, KeyError):
+            s.data = {}
+
+    def get(s, k, d=None):
+        return s.data.get(k, d)
+
+    def set(s, k, v):
+        s.data[k] = v
+        s.info["TODO_SETTINGS"] = json.dumps(s.data)
 
 
 class Popup(object):
@@ -180,19 +227,6 @@ class TimeSlider(object):
         cmds.playbackOptions(e=True, min=start, max=end)
 
 
-def unique(item):
-    """
-    Only keep one window open at a time
-    """
-    items = {}
-
-    def UniqueItem(*args, **kwargs):
-        if (item in items and sys.getrefcount(items[item]) < 3) or item not in items:
-            items[item] = item(*args, **kwargs)
-        return items[item]
-    return UniqueItem
-
-
 @unique
 class MainWindow(object):
     """
@@ -201,6 +235,7 @@ class MainWindow(object):
     def __init__(s):
         s.page = ""  # Page we are on.
         s.data = FileInfo()  # Scene stored data
+        s.settings = Settings()  # Todo app settings
         s.basename = "TODO"  # Name for all todo's to derive from
         s.regex = {}  # Compiled regexes
         s.sections = {}  # Closed / Open state of todo sections
@@ -388,19 +423,6 @@ class MainWindow(object):
         """
         ready = False  # Bug fix. Trigger updates when page is built
         s.page = "settings"
-        data = s.data["todo_settings"] if s.data["todo_settings"] else {}
-
-        def colour(val):
-            return [0.5, 0.5, 0.5] if val else [0.2, 0.2, 0.2]
-
-        def update(k, v):  # Allow module to set value
-            if ready:
-                data[k] = v
-                s.data["todo_settings"] = data
-                s._buildSettings()
-
-        def get(k, default=None):  # Allow module to get value
-            return data.get(k, default)
 
         s._clear()
         cmds.columnLayout(adjustableColumn=True, p=s.wrapper)
@@ -411,7 +433,7 @@ class MainWindow(object):
         # Settings module
         for m in addons.modules:
             with Module(m) as mod:
-                mod.settings_archive(get, update)
+                mod.settings_archive(s.settings)
         cmds.setParent("..")
         ready = True
 
