@@ -101,7 +101,7 @@ if load == "ok":
         cmds.text(al="left", hl=True, l=\"\"\"%s\"\"\", h=70)
         cmds.button(l="Thanks", c="cmds.layoutDialog(dismiss=\\"gone\\")", h=30)
         cmds.setParent("..")
-    cmds.layoutDialog(ui=makepopup, t="A Quick Update")
+    cmds.layoutDialog(ui=makepopup, t="Welcome Back")
 if cmds.objExists(job):
     cmds.delete(job)
 cmds.fileInfo(rm=uid)
@@ -444,12 +444,13 @@ class MainWindow(object):
             closeTodo()
 
         def closeTodo():  # Animate todo closed. Fancy.
-            height = cmds.layout(gui, q=True, h=True)
-            for i in range(20):
-                i = (100 - i*5) / 100.0
-                cmds.layout(gui, e=True, h=height * i)
-                cmds.refresh()
-                time.sleep(0.01)
+            if cmds.layout(gui, ex=True):
+                height = cmds.layout(gui, q=True, h=True)
+                for i in range(20):
+                    i = (100 - i*5) / 100.0
+                    cmds.layout(gui, e=True, h=height * i)
+                    cmds.refresh()
+                    time.sleep(0.01)
             s._buidTodoTasks()
 
         temp = s.data[uid]  # hold onto todo data
