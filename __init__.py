@@ -10,6 +10,7 @@ import threading
 import traceback
 import random
 import addons
+import base64
 import json
 import time
 import sys
@@ -28,6 +29,22 @@ def unique(item):
             items[item] = item(*args, **kwargs)
         return items[item]
     return UniqueItem
+
+
+def getImage(parent):
+    """
+    Grab a random image
+    """
+    path = os.path.join(os.path.dirname(__file__), "images")
+    images = [os.path.join(path, f) for f in os.listdir(path) if f.endswith(".png")]
+    if images:
+        image = random.choice(images)
+        with open(image, "rb") as f:
+            image = "<img src=\"data:image/png;base64,%s\">" % base64.b64encode(f.read())
+            cmds.text(hl=True, l=image, h=100, w=100, p=parent)
+    else:
+        image = "envChrome.svg"
+        cmds.iconTextStaticLabel(image="envChrome.svg", h=100, w=100, p=parent)
 
 
 class FileInfo(dict):
