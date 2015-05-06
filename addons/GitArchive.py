@@ -43,7 +43,7 @@ def settings_archive(mayaFile, todo, settings):
         cmds.text(label=" - ")
         cmds.iconTextButton(
             en=push,
-            image="camera.png",
+            image="channelLayers.png", # "channelBoxHyperbolicOn.png"  "createContainer.png"
             l=branch if branch else "Enter remote branch name.",
             style="iconAndTextHorizontal",
             c=lambda: settings.set("GitArchive.branch", getInput()))
