@@ -8,7 +8,7 @@ import os
 
 
 # Settings menu
-def settings_archive(mayaFile, todo, gui, settings):
+def settings_archive(mayaFile, todo, settings):
 
     def getInput():
         result = cmds.promptDialog(
@@ -51,9 +51,10 @@ def settings_archive(mayaFile, todo, gui, settings):
         cmds.text(
             en=git,
             l="%s found." % version[0].capitalize().replace("\n", ""))
+        cmds.setParent("..")
 
 
-def archive(mayaFile, todo, gui, settings):
+def archive(mayaFile, todo, settings):
     if settings.get("GitArchive.active", False) and mayaFile:
         check = Git().status(mayaFile)
         if check[1]:

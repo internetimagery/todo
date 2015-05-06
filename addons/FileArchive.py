@@ -12,7 +12,7 @@ import os
 
 
 # Settings
-def settings_archive(mayaFile, todo, gui, settings):
+def settings_archive(mayaFile, todo, settings):
 
     def filepicker():
         result = cmds.fileDialog2(ds=2, cap="Select a Folder.", fm=3, okc="Select")
@@ -23,8 +23,7 @@ def settings_archive(mayaFile, todo, gui, settings):
     # Use File Archiving
     cmds.columnLayout(
         adjustableColumn=True,
-        bgc=[0.5, 0.5, 0.5] if archive else [0.2, 0.2, 0.2],
-        p=gui)
+        bgc=[0.5, 0.5, 0.5] if archive else [0.2, 0.2, 0.2])
     cmds.checkBox(
         l="Use File Archive",
         v=archive,
@@ -39,10 +38,11 @@ def settings_archive(mayaFile, todo, gui, settings):
         style="iconAndTextHorizontal",
         c=lambda: settings.set("FileArchive.path", filepicker()))  # TODO errors when no folder is chosen because of 0 index
     cmds.setParent("..")
+    cmds.setParent("..")
 
 
 # Archive file
-def archive(mayaFile, todo, gui, settings):
+def archive(mayaFile, todo, settings):
     archive = settings.get("FileArchive.active", False)
     path = settings.get("FileArchive.path", False)
     if archive and mayaFile:

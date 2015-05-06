@@ -14,7 +14,7 @@ import os
 
 
 # Settings menu
-def settings_archive(mayaFile, todo, gui, settings):
+def settings_archive(mayaFile, todo, settings):
     amp = settings.get("AMPArchive.active", False)
     cmds.columnLayout(
         adjustableColumn=True,
@@ -30,7 +30,7 @@ def settings_archive(mayaFile, todo, gui, settings):
 
 
 # File Archive
-def archive(mayaFile, todo, gui, settings):
+def archive(mayaFile, todo, settings):
     comment = todo["label"]
     amp = settings.get("AMPArchive.active", False)
     if amp and mayaFile:

@@ -6,7 +6,7 @@
 debug = True  # Add this to override caching. So changes can be observed while testing.
 
 
-def run_hook(mayaFile, todo, gui, settings):
+def run_hook(mayaFile, todo, settings):
     """
     Run hook for whatever event is fired.
     mayaFile = path to scene.

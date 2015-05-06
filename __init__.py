@@ -316,10 +316,10 @@ class MainWindow(object):
         cmds.iconTextButton(h=30, image="revealSelected.png", label="<- Todo", style="iconAndTextHorizontal", c=s._buildTodo)
         cmds.separator()
         cmds.text(label="Settings are unique to each Maya scene.", h=50)
-        lay_arch = cmds.frameLayout(l="Archive options:")
+        cmds.frameLayout(l="Archive options:")
         # Settings module
         s.settings.update = s._buildSettings
-        s.fireHook("settings.archive", gui=lay_arch)
+        s.fireHook("settings.archive")
         cmds.setParent("..")
 
     def _parseTodo(s, label, **kwargs):
@@ -525,7 +525,7 @@ class MainWindow(object):
                     for hook in hooks:
                         s.hooks[hook] = s.hooks.get(hook, []) + [hooks[hook]]
 
-    def fireHook(s, hook, todo=None, gui=None, faf=False, callback=None):
+    def fireHook(s, hook, todo=None, faf=False, callback=None):
         """
         Use a hook
         hook = hookname, gui = parent gui element, faf = fire and forget the tasks, callback = run after each task has completed.
@@ -533,7 +533,7 @@ class MainWindow(object):
         def fire(func):
             result = None
             with safeOut():
-                result = func(mayaFile, todo, gui, s.settings)
+                result = func(mayaFile, todo, s.settings)
             if callback:
                 callback(result)
             return result
