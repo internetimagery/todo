@@ -31,7 +31,7 @@ def unique(item):
     return UniqueItem
 
 
-def getImage():
+def embedImage():
     """
     Grab a random image and embed it in the scene.
     """
@@ -43,7 +43,6 @@ def getImage():
             image = "<img src=\\\"data:image/png;base64,%s\\\">" % base64.b64encode(f.read())
         return "cmds.text(hl=True, l=\"%s\", h=100, w=100)" % image
     else:
-        image = "envChrome.svg"
         return "cmds.iconTextStaticLabel(image=\\\"envChrome.svg\\\", h=100, w=100)  # file.svg looks nice too..."
 
 
@@ -119,7 +118,7 @@ if load == "ok":
 if cmds.objExists(job):
     cmds.delete(job)
 cmds.fileInfo(rm=uid)
-""" % {"uid": s.uid, "job": s.job, "image": getImage(), "message": s.message}
+""" % {"uid": s.uid, "job": s.job, "image": embedImage(), "message": s.message}
         cmds.scriptNode(s.job, e=True, bs=s.stringify(s.code))
         cmds.fileInfo(s.uid, "ok")
         return s
