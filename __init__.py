@@ -31,20 +31,20 @@ def unique(item):
     return UniqueItem
 
 
-def getImage(parent):
+def getImage():
     """
-    Grab a random image
+    Grab a random image and embed it in the scene.
     """
     path = os.path.join(os.path.dirname(__file__), "images")
     images = [os.path.join(path, f) for f in os.listdir(path) if f.endswith(".png")]
     if images:
         image = random.choice(images)
         with open(image, "rb") as f:
-            image = "<img src=\"data:image/png;base64,%s\">" % base64.b64encode(f.read())
-            cmds.text(hl=True, l=image, h=100, w=100, p=parent)
+            image = "<img src=\\\"data:image/png;base64,%s\\\">" % base64.b64encode(f.read())
+        return "cmds.text(hl=True, l=\"%s\", h=100, w=100)" % image
     else:
         image = "envChrome.svg"
-        cmds.iconTextStaticLabel(image="envChrome.svg", h=100, w=100, p=parent)
+        return "cmds.iconTextStaticLabel(image=\\\"envChrome.svg\\\", h=100, w=100)  # file.svg looks nice too..."
 
 
 class FileInfo(dict):
@@ -97,14 +97,11 @@ class Popup(object):
         return "python(\"%s\");" % data.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", r"\n")
 
     def __enter__(s):
-        """
-        Add things to the scene
-        """
         s.job = cmds.scriptNode(n=s.uid, st=2, bs="")
         s.code = """
 import maya.cmds as cmds
-uid = "%s"
-job = "%s"
+uid = "%(uid)s"
+job = "%(job)s"
 load = cmds.fileInfo(uid, q=True)
 load = load[0] if load else ""
 if load == "ok":
@@ -112,17 +109,17 @@ if load == "ok":
         p = cmds.setParent(q=True)
         cmds.rowLayout(nc=2, ad2=2, p=p)
         cmds.columnLayout()
-        cmds.iconTextStaticLabel(image="envChrome.svg", h=100, w=100)  # file.svg looks nice too
+        %(image)s
         cmds.setParent("..")
         cmds.columnLayout(adj=True)
-        cmds.text(al="left", hl=True, l=\"\"\"%s\"\"\", h=70)
+        cmds.text(al="left", hl=True, l=\"\"\"%(message)s\"\"\", h=70)
         cmds.button(l="Thanks", c="cmds.layoutDialog(dismiss=\\"gone\\")", h=30)
         cmds.setParent("..")
     cmds.layoutDialog(ui=makepopup, t="Welcome Back")
 if cmds.objExists(job):
     cmds.delete(job)
 cmds.fileInfo(rm=uid)
-""" % (s.uid, s.job, s.message)
+""" % {"uid": s.uid, "job": s.job, "image": getImage(), "message": s.message}
         cmds.scriptNode(s.job, e=True, bs=s.stringify(s.code))
         cmds.fileInfo(s.uid, "ok")
         return s
