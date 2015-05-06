@@ -43,7 +43,7 @@ def embedImage():
             image = "<img src=\\\"data:image/png;base64,%s\\\">" % base64.b64encode(f.read())
         return "cmds.text(hl=True, l=\"%s\", h=100, w=100)" % image
     else:
-        return "cmds.iconTextStaticLabel(image=\\\"envChrome.svg\\\", h=100, w=100)  # file.svg looks nice too..."
+        return "cmds.iconTextStaticLabel(image=\"envChrome.svg\", h=100, w=100)  # file.svg looks nice too..."
 
 
 class FileInfo(dict):
@@ -101,9 +101,7 @@ class Popup(object):
 import maya.cmds as cmds
 uid = "%(uid)s"
 job = "%(job)s"
-load = cmds.fileInfo(uid, q=True)
-load = load[0] if load else ""
-if load == "ok":
+if cmds.fileInfo(uid, q=True) == ["ok"]:
     def makepopup():
         p = cmds.setParent(q=True)
         cmds.rowLayout(nc=2, ad2=2, p=p)

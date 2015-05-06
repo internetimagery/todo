@@ -48,7 +48,9 @@ def archive(mayaFile, todo, settings):
     if archive and mayaFile:
         if path and os.path.isdir(path):
             basename = os.path.basename(mayaFile)
-            name = "%s_%s_%s.zip" % (os.path.splitext(basename)[0], int(time.time() * 100), todo["label"])
+            whitelist = [" ", ".", "_"]  # Strip invalid characters
+            label = "".join(ch for ch in todo["label"] if ch.isalnum() or ch in whitelist).rstrip()
+            name = "%s_%s_%s.zip" % (os.path.splitext(basename)[0], int(time.time() * 100), label)
             dest = os.path.join(path, name)
             z = zipfile.ZipFile(dest, "w")
             z.write(mayaFile, basename)
