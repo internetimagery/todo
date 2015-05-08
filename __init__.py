@@ -69,14 +69,18 @@ def FileOpen(path):
     Open a file in a new window
     """
     if os.path.isfile(path):
-        if path[-3:] in [".ma", ".mb"]:
+        if path[-3:] in [".ma", ".mb"]:  # Make a special exception for maya files. We don't want multiple windows open.
             cmds.file(path, o=True)
-        elif sys.platform == "darwin":  # osx
-            subprocess.Popen(["open", path])
-        elif hasattr(os, "startfile"):  # Windows
-            os.startfile(path)
         else:
-            print "Sorry. File opening not currently supported for your system. :("
+            try:
+                os.startfile(path)  # Open file on windows
+            except AttributeError:
+                for command in [["open"], ["kioclient", "exec"], ["kfmclient", "exec"], ["gnome-open"], ["exo-open"]]:
+                    try:
+                        return subprocess.Popen(command + [path])
+                    except OSError:
+                        pass
+                webbrowser.open(path)
 
 
 class Settings(object):
@@ -143,7 +147,8 @@ cmds.fileInfo(rm=uid)
         Remove those things from the scene
         """
         cmds.fileInfo(rm=s.uid)
-        cmds.delete(s.job)
+        if cmds.objExists(s.job):
+            cmds.delete(s.job)
 
 
 class safeOut(object):
