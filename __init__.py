@@ -106,7 +106,7 @@ def FileOpen(path):
                             return
                     cmds.file(save=True)
                 elif answer == "no":
-                    cmds.file(modified=False)
+                    pass
                 else:
                     return
             cmds.file(path, o=True, f=True)
@@ -192,7 +192,7 @@ cmds.fileInfo(rm=uid)
 
 class safeOut(object):
     """
-    Protect output from threads
+    Protect output during threads
     """
     def __init__(s):
         s.oldOut = sys.stdout
