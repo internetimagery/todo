@@ -362,10 +362,9 @@ class MainWindow(object):
         result["hashtag"] = []
         result["url"] = ""
         result["file"] = ""
-        filePath = ""
+        clearPath = ""
         result["frame"] = None
         result["framerange"] = []
-        scene = os.path.realpath(os.path.dirname(cmds.file(q=True, sn=True))) if cmds.file(q=True, sn=True) else None
         if parse:
             for p in parse:
                 m = p.groupdict()
@@ -382,22 +381,19 @@ class MainWindow(object):
                     result["frame"] = m["frame"]
                 if m["file"]:
                     path = m["file"].split(" ")
-                    for i in range(len(path)):
-                        p = " ".join(path[i:])  # Narrow down a path
-                        rpath = ""
-                        if p[:1] in ["/", "\\"] or p[1:2] == ":":  # Check if path is absolute
-                            rpath = os.path.realpath(p)
-                        elif scene:  # Else are we working with a relative path?
-                            rpath = os.path.realpath(os.path.join(scene, p))
+                    scene = os.path.dirname(cmds.file(q=True, sn=True))
+                    for i in range(len(path)):  # Try figure out if a path is being requested
+                        p = " ".join(path[i:])
+                        rpath = os.path.realpath(os.path.join(scene, p))
                         if os.path.isfile(rpath):
-                            filePath = p
+                            clearPath = p
                             result["file"] = rpath
         # Clean out hashtags and tokens for nicer looking todos
         reg = "(\A\w+:\s)?"
         reg += "(#\s?\w+,?)?"
         reg += "(https?://[^\s]+)?"
         s.regex["label_clean"] = s.regex.get("label_clean", re.compile(reg))
-        result["label"] = s.regex["label_clean"].sub("", label).replace(filePath, "").strip()
+        result["label"] = s.regex["label_clean"].sub("", label).replace(clearPath, "").strip()
         return result
 
     def addTodo(s, todo, parent):
