@@ -48,6 +48,13 @@ def embedImage():
         return "cmds.iconTextStaticLabel(image=\"envChrome.svg\", h=100, w=100)  # file.svg looks nice too..."
 
 
+def SaveAs():
+    """
+    Save prompt
+    """
+    return cmds.fileDialog2(ds=2, sff="Maya ASCII", ff="Maya Files (*.ma *.mb);;Maya ASCII (*.ma);;Maya Binary (*.mb);;")
+
+
 class FileInfo(dict):
     """
     Fileinfo interface
@@ -90,12 +97,18 @@ def FileOpen(path):
         if path[-3:] in [".ma", ".mb"]:  # Make a special exception for maya files.
             if cmds.file(mf=True, q=True):  # File is modified. Need to make some changes.
                 answer = cmds.layoutDialog(ui=savePrompt, t="Excuse me one moment...")
-                if answer == "cancel":
-                    return "bye"
-                elif answer == "yes":
+                if answer == "yes":
+                    if not cmds.file(q=True, sn=True):
+                        loc = SaveAs()
+                        if loc:
+                            cmds.file(rn=loc[0])
+                        else:
+                            return
                     cmds.file(save=True)
                 elif answer == "no":
                     cmds.file(modified=False)
+                else:
+                    return
             cmds.file(path, o=True)
         else:
             try:
