@@ -393,7 +393,7 @@ class MainWindow(object):
         reg += "(#\s?\w+,?)?"
         reg += "(https?://[^\s]+)?"
         s.regex["label_clean"] = s.regex.get("label_clean", re.compile(reg))
-        result["label"] = s.regex["label_clean"].sub("", label).replace(clearPath, "").strip()
+        result["label"] = s.regex["label_clean"].sub("", label).replace(clearPath, os.path.basename(clearPath)).strip()
         return result
 
     def addTodo(s, todo, parent):
