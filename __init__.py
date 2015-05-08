@@ -141,7 +141,7 @@ class Settings(object):
         s.data[k] = v
         s.info["TODO_SETTINGS"] = json.dumps(s.data)
         if s.update:
-            s.update()
+            utils.executeDeferred(s.update)
 
 
 class Popup(object):
@@ -253,7 +253,6 @@ class MainWindow(object):
         s.registerHooks()  # Load our hooks
         s.basename = "TODO"  # Name for all todo's to derive from
         s.regex = {}  # Compiled regexes
-        s.sections = {}  # Closed / Open state of todo sections
         title = "Todo"
         with open(os.path.join(os.path.dirname(__file__), "quotes.json"), "r") as f:
             title = random.choice(json.load(f))
@@ -339,7 +338,10 @@ class MainWindow(object):
         sort_data = {}
 
         def stateChange(section, state):  # Save state of sections
-            s.sections[section] = state
+            s.settings.update = s._buidTodoTasks
+            data = s.settings.get("Todo.SectionState", {})
+            data[section] = state
+            s.settings.set("Todo.SectionState", data)
 
         def section(title, state):  # Build a section for each piece
             title = title.strip()
@@ -349,19 +351,21 @@ class MainWindow(object):
                 sort_data[title] = cmds.frameLayout(l=title, p=sorter, cll=True, cl=state, cc=lambda: stateChange(title, True), ec=lambda: stateChange(title, False))
                 return sort_data[title]
 
+        s.settings.update = None  # Don't need a callback or else infinite loop!
+        currState = s.settings.get("Todo.SectionState", {})
         state = {}
         for v in sorted([s._parseTodo(s.data[k], uid=k) for k in s.data.keys() if k and s.regex["uid"].match(k)], key=lambda x: x["label"]):
             if v["token"] or v["hashtag"]:
                 if v["token"]:
-                    state[v["token"]] = s.sections[v["token"]] if v["token"] in s.sections else False
+                    state[v["token"]] = currState[v["token"]] if v["token"] in currState else False
                     s.addTodo(v, section(v["token"], state[v["token"]]))
                 if v["hashtag"]:
                     for h in v["hashtag"]:
-                        state[h] = s.sections[h] if h in s.sections else False
+                        state[h] = currState[h] if h in currState else False
                         s.addTodo(v, section(h, state[h]))
             else:  # Unsorted todos
                 s.addTodo(v, unsort)
-        s.sections = state
+        s.settings.set("Todo.SectionState", state)
 
     def _buildSettings(s, *args):
         """
