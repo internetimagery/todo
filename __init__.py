@@ -342,7 +342,7 @@ class MainWindow(object):
             frr = "(?:(?P<range1>\d+)\s*(?:[^\d\s]|to|and)\s*(?P<range2>\d+))"  # Frame range
             fr = "(?P<frame>\d+)"  # Frame
             reg += "(?:%s|%s)?" % (frr, fr)
-            reg += "(?P<file>(?:[a-zA-Z]:)?[\w \\/]+\.\w+)?"  # Filename?
+            reg += "(?P<file>(?:[a-zA-Z]:|\\.{1,2})?[\w \\/]+\.\w+)?"  # Filename?
             return re.compile(reg)
 
         s.regex["label"] = s.regex.get("label", build_reg())
@@ -352,9 +352,10 @@ class MainWindow(object):
         result["hashtag"] = []
         result["url"] = ""
         result["file"] = ""
+        filePath = ""
         result["frame"] = None
         result["framerange"] = []
-        scene = os.path.realpath(cmds.file(q=True, sn=True)) if cmds.file(q=True, sn=True) else None
+        scene = os.path.realpath(os.path.dirname(cmds.file(q=True, sn=True))) if cmds.file(q=True, sn=True) else None
         if parse:
             for p in parse:
                 m = p.groupdict()
@@ -373,17 +374,21 @@ class MainWindow(object):
                     path = m["file"].split(" ")
                     for i in range(len(path)):
                         p = " ".join(path[i:])  # Narrow down a path
-                        if p[:1] == "/" or p[:1] == "\\" or p[1:2] == ":":  # Check if path is absolute
-                            print "Absolute: ", p
-                        else:  # Else are we working with a relative path?
-                            print scene
-                            print p
+                        rpath = ""
+                        if p[:1] in ["/", "\\"] or p[1:2] == ":":  # Check if path is absolute
+                            rpath = os.path.realpath(p)
+                        elif scene:  # Else are we working with a relative path?
+                            rpath = os.path.realpath(os.path.join(scene, p))
+                        if os.path.isfile(rpath):
+                            filePath = p
+                            result["file"] = rpath
+                            print rpath
         # Clean out hashtags and tokens for nicer looking todos
         reg = "(\A\w+:\s)?"
         reg += "(#\s?\w+,?)?"
         reg += "(https?://[^\s]+)?"
         s.regex["label_clean"] = s.regex.get("label_clean", re.compile(reg))
-        result["label"] = s.regex["label_clean"].sub("", label).strip()
+        result["label"] = s.regex["label_clean"].sub("", label).replace(filePath, "").strip()
         return result
 
     def addTodo(s, todo, parent):
