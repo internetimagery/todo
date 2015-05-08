@@ -109,7 +109,7 @@ def FileOpen(path):
                     cmds.file(modified=False)
                 else:
                     return
-            cmds.file(path, o=True)
+            cmds.file(path, o=True, f=True)
         else:
             try:
                 os.startfile(path)  # Open file on windows
