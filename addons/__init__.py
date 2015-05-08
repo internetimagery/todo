@@ -14,4 +14,4 @@ for f in [reg.match(m).group(1) for m in os.listdir(path) if reg.match(m)]:
         if hasattr(modules[f], "debug") and modules[f].debug:
             reload(modules[f])
     except Exception as e:
-        print "Failed to load %s." % f, e
+        print "Did not load %s." % f, e
