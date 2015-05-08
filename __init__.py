@@ -6,6 +6,8 @@
 
 import maya.utils as utils
 import maya.cmds as cmds
+import webbrowser
+import subprocess
 import threading
 import traceback
 import random
@@ -60,6 +62,16 @@ class FileInfo(dict):
     def __delitem__(s, k):
         cmds.fileInfo(rm=k)
         super(FileInfo, s).__delitem__(k)
+
+
+def FileOpen(path):
+    """
+    Open a file in a new window
+    """
+    if sys.platform == "darwin":  # osx
+        subprocess.Popen(["open", path])
+    elif hasattr(os, "startfile"):  # Windows
+        os.startfile(path)
 
 
 class Settings(object):
@@ -324,12 +336,13 @@ class MainWindow(object):
         Parse out metadata from Todo
         """
         def build_reg():
-            reg = "(?P<token>\A\w+(?=:))?"  # Token
+            reg = "(?P<token>\A\w+(?=:\s))?"  # Token
             reg += "(?P<hashtag>(?<=#)\s?\w+)?"  # Hashtag
             reg += "(?P<url>https?://[^\s]+)?"  # Url
             frr = "(?:(?P<range1>\d+)\s*(?:[^\d\s]|to|and)\s*(?P<range2>\d+))"  # Frame range
             fr = "(?P<frame>\d+)"  # Frame
             reg += "(?:%s|%s)?" % (frr, fr)
+            reg += "(?P<file>(?:[a-zA-Z]:)?[\w \\/]+\.\w+)?"  # Filename?
             return re.compile(reg)
 
         s.regex["label"] = s.regex.get("label", build_reg())
@@ -338,8 +351,10 @@ class MainWindow(object):
         result["token"] = ""
         result["hashtag"] = []
         result["url"] = ""
+        result["file"] = ""
         result["frame"] = None
         result["framerange"] = []
+        scene = os.path.realpath(cmds.file(q=True, sn=True)) if cmds.file(q=True, sn=True) else None
         if parse:
             for p in parse:
                 m = p.groupdict()
@@ -354,8 +369,17 @@ class MainWindow(object):
                     result["framerange"] = sorted([m["range1"], m["range2"]])
                 if m["frame"]:
                     result["frame"] = m["frame"]
+                if m["file"]:
+                    path = m["file"].split(" ")
+                    for i in range(len(path)):
+                        p = " ".join(path[i:])  # Narrow down a path
+                        if p[:1] == "/" or p[:1] == "\\" or p[1:2] == ":":  # Check if path is absolute
+                            print "Absolute: ", p
+                        else:  # Else are we working with a relative path?
+                            print scene
+                            print p
         # Clean out hashtags and tokens for nicer looking todos
-        reg = "(\A\w+:)?"
+        reg = "(\A\w+:\s)?"
         reg += "(#\s?\w+,?)?"
         reg += "(https?://[^\s]+)?"
         s.regex["label_clean"] = s.regex.get("label_clean", re.compile(reg))
@@ -389,6 +413,20 @@ class MainWindow(object):
                 w=30,
                 ann="Jump to frame range (%s to %s)." % (todo["framerange"][0], todo["framerange"][1]),
                 c=lambda: TimeSlider().range(todo["framerange"][0], todo["framerange"][1]))
+        elif todo["url"]:
+            cmds.iconTextButton(
+                image="SP_ComputerIcon.png",
+                style="iconOnly",
+                w=30,
+                ann="Open url in browser: %s." % todo["url"],
+                c=lambda: webbrowser.open(todo["url"], new=2))
+        elif todo["file"]:
+            cmds.iconTextButton(
+                image="setEdEditMode.png",
+                style="iconOnly",
+                w=30,
+                ann="Open file: %s." % todo["file"],
+                c=lambda: FileOpen(todo["file"]))
         cmds.iconTextButton(
             image="editBookmark.png",
             style="iconOnly",
