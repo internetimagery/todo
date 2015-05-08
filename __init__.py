@@ -66,16 +66,16 @@ class FileInfo(dict):
 
 def FileOpen(path):
     """
-    Open a file in a new window
+    Open a file
     """
     if os.path.isfile(path):
-        if path[-3:] in [".ma", ".mb"]:  # Make a special exception for maya files. We don't want multiple windows open.
+        if path[-3:] in [".ma", ".mb"]:  # Make a special exception for maya files.
             cmds.file(path, o=True)
         else:
             try:
                 os.startfile(path)  # Open file on windows
-            except AttributeError:
-                for command in [["open"], ["kioclient", "exec"], ["kfmclient", "exec"], ["gnome-open"], ["exo-open"]]:
+            except AttributeError:  # Open file on anything else
+                for command in [["open"], ["xdg-open"], ["gnome-open"], ["kde-open"], ["exo-open"]]:
                     try:
                         return subprocess.Popen(command + [path])
                     except OSError:
