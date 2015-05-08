@@ -324,10 +324,11 @@ class MainWindow(object):
         Parse out metadata from Todo
         """
         def build_reg():
-            reg = "(\A\w+(?=:))?"  # Token
-            reg += "((?<=#)\s?\w+)?"  # Hashtag
-            frr = "(?:(\d+)\s*(?:[^\d\s]|to|and)\s*(\d+))"  # Frame range
-            fr = "(\d+)"  # Frame
+            reg = "(?P<token>\A\w+(?=:))?"  # Token
+            reg += "(?P<hashtag>(?<=#)\s?\w+)?"  # Hashtag
+            reg += "(?P<url>https?://[^\s]+)?"  # Url
+            frr = "(?:(?P<range1>\d+)\s*(?:[^\d\s]|to|and)\s*(?P<range2>\d+))"  # Frame range
+            fr = "(?P<frame>\d+)"  # Frame
             reg += "(?:%s|%s)?" % (frr, fr)
             return re.compile(reg)
 
@@ -336,22 +337,28 @@ class MainWindow(object):
         result = kwargs
         result["token"] = ""
         result["hashtag"] = []
+        result["url"] = ""
         result["frame"] = None
         result["framerange"] = []
         if parse:
             for p in parse:
-                m = p.groups()
-                if m[0]:  # Match tokens
-                    result["token"] = m[0]
-                if m[1]:
-                    if m[1] not in result["hashtag"]:
-                        result["hashtag"].append(m[1].strip())
-                if m[2] and m[3]:
-                    result["framerange"] = sorted([m[2], m[3]])
-                if m[4]:
-                    result["frame"] = m[4]
+                m = p.groupdict()
+                if m["token"]:  # Match tokens
+                    result["token"] = m["token"]
+                if m["hashtag"]:
+                    if m["hashtag"] not in result["hashtag"]:
+                        result["hashtag"].append(m["hashtag"].strip())
+                if m["url"]:
+                    result["url"] = m["url"]
+                if m["range1"] and m["range2"]:
+                    result["framerange"] = sorted([m["range1"], m["range2"]])
+                if m["frame"]:
+                    result["frame"] = m["frame"]
         # Clean out hashtags and tokens for nicer looking todos
-        s.regex["label_clean"] = s.regex.get("label_clean", re.compile("(\A\w+:)?" + "(#\s?\w+,?)?"))
+        reg = "(\A\w+:)?"
+        reg += "(#\s?\w+,?)?"
+        reg += "(https?://[^\s]+)?"
+        s.regex["label_clean"] = s.regex.get("label_clean", re.compile(reg))
         result["label"] = s.regex["label_clean"].sub("", label).strip()
         return result
 
