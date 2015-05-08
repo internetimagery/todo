@@ -382,7 +382,6 @@ class MainWindow(object):
                         if os.path.isfile(rpath):
                             filePath = p
                             result["file"] = rpath
-                            print rpath
         # Clean out hashtags and tokens for nicer looking todos
         reg = "(\A\w+:\s)?"
         reg += "(#\s?\w+,?)?"
@@ -427,7 +426,7 @@ class MainWindow(object):
                 c=lambda: webbrowser.open(todo["url"], new=2))
         elif todo["file"]:
             cmds.iconTextButton(
-                image="setEdEditMode.png",
+                image="openScript.png",
                 style="iconOnly",
                 w=30,
                 ann="Open file: %s." % todo["file"],
