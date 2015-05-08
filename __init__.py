@@ -413,7 +413,7 @@ class MainWindow(object):
             fn="fixedWidthFont",
             ann="Click to check off and save.\nTODO: %s" % todo["label"],
             c=lambda: s.activateTodo(todo["uid"], wrapper))
-        if todo["frame"] or todo["frame"] is 0:
+        if todo["frame"] or todo["frame"] is 0:  # Extra convenience button
             cmds.iconTextButton(
                 image="centerCurrentTime.png",
                 style="iconOnly",
@@ -432,17 +432,17 @@ class MainWindow(object):
                 image="SP_ComputerIcon.png",
                 style="iconOnly",
                 w=30,
-                ann="Open url in browser: %s." % todo["url"],
+                ann="Open url: %s" % todo["url"],
                 c=lambda: webbrowser.open(todo["url"], new=2))
         elif todo["file"]:
             cmds.iconTextButton(
                 image="openScript.png",
                 style="iconOnly",
                 w=30,
-                ann="Open file: %s." % todo["file"],
+                ann="Open file: %s" % todo["file"],
                 c=lambda: FileOpen(todo["file"]))
         cmds.iconTextButton(
-            image="editBookmark.png",
+            image="setEdEditMode.png",
             style="iconOnly",
             w=30,
             ann="Edit Todo.",

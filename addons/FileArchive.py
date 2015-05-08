@@ -23,6 +23,7 @@ def settings_archive(mayaFile, todo, settings):
     # Use File Archiving
     cmds.columnLayout(
         adjustableColumn=True,
+        ann="Store a backup of the current scene into the provided folder upon each Todo completion.",
         bgc=[0.5, 0.5, 0.5] if archive else [0.2, 0.2, 0.2])
     cmds.checkBox(
         l="Use File Archive",

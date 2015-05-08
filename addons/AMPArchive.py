@@ -18,6 +18,7 @@ def settings_archive(mayaFile, todo, settings):
     amp = settings.get("AMPArchive.active", False)
     cmds.columnLayout(
         adjustableColumn=True,
+        ann="Check the file into AMP upon each Todo task completion.",
         bgc=[0.5, 0.5, 0.5] if amp else [0.2, 0.2, 0.2])
     cmds.checkBox(
         l="Use AMP archive",
