@@ -29,7 +29,7 @@ def settings_archive(mayaFile, todo, settings):
         branch = settings.get("GitArchive.branch", None)
         cmds.columnLayout(
             adjustableColumn=True,
-            ann="Check the Maya file into Git (if the file is located in a valid repo) upon each Todo task completion.",
+            ann="Commit the Maya file into Git (if the file is located in a valid repo) upon each Todo task completion.",
             bgc=[0.5, 0.5, 0.5] if git else [0.2, 0.2, 0.2])
         cmds.checkBox(
             l="Use Git archive",
