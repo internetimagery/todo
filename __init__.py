@@ -68,8 +68,34 @@ def FileOpen(path):
     """
     Open a file
     """
+    def savePrompt():
+        p = cmds.setParent(q=True)
+        cmds.columnLayout(adj=True, p=p)
+        cmds.rowLayout(nc=2)
+        cmds.columnLayout()
+        eval(embedImage())
+        cmds.setParent("..")
+        cmds.columnLayout(adj=True)
+        cmds.text(al="left", hl=True, l="""
+<h3>There are unsaved changes in your scene.</h3>
+<div>Would you like to save before leaving?</div>""", h=70)
+        cmds.rowLayout(nc=3, h=30)
+        cmds.button(l="Yes please!".center(20), c="cmds.layoutDialog(dismiss=\"yes\")")
+        cmds.button(l="No Thanks".center(20), c="cmds.layoutDialog(dismiss=\"no\")")
+        cmds.button(l="Cancel".center(20), c="cmds.layoutDialog(dismiss=\"cancel\")")
+        cmds.setParent("..")
+        cmds.setParent("..")
+
     if os.path.isfile(path):
         if path[-3:] in [".ma", ".mb"]:  # Make a special exception for maya files.
+            if cmds.file(mf=True, q=True):  # File is modified. Need to make some changes.
+                answer = cmds.layoutDialog(ui=savePrompt, t="Excuse me one moment...")
+                if answer == "cancel":
+                    return "bye"
+                elif answer == "yes":
+                    cmds.file(save=True)
+                elif answer == "no":
+                    cmds.file(modified=False)
             cmds.file(path, o=True)
         else:
             try:
