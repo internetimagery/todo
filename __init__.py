@@ -68,10 +68,15 @@ def FileOpen(path):
     """
     Open a file in a new window
     """
-    if sys.platform == "darwin":  # osx
-        subprocess.Popen(["open", path])
-    elif hasattr(os, "startfile"):  # Windows
-        os.startfile(path)
+    if os.path.isfile(path):
+        if path[-3:] in [".ma", ".mb"]:
+            cmds.file(path, o=True)
+        elif sys.platform == "darwin":  # osx
+            subprocess.Popen(["open", path])
+        elif hasattr(os, "startfile"):  # Windows
+            os.startfile(path)
+        else:
+            print "Sorry. File opening not currently supported for your system. :("
 
 
 class Settings(object):
@@ -342,7 +347,7 @@ class MainWindow(object):
             frr = "(?:(?P<range1>\d+)\s*(?:[^\d\s]|to|and)\s*(?P<range2>\d+))"  # Frame range
             fr = "(?P<frame>\d+)"  # Frame
             reg += "(?:%s|%s)?" % (frr, fr)
-            reg += "(?P<file>(?:[a-zA-Z]:|\\.{1,2})?[\w \\/]+\.\w+)?"  # Filename?
+            reg += "(?P<file>(?:[a-zA-Z]:|\\.{1,2})?[^\t\r\n:|]+\.\w+)?"  # Filename?
             return re.compile(reg)
 
         s.regex["label"] = s.regex.get("label", build_reg())
