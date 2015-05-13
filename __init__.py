@@ -427,11 +427,13 @@ class MainWindow(object):
                 if m["file"]:
                     path = m["file"].split(" ")
                     scene = os.path.dirname(cmds.file(q=True, sn=True))
+                    refNames = referenced.keys()
                     for i in range(len(path)):  # Try figure out if a path is being requested
                         p = " ".join(path[i:])
-                        rpath = os.path.realpath(os.path.join(scene, p))
-                        if p in referenced.keys():
+                        if p in refNames:  # Is the path a referenced item?
                             rpath = os.path.realpath(referenced[p])
+                        else:  # ... or perhaps another file somewhere else on the system?
+                            rpath = os.path.realpath(os.path.join(scene, p))
                         if os.path.isfile(rpath):
                             clearPath = p
                             result["file"] = rpath
