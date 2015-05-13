@@ -249,10 +249,10 @@ class MainWindow(object):
     def __init__(s):
         if cmds.dockControl("TODO_WINDOW", ex=True):
             cmds.deleteUI("TODO_WINDOW")
+            print "Window exists. Closing and opening a new window."
         s.page = ""  # Page we are on.
         s._refresh()  # Initialize saved data
         s.registerHooks()  # Load our hooks
-        s.basename = "TODO"  # Name for all todo's to derive from
         s.regex = {}  # Compiled regexes
         title = "Todo"
         with open(os.path.join(os.path.dirname(__file__), "quotes.json"), "r") as f:
@@ -332,7 +332,7 @@ class MainWindow(object):
         """
         if cmds.scrollLayout(s.todoContainer, ex=True):
             cmds.deleteUI(s.todoContainer)
-        s.regex["uid"] = s.regex.get("uid", re.compile("^%s_\d+" % s.basename))
+        s.regex["uid"] = s.regex.get("uid", re.compile("^TODO_\d+"))
         s.todoContainer = cmds.scrollLayout(bgc=[0.2, 0.2, 0.2], cr=True, p=s.todowrap)
         sorter = cmds.columnLayout(adj=True, p=s.todoContainer)
         unsort = cmds.columnLayout(adj=True, p=s.todoContainer)
@@ -509,7 +509,7 @@ class MainWindow(object):
             meta = s._parseTodo(label, uid=uid)
             if meta["label"]:
                 s.data[uid] = label
-                print "Updated Todo."
+                print "Window closed."
                 s.settings.update = None
                 s.fireHook("todo.edit", meta, faf=True)
                 s._buidTodoTasks()
@@ -526,7 +526,7 @@ class MainWindow(object):
         """
         Create a new Todo
         """
-        name = "%(name)s_%(stamp)s" % {"name": s.basename, "stamp": int(time.time() * 100)}
+        name = "%(name)s_%(stamp)s" % {"name": "TODO", "stamp": int(time.time() * 100)}
         meta = s._parseTodo(txt, uid=name)
         if meta["label"]:
             s.data[name] = txt
