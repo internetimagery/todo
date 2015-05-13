@@ -400,12 +400,14 @@ class MainWindow(object):
 
         s.regex["label"] = s.regex.get("label", build_reg())
         parse = s.regex["label"].finditer(label)
-        result = kwargs
+        result = kwargs  # Add extra additional custom arguments
         result["token"] = ""
         result["hashtag"] = []
         result["url"] = ""
-        result["file"] = ""
-        clearPath = ""
+        # File related searching, more complicated than the rest
+        result["file"] = ""  # Default
+        clearPath = ""  # Path to remove from todo upon match
+        referenced = dict((os.path.basename(f), f) for f in cmds.file(l=True, q=True))  # Listing of all files
         result["frame"] = None
         result["framerange"] = []
         if parse:
@@ -428,9 +430,12 @@ class MainWindow(object):
                     for i in range(len(path)):  # Try figure out if a path is being requested
                         p = " ".join(path[i:])
                         rpath = os.path.realpath(os.path.join(scene, p))
+                        if p in referenced.keys():
+                            rpath = os.path.realpath(referenced[p])
                         if os.path.isfile(rpath):
                             clearPath = p
                             result["file"] = rpath
+
         # Clean out hashtags and tokens for nicer looking todos
         reg = "(\A\w+:\s)?"
         reg += "(#\s?\w+,?)?"

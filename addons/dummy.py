@@ -11,8 +11,8 @@ def run_hook(mayaFile, todo, settings):
     Run hook for whatever event is fired.
     mayaFile = path to scene.
     todo = todo metadata (optional).
-    gui = gui to parent any created gui items to (optional).
     settings = get() and set() settings. !!Beware setting the settings in hooks other than ones denoted with "settings" ie "settings.archive"!!
+    
     """
     pass
 
