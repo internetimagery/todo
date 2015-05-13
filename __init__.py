@@ -526,7 +526,7 @@ class MainWindow(object):
         """
         Create a new Todo
         """
-        name = "%s_%s" % (s.basename, int(time.time() * 100))
+        name = "%(name)s_%(stamp)s" % {"name": s.basename, "stamp": int(time.time() * 100)}
         meta = s._parseTodo(txt, uid=name)
         if meta["label"]:
             s.data[name] = txt
@@ -576,10 +576,10 @@ class MainWindow(object):
             process = cmds.scriptJob(e=['SceneSaved', performArchive], ro=True)
             try:
                 message = """
-<div>- This Scene was last saved on <em>%s</em>.</div>
-<div>- Completing the task: <code>%s</code></div>
+<div>- This Scene was last saved on <em>%(time)s</em>.</div>
+<div>- Completing the task: <code>%(todo)s</code></div>
 <div>- The file <strong>has not been modified since.</strong></div><br>
-""" % (time.ctime(), tempmeta["label"])
+""" % {"time": time.ctime(), "todo": tempmeta["label"]}
                 with Popup(message):
                     cmds.file(save=True)  # Save the scene
             except RuntimeError:  # If scene save was canceled or failed. Reset everything
@@ -630,7 +630,7 @@ class MainWindow(object):
     def fireHook(s, hook, todo=None, faf=False, callback=None):
         """
         Use a hook
-        hook = hookname, gui = parent gui element, faf = fire and forget the tasks, callback = run after each task has completed.
+        hook = hookname, todo = todo meta data, faf = fire and forget the tasks, callback = run after each task has completed.
         """
         def fire(func):
             result = None
