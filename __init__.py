@@ -10,6 +10,7 @@ import webbrowser
 import subprocess
 import threading
 import traceback
+import urlparse
 import random
 import addons
 import base64
@@ -404,46 +405,45 @@ class MainWindow(object):
         result["token"] = ""
         result["hashtag"] = []
         result["url"] = ""
-        # File related searching, more complicated than the rest
         result["file"] = ""  # Default
-        clearPath = ""  # Path to remove from todo upon match
-        referenced = dict((os.path.basename(f), f) for f in cmds.file(l=True, q=True))  # Listing of all files
         result["frame"] = None
         result["framerange"] = []
+        replace = {}  # Make the output nicer by removing certain tags
         if parse:
             for p in parse:
                 m = p.groupdict()
                 if m["token"]:  # Match tokens
                     result["token"] = m["token"]
-                if m["hashtag"]:
+                    replace[m["token"] + ":"] = ""
+                if m["hashtag"]:  # Grab all hashtags, avoiding duplicates
                     if m["hashtag"] not in result["hashtag"]:
                         result["hashtag"].append(m["hashtag"].strip())
-                if m["url"]:
+                        replace["#" + m["hashtag"]] = ""
+                if m["url"]:  # Looking for a website?
                     result["url"] = m["url"]
-                if m["range1"] and m["range2"]:
+                    replace[m["url"]] = urlparse.urlparse(m["url"]).netloc
+                if m["range1"] and m["range2"]:  # Frame range?
                     result["framerange"] = sorted([m["range1"], m["range2"]])
                 if m["frame"]:
                     result["frame"] = m["frame"]
-                if m["file"]:
+                if m["file"] and not result["file"]:
                     path = m["file"].split(" ")
                     scene = os.path.dirname(cmds.file(q=True, sn=True))
-                    refNames = referenced.keys()
+                    refPaths = dict((os.path.basename(f), f) for f in cmds.file(l=True, q=True))  # Listing of all files
+                    refNames = refPaths.keys()
                     for i in range(len(path)):  # Try figure out if a path is being requested
                         p = " ".join(path[i:])
                         if p in refNames:  # Is the path a referenced item?
-                            rpath = os.path.realpath(referenced[p])
+                            rpath = os.path.realpath(refPaths[p])
                         else:  # ... or perhaps another file somewhere else on the system?
                             rpath = os.path.realpath(os.path.join(scene, p))
                         if os.path.isfile(rpath):
-                            clearPath = p
                             result["file"] = rpath
-
-        # Clean out hashtags and tokens for nicer looking todos
-        reg = "(\A\w+:\s)?"
-        reg += "(#\s?\w+,?)?"
-        reg += "(https?://[^\s]+)?"
-        s.regex["label_clean"] = s.regex.get("label_clean", re.compile(reg))
-        result["label"] = s.regex["label_clean"].sub("", label).replace(clearPath, os.path.basename(clearPath)).strip()
+                            replace[p] = os.path.basename(p)
+        result["label"] = label.strip()
+        if replace:
+            for r in replace:
+                result["label"] = result["label"].replace(r, replace[r])
         return result
 
     def addTodo(s, todo, parent):
