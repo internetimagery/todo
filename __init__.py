@@ -265,7 +265,7 @@ class MainWindow(object):
             print "No inspirational quotes loaded."
 
         window = cmds.window(title=title, rtf=True)
-        s.container = cmds.columnLayout(adjustableColumn=True)
+        s.container = cmds.columnLayout(adj=True)
         s.wrapper = ""
 
         allowed_areas = ['right', 'left']
@@ -287,7 +287,7 @@ class MainWindow(object):
         """
         if cmds.layout(s.wrapper, ex=True):
             cmds.deleteUI(s.wrapper)
-        s.wrapper = cmds.columnLayout(adjustableColumn=True, p=s.container)
+        s.wrapper = cmds.columnLayout(adj=True, p=s.container)
 
     def _refresh(s):
         """
@@ -306,8 +306,8 @@ class MainWindow(object):
         """
         s.page = "todo"
         s._clear()
-        cmds.columnLayout(adjustableColumn=True)
-        cmds.columnLayout(adjustableColumn=True)
+        cmds.columnLayout(adj=True)
+        cmds.columnLayout(adj=True)
         cmds.iconTextButton(
             h=30,
             ann="Click to view the Todo scripts settings. Settings are saved with the Maya scene, so you will need to set them for each scene.",
@@ -332,7 +332,7 @@ class MainWindow(object):
         def clear():  # Clear the text field
             cmds.textField(text, e=True, tx="")
 
-        s.todowrap = cmds.columnLayout(adjustableColumn=True)
+        s.todowrap = cmds.columnLayout(adj=True)
         # Todo items in here!
         s.todoContainer = ""
         cmds.setParent("..")
@@ -389,7 +389,7 @@ class MainWindow(object):
         s.page = "settings"
 
         s._clear()
-        cmds.columnLayout(adjustableColumn=True, p=s.wrapper)
+        cmds.columnLayout(adj=True, p=s.wrapper)
         cmds.iconTextButton(
             h=30,
             ann="Click to return to your Todo list.",
