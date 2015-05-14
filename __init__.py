@@ -304,16 +304,24 @@ class MainWindow(object):
         s._clear()
         cmds.columnLayout(adjustableColumn=True)
         cmds.columnLayout(adjustableColumn=True)
-        cmds.iconTextButton(h=30, image="attributes.png", label="Settings ->", style="iconAndTextHorizontal", c=s._buildSettings)
+        cmds.iconTextButton(
+            h=30,
+            ann="Click to view the Todo scripts settings. Settings are saved with the Maya scene, so you will need to set them for each scene.",
+            image="attributes.png",
+            label="Settings ->",
+            style="iconAndTextHorizontal",
+            c=s._buildSettings)
         cmds.separator()
         text = cmds.textField(
             aie=True,
             ed=True,
             h=30,
+            ann="Type a task into the box.",
             ec=lambda x: not s.createTodo(x) or clear())
         cmds.button(
             label="Create a new TODO",
             h=20,
+            ann="Type a task into the box.",
             c=lambda x: not s.createTodo(cmds.textField(text, q=True, tx=True)) or clear())
         cmds.setParent("..")
 
@@ -378,7 +386,13 @@ class MainWindow(object):
 
         s._clear()
         cmds.columnLayout(adjustableColumn=True, p=s.wrapper)
-        cmds.iconTextButton(h=30, image="revealSelected.png", label="<- Todo", style="iconAndTextHorizontal", c=s._buildTodo)
+        cmds.iconTextButton(
+            h=30,
+            ann="Click to return to your Todo list.",
+            image="revealSelected.png",
+            label="<- Todo",
+            style="iconAndTextHorizontal",
+            c=s._buildTodo)
         cmds.separator()
         cmds.text(label="Settings are unique to each Maya scene.", h=50)
         cmds.frameLayout(l="Archive options:")
