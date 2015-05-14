@@ -258,8 +258,11 @@ class MainWindow(object):
         s.fireHook("app.start")
         s.regex = {}  # Compiled regexes
         title = "Todo"
-        with open(os.path.join(os.path.dirname(__file__), "quotes.json"), "r") as f:
-            title = random.choice(json.load(f))
+        try:
+            with open(os.path.join(os.path.dirname(__file__), "quotes.json"), "r") as f:  # Motivation!
+                title = random.choice(json.load(f))
+        except IOError:
+            pass
 
         window = cmds.window(title=title, rtf=True)
         s.container = cmds.columnLayout(adjustableColumn=True)
