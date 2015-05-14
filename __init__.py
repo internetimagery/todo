@@ -261,8 +261,8 @@ class MainWindow(object):
         try:
             with open(os.path.join(os.path.dirname(__file__), "quotes.json"), "r") as f:  # Motivation!
                 title = random.choice(json.load(f))
-        except IOError:
-            pass
+        except (IOError, ValueError):
+            print "No inspirational quotes loaded."
 
         window = cmds.window(title=title, rtf=True)
         s.container = cmds.columnLayout(adjustableColumn=True)
