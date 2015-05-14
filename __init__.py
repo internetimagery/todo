@@ -619,10 +619,12 @@ class MainWindow(object):
             for name in addons.modules:
                 mod = addons.modules[name]
                 mod.cmds = safeCMDS()
-                if hasattr(mod, "hooks") and callable(mod.hooks):
+                try:
                     hooks = mod.hooks()
                     for hook in hooks:
                         s.hooks[hook] = s.hooks.get(hook, []) + [hooks[hook]]
+                except (AttributeError, TypeError):
+                    print "Module %s is misisng a \"hooks\" function." % name
 
     def fireHook(s, hook, todo=None, faf=False, settings=None, callback=None):
         """
