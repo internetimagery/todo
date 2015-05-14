@@ -381,8 +381,7 @@ class MainWindow(object):
         cmds.text(label="Settings are unique to each Maya scene.", h=50)
         cmds.frameLayout(l="Archive options:")
         # Settings module
-        s.settings.update = s._buildSettings
-        s.fireHook("settings.archive")
+        s.fireHook("settings.archive", settings=s._buildSettings)
         cmds.setParent("..")
 
     def _parseTodo(s, label, **kwargs):
@@ -509,8 +508,6 @@ class MainWindow(object):
             meta = s._parseTodo(label, uid=uid)
             if meta["label"]:
                 s.data[uid] = label
-                print "Window closed."
-                s.settings.update = None
                 s.fireHook("todo.edit", meta, faf=True)
                 s._buidTodoTasks()
             else:
@@ -530,7 +527,6 @@ class MainWindow(object):
         meta = s._parseTodo(txt, uid=name)
         if meta["label"]:
             s.data[name] = txt
-            s.settings.update = None
             s.fireHook("todo.create", meta, faf=True)
             s._buidTodoTasks()
             return True  # Return True to retain input
@@ -543,7 +539,6 @@ class MainWindow(object):
         Remove a Todo
         """
         meta = s._parseTodo(s.data[uid], uid=uid)
-        s.settings.update = None
         s.fireHook("todo.delete", meta, faf=True)
         del s.data[uid]
         s._buidTodoTasks()
@@ -555,7 +550,6 @@ class MainWindow(object):
         cmds.rowLayout(gui, e=True, en=False)
 
         def performArchive():
-            s.settings.update = None  # Nothing to update
             s.fireHook("todo.complete", todo=tempmeta, faf=True)
             closeTodo()
 
@@ -627,10 +621,10 @@ class MainWindow(object):
                     for hook in hooks:
                         s.hooks[hook] = s.hooks.get(hook, []) + [hooks[hook]]
 
-    def fireHook(s, hook, todo=None, faf=False, callback=None):
+    def fireHook(s, hook, todo=None, faf=False, settings=None, callback=None):
         """
         Use a hook
-        hook = hookname, todo = todo meta data, faf = fire and forget the tasks, callback = run after each task has completed.
+        hook = hookname, todo = todo meta data, faf = fire and forget the tasks, callback = run after each task has completed, settings = callback if setting a settings option.
         """
         def fire(func):
             result = None
@@ -643,6 +637,7 @@ class MainWindow(object):
         result = []
         threads = []
         if hook in s.hooks:
+            s.settings.update = settings
             path = os.path.realpath(cmds.file(q=True, sn=True))  # Scene name
             mayaFile = os.path.realpath(path) if os.path.isfile(path) else None
             for h in s.hooks[hook]:
