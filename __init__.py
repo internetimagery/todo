@@ -247,12 +247,14 @@ class MainWindow(object):
     Main GUI Window
     """
     def __init__(s):
+        s.registerHooks()  # Load our hooks
         if cmds.dockControl("TODO_WINDOW", ex=True):
             cmds.deleteUI("TODO_WINDOW")
+            s.fireHook("app.end")
             print "Window exists. Closing and opening a new window."
         s.page = ""  # Page we are on.
         s._refresh()  # Initialize saved data
-        s.registerHooks()  # Load our hooks
+        s.fireHook("app.start")
         s.regex = {}  # Compiled regexes
         title = "Todo"
         with open(os.path.join(os.path.dirname(__file__), "quotes.json"), "r") as f:
@@ -339,7 +341,7 @@ class MainWindow(object):
         sort_data = {}
 
         def stateChange(section, state):  # Save state of sections
-            s.settings.update = s._buidTodoTasks
+            s.fireHook("app.changeSection", settings=s._buidTodoTasks)
             data = s.settings.get("Todo.SectionState", {})
             data[section] = state
             s.settings.set("Todo.SectionState", data)
@@ -352,7 +354,7 @@ class MainWindow(object):
                 sort_data[title] = cmds.frameLayout(l=title, p=sorter, cll=True, cl=state, cc=lambda: stateChange(title, True), ec=lambda: stateChange(title, False))
                 return sort_data[title]
 
-        s.settings.update = None  # Don't need a callback or else infinite loop!
+        s.fireHook("app.buildList")
         currState = s.settings.get("Todo.SectionState", {})
         state = {}
         for v in sorted([s._parseTodo(s.data[k], uid=k) for k in s.data.keys() if k and s.regex["uid"].match(k)], key=lambda x: x["label"]):
@@ -605,6 +607,7 @@ class MainWindow(object):
             cmds.scriptJob(ie=s.closeDock, p=s.dock, ro=True)
         elif not visible:
             cmds.deleteUI(s.dock, ctl=True)
+            s.fireHook("app.end")
             print "Window closed."
 
     def registerHooks(s):
@@ -636,8 +639,8 @@ class MainWindow(object):
 
         result = []
         threads = []
+        s.settings.update = settings
         if hook in s.hooks:
-            s.settings.update = settings
             path = os.path.realpath(cmds.file(q=True, sn=True))  # Scene name
             mayaFile = os.path.realpath(path) if os.path.isfile(path) else None
             for h in s.hooks[hook]:

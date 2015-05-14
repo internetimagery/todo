@@ -12,16 +12,19 @@ def run_hook(mayaFile, todo, settings):
     mayaFile = path to scene.
     todo = todo metadata (optional).
     settings = get() and set() settings. !!Beware setting the settings in hooks other than ones denoted with "settings" ie "settings.archive"!!
-    
     """
     pass
 
 
 def hooks():
     return {
-        "settings.archive": run_hook,
-        "todo.complete": run_hook,
-        "todo.delete": run_hook,
-        "todo.create": run_hook,
-        "todo.edit": run_hook
+        "settings.archive": run_hook,  # Populate the settings menu with archive options
+        "todo.complete": run_hook,  # Fired upon completion of a todo
+        "todo.delete": run_hook,  # Todo has been deleted (trash can button)
+        "todo.create": run_hook,  # A New Todo has been created
+        "todo.edit": run_hook,  # An existing Todo has had its name changed
+        "app.changeSection": run_hook,  # A section has been opened or closed
+        "app.buildList": run_hook,  # The main todo list is populating with todos
+        "app.start": run_hook,  # The script has been invoked (opened / run)
+        "app.end": run_hook  # The window has been closed.
         }
