@@ -225,6 +225,7 @@ class safeCMDS(object):
         if hasattr(cmds, n):
             at = getattr(cmds, n)
             return lambda *a, **kw: utils.executeInMainThreadWithResult(lambda: at(*a, **kw))
+        raise AttributeError
 
 
 class TimeSlider(object):
