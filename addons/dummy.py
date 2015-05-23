@@ -1,7 +1,10 @@
+# coding: utf-8
 # Dummy addon. Doesn't do anything, but is something to build off of.
 #
 # Created by Jason Dixon
 # 02/05/15
+import maya.cmds as cmds
+import maya.mel as mel
 
 debug = True  # Add this to override caching. So changes can be observed while testing.
 

@@ -1,3 +1,4 @@
+# coding: utf-8
 # Archive options for Git
 #
 # Created by Jason Dixon

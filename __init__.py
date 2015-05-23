@@ -112,15 +112,22 @@ def FileOpen(path):
                     return
             cmds.file(path, o=True, f=True)
         else:
+            universalOpen(path)
+
+
+def universalOpen(command):
+    """
+    Open file in different OS's
+    """
+    try:
+        os.startfile(command)  # Open file on windows
+    except AttributeError:  # Open file on anything else
+        for com in [["open"], ["xdg-open"], ["gnome-open"], ["kde-open"], ["exo-open"]]:
             try:
-                os.startfile(path)  # Open file on windows
-            except AttributeError:  # Open file on anything else
-                for command in [["open"], ["xdg-open"], ["gnome-open"], ["kde-open"], ["exo-open"]]:
-                    try:
-                        return subprocess.Popen(command + [path])
-                    except OSError:
-                        pass
-                webbrowser.open(path)
+                return subprocess.Popen(com + [command])
+            except OSError:
+                pass
+            webbrowser.open(command)
 
 
 class Settings(object):

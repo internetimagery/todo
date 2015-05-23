@@ -1,3 +1,4 @@
+# coding: utf-8
 # Import AMP support
 # Created by Jason Dixon
 # 02/05/15
