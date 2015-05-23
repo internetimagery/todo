@@ -410,6 +410,13 @@ class MainWindow(object):
         # Settings module
         s.fireHook("settings.archive", settings=s._buildSettings)
         cmds.setParent("..")
+        cmds.frameLayout(l="Feedback:")
+        cmds.iconTextButton(
+            image="party.png",
+            ann="Have any feedback? Good or bad. Love to hear it! :)",
+            l="Leave Feedback...",
+            style="iconAndTextHorizontal",
+            c=lambda: universalOpen("mailto:jason.dixon.email@gmail.com?subject=Todo Feedback"))  # TODO errors when no folder is chosen because of 0 index
 
     def _parseTodo(s, label, **kwargs):
         """
