@@ -494,20 +494,13 @@ class MainWindow(object):
             fn="fixedWidthFont",
             ann="Click to check off and save.\nTODO: %s" % todo["label"],
             c=lambda: s.activateTodo(todo["uid"], wrapper))
-        if todo["frame"] or todo["frame"] is 0:  # Extra convenience button
+        if todo["file"]:
             cmds.iconTextButton(
-                image="centerCurrentTime.png",
+                image="openScript.png",
                 style="iconOnly",
                 w=30,
-                ann="Go to frame %s." % todo["frame"],
-                c=lambda: TimeSlider().frame(todo["frame"]))
-        elif todo["framerange"]:
-            cmds.iconTextButton(
-                image="traxFrameRange.png",
-                style="iconOnly",
-                w=30,
-                ann="Jump to frame range (%s to %s)." % (todo["framerange"][0], todo["framerange"][1]),
-                c=lambda: TimeSlider().range(todo["framerange"][0], todo["framerange"][1]))
+                ann="Open file: %s" % todo["file"],
+                c=lambda: FileOpen(todo["file"]))
         elif todo["url"]:
             cmds.iconTextButton(
                 image="SP_ComputerIcon.png",
@@ -515,13 +508,20 @@ class MainWindow(object):
                 w=30,
                 ann="Open url: %s" % todo["url"],
                 c=lambda: webbrowser.open(todo["url"], new=2))
-        elif todo["file"]:
+        elif todo["framerange"]:
             cmds.iconTextButton(
-                image="openScript.png",
+                image="traxFrameRange.png",
                 style="iconOnly",
                 w=30,
-                ann="Open file: %s" % todo["file"],
-                c=lambda: FileOpen(todo["file"]))
+                ann="Jump to frame range (%s to %s)." % (todo["framerange"][0], todo["framerange"][1]),
+                c=lambda: TimeSlider().range(todo["framerange"][0], todo["framerange"][1]))
+        elif todo["frame"] or todo["frame"] is 0:  # Extra convenience button
+            cmds.iconTextButton(
+                image="centerCurrentTime.png",
+                style="iconOnly",
+                w=30,
+                ann="Go to frame %s." % todo["frame"],
+                c=lambda: TimeSlider().frame(todo["frame"]))
         cmds.iconTextButton(
             image="setEdEditMode.png",
             style="iconOnly",
