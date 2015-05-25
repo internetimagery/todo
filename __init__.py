@@ -11,6 +11,7 @@ import subprocess
 import threading
 import traceback
 import urlparse
+import difflib
 import random
 import addons
 import base64
@@ -466,8 +467,9 @@ class MainWindow(object):
                     refNames = refPaths.keys()
                     for i in range(len(path)):  # Try figure out if a path is being requested
                         p = " ".join(path[i:])
-                        if p in refNames:  # Is the path a referenced item?
-                            rpath = os.path.realpath(refPaths[p])
+                        closeMatch = difflib.get_close_matches(p, refNames, 1)  # Fuzzy search filenames
+                        if closeMatch:  # Have we found a reference file?
+                            rpath = os.path.realpath(refPaths[closeMatch[0]])
                         else:  # ... or perhaps another file somewhere else on the system?
                             rpath = os.path.realpath(os.path.join(scene, p))
                         if os.path.isfile(rpath):
