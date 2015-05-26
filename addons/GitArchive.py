@@ -23,59 +23,49 @@ def settings_archive(mayaFile, todo, settings):
             return cmds.promptDialog(q=True, text=True)
         return ""
 
-    def update(yesno):
-        yesno = yesno if yesno else False
-        settings.GitArchiveActive = yesno
-        cmds.columnLayout(col, e=True, bgc=[0.5, 0.5, 0.5] if yesno else [0.2, 0.2, 0.2])
-        cmds.checkBox(activeButton, e=True, v=yesno)
-        cmds.rowColumnLayout(row, e=True, en=yesno)
-        cmds.text(vers, e=True, en=yesno)
-
-    def updatePush(yesno):
-        yesno = yesno if yesno else False
-        settings.GitArchivePush = yesno
-        cmds.checkBox(pushButton, e=True, v=yesno)
-        cmds.iconTextButton(branchButton, e=True, en=yesno)
-
-    def updateBranch(text):
-        settings.GitArchiveBranch = text
-        cmds.iconTextButton(branchButton, e=True, l=text if text else "Enter remote branch name.")
-
     version = Git().version()
     if not version[1]:
-        col = cmds.columnLayout(
+        git = settings.get("GitArchive.active", False)
+        push = settings.get("GitArchive.push", False)
+        branch = settings.get("GitArchive.branch", None)
+        cmds.columnLayout(
             adjustableColumn=True,
-            ann="Commit the Maya file into Git (if the file is located in a valid repo) upon each Todo task completion.")
-        activeButton = cmds.checkBox(
+            ann="Commit the Maya file into Git (if the file is located in a valid repo) upon each Todo task completion.",
+            bgc=[0.5, 0.5, 0.5] if git else [0.2, 0.2, 0.2])
+        cmds.checkBox(
             l="Use Git archive",
-            cc=update)
-        row = cmds.rowColumnLayout(nc=2)
+            v=git,
+            cc=lambda x: settings.set("GitArchive.active", x))
+        cmds.rowColumnLayout(nc=2, en=git)
         cmds.text(label=" - ")
-        pushButton = cmds.checkBox(
+        cmds.checkBox(
             l="Automatically PUSH changes.",
-            cc=updatePush)
+            v=push,
+            cc=lambda x: settings.set("GitArchive.push", x))
         cmds.text(label=" - ")
-        branchButton = cmds.iconTextButton(
+        cmds.iconTextButton(
+            en=push,
             image="createContainer.png",  # "publishNamedAttribute.png" "channelBoxHyperbolicOn.png"  "createContainer.png"
+            l=branch if branch else "Enter remote branch name.",
             style="iconAndTextHorizontal",
-            c=lambda: updateBranch(getInput()))
+            c=lambda: settings.set("GitArchive.branch", getInput()))
         cmds.setParent("..")
-        vers = cmds.text(
+        cmds.text(
+            en=git,
             l="%s found." % version[0].capitalize().replace("\n", ""))
-        updatePush(settings.GitArchivePush)
-        updateBranch(settings.GitArchiveBranch)
-        update(settings.GitArchiveActive)
+        cmds.setParent("..")
 
 
 def archive(mayaFile, todo, settings):
-    if settings.GitArchiveActive and mayaFile:
+    if settings.get("GitArchive.active", False) and mayaFile:
         check = Git().status(mayaFile)
         if check[1]:
             print "Cannot commit file: %s." % check[1]
         else:
-            if Git().commit(mayaFile, todo["label"]) and settings.GitArchivePush:
+            if Git().commit(mayaFile, todo["label"]) and settings.get("GitArchive.push", False):
                 print "Pushing update"
-                pushed = Git().push(mayaFile, settings.GitArchiveBranch)
+                push = settings.get("GitArchive.branch", None)
+                pushed = Git().push(mayaFile, push)
                 print pushed[1] if pushed[1] else pushed[0]
 
 

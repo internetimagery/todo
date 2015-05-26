@@ -65,7 +65,7 @@ class FileInfo(dict):
         s.update(dict((k, v.decode("unicode_escape")) for k, v in (lambda x: zip(x[::2], x[1::2]))(cmds.fileInfo(q=True))))
 
     def __setitem__(s, k, v):
-        utils.executeDeferred(lambda: cmds.fileInfo(k, v))
+        cmds.fileInfo(k, v)
         super(FileInfo, s).__setitem__(k, v)
 
     def __delitem__(s, k):
@@ -135,22 +135,22 @@ class Settings(object):
     """
     Settings interface
     """
-    data = {}
-    info = FileInfo()
-
     def __init__(s):
+        s.info = FileInfo()
+        s.update = None  # command to update on settings change
         try:
             s.data = json.loads(s.info["TODO_SETTINGS"])
         except (ValueError, KeyError):
-            pass
+            s.data = {}
 
-    def __getattr__(s, k):
-        print "KEY:", k
-        return s.data.get(k, None)
+    def get(s, k, d=None):
+        return s.data.get(k, d)
 
-    def __setattr__(s, k, v):
+    def set(s, k, v):
         s.data[k] = v
         s.info["TODO_SETTINGS"] = json.dumps(s.data)
+        if s.update:
+            utils.executeDeferred(s.update)
 
 
 class Popup(object):
@@ -361,11 +361,10 @@ class MainWindow(object):
         sort_data = {}
 
         def stateChange(section, state):  # Save state of sections
-            s.fireHook("app.changeSection")  # , settings=s._buidTodoTasks)
-            data = s.settings.TodoSection if s.settings.TodoSection else {}
+            s.fireHook("app.changeSection", settings=s._buidTodoTasks)
+            data = s.settings.get("Todo.SectionState", {})
             data[section] = state
-            s.settings.TodoSection = data
-            utils.executeDeferred(s._buidTodoTasks)
+            s.settings.set("Todo.SectionState", data)
 
         def section(title, state):  # Build a section for each piece
             title = title.strip()
@@ -376,7 +375,7 @@ class MainWindow(object):
                 return sort_data[title]
 
         s.fireHook("app.buildList")
-        currState = s.settings.TodoSection if s.settings.TodoSection else {}
+        currState = s.settings.get("Todo.SectionState", {})
         state = {}
         for v in sorted([s._parseTodo(s.data[k], uid=k) for k in s.data.keys() if k and s.regex["uid"].match(k)], key=lambda x: x["label"]):
             if v["token"] or v["hashtag"]:
@@ -389,7 +388,7 @@ class MainWindow(object):
                         s.addTodo(v, section(h, state[h]))
             else:  # Unsorted todos
                 s.addTodo(v, unsort)
-        s.settings.TodoSection = state
+        s.settings.set("Todo.SectionState", state)
 
     def _buildSettings(s, *args):
         """
@@ -410,7 +409,7 @@ class MainWindow(object):
         cmds.text(label="Settings are unique to each Maya scene.", h=50)
         frame = cmds.frameLayout(l="Archive options:")
         # Settings module
-        s.fireHook("settings.archive", callback=lambda x: cmds.setParent(frame))  # , settings=s._buildSettings)
+        s.fireHook("settings.archive", settings=s._buildSettings, callback=lambda x: cmds.setParent(frame))
         cmds.setParent("..")
         cmds.frameLayout(l="Feedback:")
         cmds.iconTextButton(
@@ -661,10 +660,10 @@ class MainWindow(object):
                 except (AttributeError, TypeError):
                     print "Module %s is misisng a \"hooks\" function." % name
 
-    def fireHook(s, hook, todo=None, faf=False, callback=None):
+    def fireHook(s, hook, todo=None, faf=False, settings=None, callback=None):
         """
         Use a hook
-        hook = hookname, todo = todo meta data, faf = fire and forget the tasks, callback = run after each task has completed.
+        hook = hookname, todo = todo meta data, faf = fire and forget the tasks, callback = run after each task has completed, settings = callback if setting a settings option.
         """
         def fire(func):
             result = None
@@ -676,6 +675,7 @@ class MainWindow(object):
 
         result = []
         threads = []
+        s.settings.update = settings
         if hook in s.hooks:
             path = os.path.realpath(cmds.file(q=True, sn=True))  # Scene name
             mayaFile = os.path.realpath(path) if os.path.isfile(path) else None

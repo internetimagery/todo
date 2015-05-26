@@ -18,39 +18,34 @@ def settings_archive(mayaFile, todo, settings):
         result = cmds.fileDialog2(ds=2, cap="Select a Folder.", fm=3, okc="Select")
         return result[0] if result else ""
 
-    def activate(yesno):
-        yesno = yesno if yesno else False
-        settings.FileArchiveActive = yesno
-        cmds.columnLayout(col, e=True, bgc=[0.5, 0.5, 0.5] if yesno else [0.2, 0.2, 0.2])
-        cmds.checkBox(activeButton, e=True, v=yesno)
-        cmds.iconTextButton(pathButton, e=True, en=yesno)
-
-    def updatePath(path):
-        settings.FileArchivePath = path
-        cmds.iconTextButton(pathButton, e=True, l=path if path else "Pick archive folder.")
-
+    archive = settings.get("FileArchive.active", False)
+    path = settings.get("FileArchive.path")
     # Use File Archiving
-    col = cmds.columnLayout(
+    cmds.columnLayout(
         adjustableColumn=True,
-        ann="Store a backup of the current scene into the provided folder upon each Todo completion.")
-    activeButton = cmds.checkBox(
+        ann="Store a backup of the current scene into the provided folder upon each Todo completion.",
+        bgc=[0.5, 0.5, 0.5] if archive else [0.2, 0.2, 0.2])
+    cmds.checkBox(
         l="Use File Archive",
-        cc=activate)
+        v=archive,
+        cc=lambda x: settings.set("FileArchive.active", x))
     # File archive path
     cmds.rowLayout(nc=2, ad2=2)
     cmds.text(label=" - ")
-    pathButton = cmds.iconTextButton(
+    cmds.iconTextButton(
+        en=archive,
         image="fileOpen.png",
+        l=path if path else "Pick archive folder.",
         style="iconAndTextHorizontal",
-        c=lambda: updatePath(filepicker()))  # TODO errors when no folder is chosen because of 0 index
-    activate(settings.FileArchiveActive)
-    updatePath(settings.FileArchivePath)
+        c=lambda: settings.set("FileArchive.path", filepicker()))  # TODO errors when no folder is chosen because of 0 index
+    cmds.setParent("..")
+    cmds.setParent("..")
 
 
 # Archive file
 def archive(mayaFile, todo, settings):
-    archive = settings.FileArchiveActive
-    path = settings.FileArchivePath
+    archive = settings.get("FileArchive.active", False)
+    path = settings.get("FileArchive.path", False)
     if archive and mayaFile:
         if path and os.path.isdir(path):
             basename = os.path.basename(mayaFile)
