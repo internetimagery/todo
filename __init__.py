@@ -361,10 +361,11 @@ class MainWindow(object):
         sort_data = {}
 
         def stateChange(section, state):  # Save state of sections
-            s.fireHook("app.changeSection", settings=s._buidTodoTasks)
+            s.fireHook("app.changeSection")  # , settings=s._buidTodoTasks)
             data = s.settings.get("Todo.SectionState", {})
             data[section] = state
             s.settings.set("Todo.SectionState", data)
+            s._buidTodoTasks()
 
         def section(title, state):  # Build a section for each piece
             title = title.strip()
