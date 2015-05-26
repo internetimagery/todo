@@ -19,6 +19,7 @@ def settings_archive(mayaFile, todo, settings):
         return result[0] if result else ""
 
     def activate(yesno):
+        yesno = yesno if yesno else False
         settings.FileArchiveActive = yesno
         cmds.columnLayout(col, e=True, bgc=[0.5, 0.5, 0.5] if yesno else [0.2, 0.2, 0.2])
         cmds.checkBox(activeButton, e=True, v=yesno)

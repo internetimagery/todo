@@ -65,7 +65,7 @@ class FileInfo(dict):
         s.update(dict((k, v.decode("unicode_escape")) for k, v in (lambda x: zip(x[::2], x[1::2]))(cmds.fileInfo(q=True))))
 
     def __setitem__(s, k, v):
-        cmds.fileInfo(k, v)
+        utils.executeDeferred(lambda: cmds.fileInfo(k, v))
         super(FileInfo, s).__setitem__(k, v)
 
     def __delitem__(s, k):
@@ -145,6 +145,7 @@ class Settings(object):
             pass
 
     def __getattr__(s, k):
+        print "KEY:", k
         return s.data.get(k, None)
 
     def __setattr__(s, k, v):
@@ -364,7 +365,7 @@ class MainWindow(object):
             data = s.settings.TodoSection if s.settings.TodoSection else {}
             data[section] = state
             s.settings.TodoSection = data
-            s._buidTodoTasks()
+            utils.executeDeferred(s._buidTodoTasks)
 
         def section(title, state):  # Build a section for each piece
             title = title.strip()
