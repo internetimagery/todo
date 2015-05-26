@@ -407,9 +407,9 @@ class MainWindow(object):
             c=s._buildTodo)
         cmds.separator()
         cmds.text(label="Settings are unique to each Maya scene.", h=50)
-        cmds.frameLayout(l="Archive options:")
+        frame = cmds.frameLayout(l="Archive options:")
         # Settings module
-        s.fireHook("settings.archive", settings=s._buildSettings)
+        s.fireHook("settings.archive", callback=lambda x: cmds.setParent(frame))  # , settings=s._buildSettings)
         cmds.setParent("..")
         cmds.frameLayout(l="Feedback:")
         cmds.iconTextButton(

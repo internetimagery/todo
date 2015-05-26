@@ -18,28 +18,32 @@ def settings_archive(mayaFile, todo, settings):
         result = cmds.fileDialog2(ds=2, cap="Select a Folder.", fm=3, okc="Select")
         return result[0] if result else ""
 
-    archive = settings.get("FileArchive.active", False)
-    path = settings.get("FileArchive.path")
+    def activate(yesno):
+        settings.set("FileArchive.active", yesno)
+        cmds.columnLayout(col, e=True, bgc=[0.5, 0.5, 0.5] if yesno else [0.2, 0.2, 0.2])
+        cmds.checkBox(activeButton, e=True, v=yesno)
+        cmds.iconTextButton(pathButton, e=True, en=yesno)
+
+    def updatePath(path):
+        settings.set("FileArchive.path", path)
+        cmds.iconTextButton(pathButton, e=True, l=path if path else "Pick archive folder.")
+
     # Use File Archiving
-    cmds.columnLayout(
+    col = cmds.columnLayout(
         adjustableColumn=True,
-        ann="Store a backup of the current scene into the provided folder upon each Todo completion.",
-        bgc=[0.5, 0.5, 0.5] if archive else [0.2, 0.2, 0.2])
-    cmds.checkBox(
+        ann="Store a backup of the current scene into the provided folder upon each Todo completion.")
+    activeButton = cmds.checkBox(
         l="Use File Archive",
-        v=archive,
-        cc=lambda x: settings.set("FileArchive.active", x))
+        cc=activate)
     # File archive path
     cmds.rowLayout(nc=2, ad2=2)
     cmds.text(label=" - ")
-    cmds.iconTextButton(
-        en=archive,
+    pathButton = cmds.iconTextButton(
         image="fileOpen.png",
-        l=path if path else "Pick archive folder.",
         style="iconAndTextHorizontal",
-        c=lambda: settings.set("FileArchive.path", filepicker()))  # TODO errors when no folder is chosen because of 0 index
-    cmds.setParent("..")
-    cmds.setParent("..")
+        c=lambda: updatePath(filepicker()))  # TODO errors when no folder is chosen because of 0 index
+    activate(settings.get("FileArchive.active", False))
+    updatePath(settings.get("FileArchive.path"))
 
 
 # Archive file
