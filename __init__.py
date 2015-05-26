@@ -463,7 +463,7 @@ class MainWindow(object):
                 if m["file"] and not result["file"]:
                     path = m["file"].split(" ")
                     scene = os.path.dirname(cmds.file(q=True, sn=True))
-                    refPaths = dict((os.path.basename(f), f) for f in cmds.file(l=True, q=True))  # Listing of all files
+                    refPaths = dict((os.path.basename(f), f) for f in cmds.file(l=True, q=True)[1:])  # Listing of all files
                     refNames = refPaths.keys()
                     for i in range(len(path)):  # Try figure out if a path is being requested
                         p = " ".join(path[i:])
