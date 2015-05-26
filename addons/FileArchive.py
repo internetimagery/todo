@@ -19,13 +19,13 @@ def settings_archive(mayaFile, todo, settings):
         return result[0] if result else ""
 
     def activate(yesno):
-        settings.set("FileArchive.active", yesno)
+        settings.FileArchiveActive = yesno
         cmds.columnLayout(col, e=True, bgc=[0.5, 0.5, 0.5] if yesno else [0.2, 0.2, 0.2])
         cmds.checkBox(activeButton, e=True, v=yesno)
         cmds.iconTextButton(pathButton, e=True, en=yesno)
 
     def updatePath(path):
-        settings.set("FileArchive.path", path)
+        settings.FileArchivePath = path
         cmds.iconTextButton(pathButton, e=True, l=path if path else "Pick archive folder.")
 
     # Use File Archiving
@@ -42,14 +42,14 @@ def settings_archive(mayaFile, todo, settings):
         image="fileOpen.png",
         style="iconAndTextHorizontal",
         c=lambda: updatePath(filepicker()))  # TODO errors when no folder is chosen because of 0 index
-    activate(settings.get("FileArchive.active", False))
-    updatePath(settings.get("FileArchive.path"))
+    activate(settings.FileArchiveActive)
+    updatePath(settings.FileArchivePath)
 
 
 # Archive file
 def archive(mayaFile, todo, settings):
-    archive = settings.get("FileArchive.active", False)
-    path = settings.get("FileArchive.path", False)
+    archive = settings.FileArchiveActive
+    path = settings.FileArchivePath
     if archive and mayaFile:
         if path and os.path.isdir(path):
             basename = os.path.basename(mayaFile)

@@ -24,19 +24,19 @@ def settings_archive(mayaFile, todo, settings):
         return ""
 
     def update(yesno):
-        settings.set("GitArchive.active", yesno)
+        settings.GitArchiveActive = yesno
         cmds.columnLayout(col, e=True, bgc=[0.5, 0.5, 0.5] if yesno else [0.2, 0.2, 0.2])
         cmds.checkBox(activeButton, e=True, v=yesno)
         cmds.rowColumnLayout(row, e=True, en=yesno)
         cmds.text(vers, e=True, en=yesno)
 
     def updatePush(yesno):
+        settings.GitArchivePush = yesno
         cmds.checkBox(pushButton, e=True, v=yesno)
         cmds.iconTextButton(branchButton, e=True, en=yesno)
-        settings.set("GitArchive.push", yesno)
 
     def updateBranch(text):
-        settings.set("GitArchive.branch", text)
+        settings.GitArchiveBranch = text
         cmds.iconTextButton(branchButton, e=True, l=text if text else "Enter remote branch name.")
 
     version = Git().version()
@@ -60,21 +60,20 @@ def settings_archive(mayaFile, todo, settings):
         cmds.setParent("..")
         vers = cmds.text(
             l="%s found." % version[0].capitalize().replace("\n", ""))
-        updatePush(settings.get("GitArchive.push", False))
-        updateBranch(settings.get("GitArchive.branch", None))
-        update(settings.get("GitArchive.active", False))
+        updatePush(settings.GitArchivePush)
+        updateBranch(settings.GitArchiveBranch)
+        update(settings.GitArchiveActive)
 
 
 def archive(mayaFile, todo, settings):
-    if settings.get("GitArchive.active", False) and mayaFile:
+    if settings.GitArchiveActive and mayaFile:
         check = Git().status(mayaFile)
         if check[1]:
             print "Cannot commit file: %s." % check[1]
         else:
-            if Git().commit(mayaFile, todo["label"]) and settings.get("GitArchive.push", False):
+            if Git().commit(mayaFile, todo["label"]) and settings.GitArchivePush:
                 print "Pushing update"
-                push = settings.get("GitArchive.branch", None)
-                pushed = Git().push(mayaFile, push)
+                pushed = Git().push(mayaFile, settings.GitArchiveBranch)
                 print pushed[1] if pushed[1] else pushed[0]
 
 

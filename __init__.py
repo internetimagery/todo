@@ -135,22 +135,21 @@ class Settings(object):
     """
     Settings interface
     """
+    data = {}
+    info = FileInfo()
+
     def __init__(s):
-        s.info = FileInfo()
-        s.update = None  # command to update on settings change
         try:
             s.data = json.loads(s.info["TODO_SETTINGS"])
         except (ValueError, KeyError):
-            s.data = {}
+            pass
 
-    def get(s, k, d=None):
-        return s.data.get(k, d)
+    def __getattr__(s, k):
+        return s.data.get(k, None)
 
-    def set(s, k, v):
+    def __setattr__(s, k, v):
         s.data[k] = v
         s.info["TODO_SETTINGS"] = json.dumps(s.data)
-        if s.update:
-            utils.executeDeferred(s.update)
 
 
 class Popup(object):
@@ -362,9 +361,9 @@ class MainWindow(object):
 
         def stateChange(section, state):  # Save state of sections
             s.fireHook("app.changeSection")  # , settings=s._buidTodoTasks)
-            data = s.settings.get("Todo.SectionState", {})
+            data = s.settings.TodoSection if s.settings.TodoSection else {}
             data[section] = state
-            s.settings.set("Todo.SectionState", data)
+            s.settings.TodoSection = data
             s._buidTodoTasks()
 
         def section(title, state):  # Build a section for each piece
@@ -376,7 +375,7 @@ class MainWindow(object):
                 return sort_data[title]
 
         s.fireHook("app.buildList")
-        currState = s.settings.get("Todo.SectionState", {})
+        currState = s.settings.TodoSection if s.settings.TodoSection else {}
         state = {}
         for v in sorted([s._parseTodo(s.data[k], uid=k) for k in s.data.keys() if k and s.regex["uid"].match(k)], key=lambda x: x["label"]):
             if v["token"] or v["hashtag"]:
@@ -389,7 +388,7 @@ class MainWindow(object):
                         s.addTodo(v, section(h, state[h]))
             else:  # Unsorted todos
                 s.addTodo(v, unsort)
-        s.settings.set("Todo.SectionState", state)
+        s.settings.TodoSection = state
 
     def _buildSettings(s, *args):
         """
@@ -661,10 +660,10 @@ class MainWindow(object):
                 except (AttributeError, TypeError):
                     print "Module %s is misisng a \"hooks\" function." % name
 
-    def fireHook(s, hook, todo=None, faf=False, settings=None, callback=None):
+    def fireHook(s, hook, todo=None, faf=False, callback=None):
         """
         Use a hook
-        hook = hookname, todo = todo meta data, faf = fire and forget the tasks, callback = run after each task has completed, settings = callback if setting a settings option.
+        hook = hookname, todo = todo meta data, faf = fire and forget the tasks, callback = run after each task has completed.
         """
         def fire(func):
             result = None
@@ -676,7 +675,6 @@ class MainWindow(object):
 
         result = []
         threads = []
-        s.settings.update = settings
         if hook in s.hooks:
             path = os.path.realpath(cmds.file(q=True, sn=True))  # Scene name
             mayaFile = os.path.realpath(path) if os.path.isfile(path) else None

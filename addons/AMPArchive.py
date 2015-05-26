@@ -18,7 +18,7 @@ import os
 def settings_archive(mayaFile, todo, settings):
 
     def update(yesno):
-        settings.set("AMPArchive.active", yesno)
+        settings.AMPArchiveActive = yesno
         cmds.columnLayout(col, e=True, bgc=[0.5, 0.5, 0.5] if yesno else [0.2, 0.2, 0.2])
         cmds.checkBox(activeButton, e=True, v=yesno)
         cmds.text(vers, e=True, en=yesno)
@@ -31,14 +31,13 @@ def settings_archive(mayaFile, todo, settings):
         cc=update)
     vers = cmds.text(
         l="AMP version %s found." % version.version)
-    update(settings.get("AMPArchive.active", False))
+    update(settings.AMPArchiveActive)
 
 
 # File Archive
 def archive(mayaFile, todo, settings):
     comment = todo["label"]
-    amp = settings.get("AMPArchive.active", False)
-    if amp and mayaFile:
+    if settings.AMPArchiveActive and mayaFile:
         if Mutils.executeInMainThreadWithResult(lambda: AMPArchive().archive(mayaFile, comment)):
             print "Checking file into AMP."
         else:
