@@ -427,7 +427,7 @@ class MainWindow(object):
             reg = "(?P<token>\A\w+(?=:\s))?"  # Token
             reg += "(?P<hashtag>(?<=#)\s?\w+)?"  # Hashtag
             reg += "(?P<url>https?://[^\s]+)?"  # Url
-            frr = "(?:(?P<range1>\d+)\s*(?:[^\d\s]|to|and)\s*(?P<range2>\d+))"  # Frame range
+            frr = "(?:(?P<range1>\d+)\s*(?:[^\d\s]|to|and|through)\s*(?P<range2>\d+))"  # Frame range
             fr = "(?P<frame>\d+)"  # Frame
             reg += "(?:%s|%s)?" % (frr, fr)
             reg += "(?P<file>(?:[a-zA-Z]:|\\.{1,2})?[^\t\r\n:|]+\.\w+)?"  # Filename?
