@@ -467,7 +467,7 @@ class MainWindow(object):
                     refNames = refPaths.keys()
                     for i in range(len(path)):  # Try figure out if a path is being requested
                         p = " ".join(path[i:])
-                        closeMatch = difflib.get_close_matches(p, refNames, 1)  # Fuzzy search filenames
+                        closeMatch = difflib.get_close_matches(p, refNames, 1, 0.9)  # Fuzzy search filenames
                         if closeMatch:  # Have we found a reference file?
                             rpath = os.path.realpath(refPaths[closeMatch[0]])
                         else:  # ... or perhaps another file somewhere else on the system?
