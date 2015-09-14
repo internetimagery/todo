@@ -27,6 +27,39 @@ def parseFilePath(i, token, fileName):
             return basename(token), ("File", [path])
     return token, None
 
+tempRange = {}
+rangeNames = ["to", "through", "-", ":", "and", "->"] # Names that create a range
+def resetTempRange():
+    tempRange["first"] = None
+    tempRange["middle"] = None
+    tempRange["last"] = None
+resetTempRange()
+def parseFrame(i, token, fileName):
+    try:
+        num = int(token)
+    except ValueError:
+        num = None
+    if tempRange["first"] is not None: # Check the following parts
+        if tempRange["middle"] and num is not None: # Check the last part
+            first = tempRange["first"]
+            resetTempRange()
+            return token, ("FrameRange", sorted([first, num]))
+        elif token in rangeNames: # Check the middle
+            tempRange["middle"] = token
+        elif num is not None: # Or it could be another number
+            first = tempRange["first"]
+            resetTempRange()
+            return token, ("FrameRange", sorted([first, num]))
+        else:
+            resetTempRange()
+    else:
+        if num is not None: # Add our first number
+            tempRange["first"] = num
+            return token, ("Frame", [num])
+        else:
+            resetTempRange()
+    return token, None
+
 # A Single Todo
 class Todo(object):
     """
@@ -35,7 +68,8 @@ class Todo(object):
     parsers = [ # Parsers
         parseHashTag, # Hashtag : "#hash"
         parseUrl, # urls : "http://thing.com"
-        parseFilePath # relative / absolute path : "./place"
+        parseFilePath, # relative / absolute path : "./place"
+        parseFrame # grab numbers as possible frame numbers
     ]
     def __init__(s, todoName, fileName):
         s.todoName = todoName.strip() # Original name of todo
@@ -55,10 +89,11 @@ class Todo(object):
             filtered = []
             for i, token in enumerate(tokens):
                 for parser in s.parsers:
-                    token, extra = parser(i, token, s.fileName)
-                    if extra:
-                        tokenName, tokenArgs = extra
-                        s.tokens[tokenName] = tokenArgs
+                    if token:
+                        token, extra = parser(i, token, s.fileName)
+                        if extra:
+                            tokenName, tokenArgs = extra
+                            s.tokens[tokenName] = tokenArgs
                 if token:
                     filtered.append(token)
 
@@ -66,7 +101,7 @@ class Todo(object):
 
 import maya.cmds as cmds
 f = cmds.file(q=True, sn=True)
-Todo("#home ./test.ma /basename/place\ thing -stuff http://internetimagery.com/thing", f)
+Todo("#home 34 1 2 to -5435 0 ./test.ma /basename/place\ thing -stuff http://internetimagery.com/thing", f)
 
     # def _parseTodo(s, label, **kwargs):
     #     """
@@ -77,16 +112,12 @@ Todo("#home ./test.ma /basename/place\ thing -stuff http://internetimagery.com/t
     #         frr = "(?:(?P<range1>\d+)\s*(?:[^\d\s]|to|and|through)\s*(?P<range2>\d+))"  # Frame range
     #         fr = "(?P<frame>\d+)"  # Frame
     #         reg += "(?:%s|%s)?" % (frr, fr)
-    #         reg += "(?P<file>(?:[a-zA-Z]:|\\.{1,2})?[^\t\r\n:|]+\.\w+)?"  # Filename?
+
     #         return re.compile(reg)
     #
-    #     s.regex["label"] = s.regex.get("label", build_reg())
-    #     parse = s.regex["label"].finditer(label)
-    #     result = kwargs  # Add extra additional custom arguments
-    #     result["token"] = ""
-    #     result["hashtag"] = []
-    #     result["url"] = ""
-    #     result["file"] = ""  # Default
+
+
+
     #     result["frame"] = None
     #     result["framerange"] = []
     #     replace = {}  # Make the output nicer by removing certain tags
