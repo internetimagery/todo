@@ -1,7 +1,7 @@
 # Filter todo for its possible parts
 
 from urlparse import urlparse
-from os.path import dirname, realpath, join
+from os.path import dirname, realpath, join, isfile, basename
 from shlex import split
 
 # FILTERS
@@ -22,8 +22,9 @@ def parseUrl(i, token, fileName):
 def parseFilePath(i, token, fileName):
     if "/" in token:
         root = dirname(fileName) if fileName else ""
-        # print realpath(join(root, token))
-
+        path = realpath(join(root, token))
+        if isfile(path):
+            return basename(token), ("File", [path])
     return token, None
 
 # A Single Todo
@@ -42,8 +43,8 @@ class Todo(object):
         s.label = "" # Name after parsing
         s.tokens = {} # Tokens if any
         s.parse()
-        # print s.tokens
-        # print s.label
+        print s.tokens
+        print s.label
 
     """
     Parse out the todo, and decide if there is anything special written inside it.
@@ -65,7 +66,7 @@ class Todo(object):
 
 import maya.cmds as cmds
 f = cmds.file(q=True, sn=True)
-Todo("#home ./thing /basename/place\ thing stuff http://internetimagery.com/thing", f)
+Todo("#home ./test.ma /basename/place\ thing -stuff http://internetimagery.com/thing", f)
 
     # def _parseTodo(s, label, **kwargs):
     #     """
