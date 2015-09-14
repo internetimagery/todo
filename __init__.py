@@ -15,6 +15,7 @@ import difflib
 import random
 import addons
 import base64
+import todo
 import json
 import time
 import sys
@@ -592,6 +593,8 @@ class MainWindow(object):
         """
         Create a new Todo
         """
+        f = cmds.file(q=True, sn=True)
+        print todo.Todo(txt, f).tokens
         name = "%(name)s_%(stamp)s" % {"name": "TODO", "stamp": int(time.time() * 100)}
         meta = s._parseTodo(txt, uid=name)
         if meta["label"]:
