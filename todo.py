@@ -1,20 +1,29 @@
 # Filter todo for its possible parts
 
 from urlparse import urlparse
+from os.path import dirname, realpath, join
+from shlex import split
 
 # FILTERS
 # Return text unless it is to be removed
 # Return name of token if one is found, and corresponding info
 
-def parseHashTag(i, token):
+def parseHashTag(i, token, fileName):
     if 1 < len(token) and token[:1] == "#":
         return "", ("Hashtag", [token[1:]])
     return token, None
 
-def parseUrl(i, token):
+def parseUrl(i, token, fileName):
     url = urlparse(token)
     if url.scheme and url.netloc:
         return url.netloc, ("Url", [token])
+    return token, None
+
+def parseFilePath(i, token, fileName):
+    if "/" in token:
+        root = dirname(fileName) if fileName else ""
+        # print realpath(join(root, token))
+
     return token, None
 
 # A Single Todo
@@ -22,28 +31,30 @@ class Todo(object):
     """
     A single Todo
     """
-    parsers = [
-        parseHashTag,
-        parseUrl
+    parsers = [ # Parsers
+        parseHashTag, # Hashtag : "#hash"
+        parseUrl, # urls : "http://thing.com"
+        parseFilePath # relative / absolute path : "./place"
     ]
-    def __init__(s, name):
-        s.name = name.strip() # Original name of todo
+    def __init__(s, todoName, fileName):
+        s.todoName = todoName.strip() # Original name of todo
+        s.fileName = fileName # Name of current scene file
         s.label = "" # Name after parsing
         s.tokens = {} # Tokens if any
         s.parse()
-        print s.tokens
-        print s.label
+        # print s.tokens
+        # print s.label
 
     """
     Parse out the todo, and decide if there is anything special written inside it.
     """
     def parse(s):
-        if s.name:
-            tokens = s.name.split(" ")
+        if s.todoName:
+            tokens = split(s.todoName)
             filtered = []
             for i, token in enumerate(tokens):
                 for parser in s.parsers:
-                    token, extra = parser(i, token)
+                    token, extra = parser(i, token, s.fileName)
                     if extra:
                         tokenName, tokenArgs = extra
                         s.tokens[tokenName] = tokenArgs
@@ -52,18 +63,16 @@ class Todo(object):
 
             s.label = " ".join(filtered)
 
-
-
-Todo("#home ./thing stuff http://internetimagery.com/thing")
+import maya.cmds as cmds
+f = cmds.file(q=True, sn=True)
+Todo("#home ./thing /basename/place\ thing stuff http://internetimagery.com/thing", f)
 
     # def _parseTodo(s, label, **kwargs):
     #     """
     #     Parse out metadata from Todo
     #     """
     #     def build_reg():
-    #         reg = "(?P<token>\A\w+(?=:\s))?"  # Token
-    #         reg += "(?P<hashtag>(?<=#)\s?\w+)?"  # Hashtag
-    #         reg += "(?P<url>https?://[^\s]+)?"  # Url
+
     #         frr = "(?:(?P<range1>\d+)\s*(?:[^\d\s]|to|and|through)\s*(?P<range2>\d+))"  # Frame range
     #         fr = "(?P<frame>\d+)"  # Frame
     #         reg += "(?:%s|%s)?" % (frr, fr)

@@ -249,6 +249,39 @@ class TimeSlider(object):
         """
         cmds.playbackOptions(e=True, min=start, max=end)
 
+class Todo(object):
+    """
+    Single Todo
+    """
+    def __init__(s, name):
+        s.name = name
+    """
+    Add to the GUI
+    """
+    def attach(s, parent):
+        cmds.columnLayout(adj=True, p=parent)
+        cmds.iconTextButton(
+            h=30,
+            ann="Click to view the Todo scripts settings. Settings are saved with the Maya scene, so you will need to set them for each scene.",
+            image="attributes.png",
+            label="Settings ->",
+            style="iconAndTextHorizontal",
+            c=s._buildSettings)
+        cmds.separator()
+        text = cmds.textField(
+            aie=True,
+            ed=True,
+            h=30,
+            ann="Type a task into the box.",
+            ec=lambda x: not s.createTodo(x) or clear())
+        cmds.button(
+            label="Create a new TODO",
+            h=20,
+            ann="Type a task into the box.",
+            c=lambda x: not s.createTodo(cmds.textField(text, q=True, tx=True)) or clear())
+        cmds.setParent("..")
+
+        pass
 
 #@unique
 class MainWindow(object):
