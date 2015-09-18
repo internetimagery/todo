@@ -25,7 +25,7 @@ class Controller(object):
         s._archive = set()
         # Settings
         s._settingsName = "TODO_SETTINGS"
-        s._settings = s.read(s._settingsName, {})
+        s._settings = s._read(s._settingsName, {})
         # Todos
         s._todos = {} # Store all todos
         s._todoTree = {"None": set()} # Store todos in heirarchy for sorting
@@ -62,7 +62,7 @@ class Controller(object):
             if ID:
                 newTodo.id = ID
             else:
-                s._create(ID, newTodo.label
+                s._create(ID, newTodo.label)
             s._todos[ID] = newTodo
             if "Hashtag" in newTodo.meta:
                 for tag in newTodo.meta["Hashtag"]:
@@ -108,7 +108,7 @@ class Controller(object):
     """
     def settingsGet(s, key=None, default=None):
         if key:
-            return s._settings[key] if s._settings[key] else default
+            return s._settings[key] if key in s._settings else default
         else:
             return s._settings
     """
@@ -128,9 +128,10 @@ class Todo(object):
     """
     def __init__(s, task, parsers):
         s.task = task.strip()
-        s.parsers = parsers + default.getAllParsers()
+        s.parsers = set(default.getAllParsers())
+        s.parsers |= parsers
         s.id = "Task_%s" % uuid4()
-        s.label, s.meta = s.parse(s.task)
+        s.label, s.meta = s.parse()
 
     """
     Parse out specific information from todo task

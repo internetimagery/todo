@@ -130,3 +130,5 @@ def Todo(task):
         parseFilePath,
         parseObject
         ])
+
+Start()
