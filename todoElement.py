@@ -1,14 +1,14 @@
 # Todo
 from shlex import split
-from todo.parsersDefault import getAllParsers
+import todo.parsersDefault as default
 
 class Todo(object):
     """
     Single Todo item
     """
-    def __init__(s, task, parsers=[]):
+    def __init__(s, task, parsers):
         s.task = task.strip()
-        s.parsers = parsers + getAllParsers()
+        s.parsers = parsers + default.getAllParsers()
         s.label, s.meta = s.parse(s.task)
 
     """
@@ -32,7 +32,7 @@ class Todo(object):
             filtered = []
             metadata = {}
             for token in tokens:
-                if parsers:
+                if s.parsers:
                     for parser in s.parsers:
                         if token:
                             token, meta = parser(token)

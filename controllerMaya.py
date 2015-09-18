@@ -1,9 +1,8 @@
 # Controller for Maya
 import maya.cmds as cmds
 import todo.viewMaya as view
-from todo.todo import Todo
-from todo.parsersDefault import getAllParsers
-print getAllParsers()
+import todo.todoElement as td
+
 
 # Begin Application
 class Start(object):
@@ -14,7 +13,7 @@ class Start(object):
         if not location:
             location = "float" # TODO retrieve this from file
 
-        testdo = Todo("#a # test todo", [])
+        testdo = td.Todo("#a # test todo", [])
         print testdo.getLabel()
         print testdo.getMeta()
 
