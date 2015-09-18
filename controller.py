@@ -20,7 +20,10 @@ class Controller(object):
         s.parsers = set()
         s.archive = set()
 
+        s.settings = s.read("TODO_SETTINGS", {})
         s.todos = {}
+        for todoID in s.read():
+            
 
     """
     Add a filter for parsing Todos
@@ -29,7 +32,7 @@ class Controller(object):
         s.parsers.add(parser)
 
     """
-    Add an archive
+    Add an archive for storing data after task complete
     """
     def addArchive(s, archive):
         s.archive.add(archive)

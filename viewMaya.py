@@ -59,7 +59,6 @@ class MainWindow(GUIElement):
             cmds.dockControl(s.window, e=True, fl=True)
         elif s.options["location"] in allowed:
             cmds.dockControl(s.window, e=True, a=s.options["location"], fl=False)
-        return s.buildTodo()
 
     """
     Build todo window
@@ -91,8 +90,9 @@ class MainWindow(GUIElement):
             c=lambda x: s.options["newTodoCallback"](cmds.textField(s.todoText, q=True, tx=True))
             )
         cmds.setParent("..")
-        s.options["buildTodoCallback"](s.wrapper)
-        return s.wrapper
+        todoContainer = cmds.scrollLayout(bgc=[0.2, 0.2, 0.2], cr=True)
+        s.options["buildTodoCallback"](todoContainer)
+        return todoContainer
 
     """
     Build settings window
@@ -110,7 +110,9 @@ class MainWindow(GUIElement):
             )
         cmds.separator()
         cmds.text(label="Settings are unique to each Maya scene.", h=50)
-        s.options["buildSettingsCallback"](s.wrapper)
+        settingsContainer = cmds.columnLayout(adj=True)
+        s.options["buildSettingsCallback"](settingsContainer)
+        return settingsContainer
 
     """
     Edit the todo input text
