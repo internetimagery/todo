@@ -1,5 +1,6 @@
 # Todo
 from shlex import split
+from uuid import uuid4
 import todo.parsersDefault as default
 
 class Todo(object):
@@ -10,6 +11,7 @@ class Todo(object):
         s.task = task.strip()
         s.parsers = parsers + default.getAllParsers()
         s.label, s.meta = s.parse(s.task)
+        s.id = "Task_%s" % uuid4()
 
     """
     Get label
