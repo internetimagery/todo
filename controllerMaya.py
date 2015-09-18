@@ -29,6 +29,8 @@ class Start(object):
     def buildTodo(s, parent):
         s.todoContainer = cmds.scrollLayout(bgc=[0.2, 0.2, 0.2], cr=True, p=parent)
         cmds.text(l="Added in controller")
+        cmds.text(l="Also added in controller")
+        cmds.text(l="Comes from in controller")
         s.todoContainerSections = cmds.columnLayout(adj=True, p=s.todoContainer)
         s.todoContainerUnsectioned = cmds.columnLayout(adj=True, p=s.todoContainer)
 
@@ -43,7 +45,12 @@ class Start(object):
     New todo requested
     """
     def newTodo(s, text):
-        print "new todo:", text
+        text = text.strip()
+        if text:
+            s.window.editTodo("")
+            print "WE HAVE A NEW TODO:", text
+        else:
+            cmds.confirmDialog(title="Whoops...", message="You need to add some text for your Todo.")
 
     """
     Update window position
