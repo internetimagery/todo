@@ -52,7 +52,33 @@ class MainWindow(GUIElement):
             )
         if s.options["location"] in ["left", "right"]:
             cmds.dockControl(s.wrapper, e=True, a=s.options["location"], fl=False)
+        return s.wrapper
 
+    """
+    Keep track of dock movement
+    """
+    def moveDock(s):  # Update dock location information
+        if cmds.dockControl(s.wrapper, q=True, fl=True):
+            s.options["location"] = "float"
+            s.options["moveCallback"]("float")
+            print "Floating Dock."
+        else:
+            area = cmds.dockControl(s.wrapper, q=True, a=True)
+            s.options["location"] = area
+            s.options["moveCallback"](area)
+            print "Docking %s." % area
+
+    """
+    Close window
+    """
+    def closeDock(s, *loop):
+        visible = cmds.dockControl(s.wrapper, q=True, vis=True)
+        if not visible and loop:
+            cmds.scriptJob(ie=s.closeDock, p=s.wrapper, ro=True)
+        elif not visible:
+            print "Window closed."
+            s.removeUI()
+            s.options["closeCallback"]()
 
 # options:
 # realLabel = label that includes hashtags etc etc
