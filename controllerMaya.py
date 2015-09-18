@@ -46,13 +46,16 @@ class Start(ctrl.Controller):
         cmds.text(l="Comes from in controller")
         def test(*args):
             print "test", args
-        view.Todo(
+        def edit(ID, text):
+            viewdo.label = text
+            viewdo.buildElement()
+        viewdo = view.Todo(
             "one",
             parent,
             ID="STUFF",
             realLabel="thing",
             doneCallback=test,
-            editCallback=test,
+            editCallback=edit,
             deleteCallback=test,
             special={
                 "description" : "what it does",
