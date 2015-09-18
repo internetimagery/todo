@@ -19,6 +19,7 @@ class CRUD(object):
     Set data
     """
     def create(s, k, v):
+        print "Creating:", k, v
         if type(v) == str:
             cmds.fileInfo(k, v)
         else:

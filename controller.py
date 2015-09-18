@@ -62,6 +62,7 @@ class Controller(object):
             if ID:
                 newTodo.id = ID
             else:
+                ID = newTodo.id
                 s._create(ID, newTodo.label)
             s._todos[ID] = newTodo
             if "Hashtag" in newTodo.meta:
