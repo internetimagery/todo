@@ -54,8 +54,7 @@ class MainWindow(GUIElement):
             )
         if s.options["location"] in ["left", "right"]:
             cmds.dockControl(s.wrapper, e=True, a=s.options["location"], fl=False)
-        s.buildTodo()
-        return s.wrapper
+        return s.buildTodo()
 
     """
     Build todo window
@@ -73,20 +72,21 @@ class MainWindow(GUIElement):
             c=s.buildSettings
             )
         cmds.separator()
-        text = cmds.textField(
+        s.todoText = cmds.textField(
             aie=True,
             ed=True,
             h=30,
             ann="Type a task into the box.",
-            ec=lambda x: s.options["newTodoCallback"](cmds.textField(text, q=True, tx=True))
+            ec=lambda x: s.options["newTodoCallback"](cmds.textField(s.todoText, q=True, tx=True))
             )
         cmds.button(
             label="Create a new TODO",
             h=20,
             ann="Type a task into the box.",
-            c=lambda x: s.options["newTodoCallback"](cmds.textField(text, q=True, tx=True)
+            c=lambda x: s.options["newTodoCallback"](cmds.textField(s.todoText, q=True, tx=True)
             )
         cmds.setParent("..")
+        return s.wrapper
 
     """
     Build settings window
@@ -105,6 +105,15 @@ class MainWindow(GUIElement):
         cmds.separator()
         cmds.text(label="Settings are unique to each Maya scene.", h=50)
         s.options["buildSettingsCallback"]()
+
+    """
+    Edit the todo input text
+    """
+    def editTodo(s, text):
+        try:
+            cmds.textField(s.todoText, e=True, tx=text)
+        except RuntimeError:
+            pass
 
     """
     Keep track of dock movement
