@@ -1,6 +1,9 @@
 # Controller for Maya
 import maya.cmds as cmds
 import todo.viewMaya as view
+from todo.todo import Todo
+from todo.parsersDefault import getAllParsers
+print getAllParsers()
 
 # Begin Application
 class Start(object):
@@ -11,17 +14,21 @@ class Start(object):
         if not location:
             location = "float" # TODO retrieve this from file
 
-        s.window = view.MainWindow(
-            "Todo_window_Temporaryname",
-            "",
-            title                 = "grab from file",
-            location              = location,
-            moveCallback          = s.moveUpdate,
-            closeCallback         = s.closeUpdate,
-            buildTodoCallback     = s.buildTodo,
-            buildSettingsCallback = s.buildSettings,
-            newTodoCallback       = s.newTodo
-            )
+        testdo = Todo("#a # test todo", [])
+        print testdo.getLabel()
+        print testdo.getMeta()
+
+        # s.window = view.MainWindow(
+        #     "Todo_window_Temporaryname",
+        #     "",
+        #     title                 = "grab from file",
+        #     location              = location,
+        #     moveCallback          = s.moveUpdate,
+        #     closeCallback         = s.closeUpdate,
+        #     buildTodoCallback     = s.buildTodo,
+        #     buildSettingsCallback = s.buildSettings,
+        #     newTodoCallback       = s.newTodo
+        #     )
 
     """
     Build out todo page
