@@ -2,6 +2,7 @@
 import maya.cmds as cmds
 import todo.viewMaya as view
 
+# Begin Application
 class Start(object):
     """
     Application
@@ -10,37 +11,50 @@ class Start(object):
         if not location:
             location = "float" # TODO retrieve this from file
 
-        windowOptions = {
-            "title"                    : "grab from file",
-            "location"                 : location,
-            "moveCallback"             : s.test,
-            "closeCallback"            : s.test,
-            "buildTodoCallback"        : s.test,
-            "buildSettingsCallback"    : s.test,
-            "newTodoCallback"          : s.test
-        }
         s.window = view.MainWindow(
             "Todo_window_Temporaryname",
             "",
             title                 = "grab from file",
             location              = location,
-            moveCallback          = s.test,
-            closeCallback         = s.test,
-            buildTodoCallback     = s.test,
-            buildSettingsCallback = s.test,
-            newTodoCallback       = s.test
+            moveCallback          = s.moveUpdate,
+            closeCallback         = s.closeUpdate,
+            buildTodoCallback     = s.buildTodo,
+            buildSettingsCallback = s.buildSettings,
+            newTodoCallback       = s.newTodo
             )
 
-    def test(s, *args):
-        print args
+    """
+    Build out todo page
+    """
+    def buildTodo(s, parent):
+        cmds.text(l="Added in controller", p=parent)
+        print "todo page", parent
+
+    """
+    Build out settings page
+    """
+    def buildSettings(s, parent):
+        cmds.text(l="Added in controller", p=parent)
+        print "settings page", parent
+
+    """
+    New todo requested
+    """
+    def newTodo(s, text):
+        print "new todo:", text
+
+    """
+    Update window position
+    """
+    def moveUpdate(s, location):
+        print "moved", location
+        print "todo, store this info in preferences"
+
+    """
+    No real functionality
+    """
+    def closeUpdate(s):
+        print "closed"
+
 
 Start()
-
-# options:
-# title = window title
-# location = "float" or "left" or "right"
-# moveCallback(location) = run when docked or undocked
-# closeCallback = run when window closed
-# buildTodoCallback(parent) = run when switching to main todo window
-# buildSettingsCallback(parent) = run when switching to settings window
-# newTodoCallback(text) = run when creating a new todo

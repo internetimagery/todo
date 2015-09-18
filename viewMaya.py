@@ -6,11 +6,9 @@ class GUIElement(object):
     Base gui class
     """
     def __init__(s, label, parent, **kwargs):
-        print "hello there"
         s.label = label
         s.parent = parent
         s.options = kwargs
-        print kwargs
         s.wrapper = ""
         s.buildElement()
 
@@ -91,6 +89,7 @@ class MainWindow(GUIElement):
             c=lambda x: s.options["newTodoCallback"](cmds.textField(s.todoText, q=True, tx=True))
             )
         cmds.setParent("..")
+        s.options["buildTodoCallback"](s.wrapper)
         return s.wrapper
 
     """
@@ -109,7 +108,7 @@ class MainWindow(GUIElement):
             )
         cmds.separator()
         cmds.text(label="Settings are unique to each Maya scene.", h=50)
-        s.options["buildSettingsCallback"]()
+        s.options["buildSettingsCallback"](s.wrapper)
 
     """
     Edit the todo input text
