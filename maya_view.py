@@ -28,13 +28,31 @@ class GUIElement(object):
         print "Need to override the build element function"
 
 # options:
-#
+# title = window title
+# location = "float" or "left" or "right"
+# moveCallback = run when docked or undocked
+# closeCallback = run when window closed
 class MainWindow(GUIElement):
     """
     build window
     """
     def buildElement(s):
-        pass
+        s.removeUI()
+        window = cmds.window(title=title, rtf=True)
+        s.outerContainer = cmds.columnLayout(adj=True)
+        s.wrapper = cmds.dockControl(
+            s.label,
+            a="float",
+            content=window,
+            aa=["left", "right"],
+            fl=True,
+            l=s.options["title"],
+            fcc=s.moveDock,
+            vcc=s.closeDock
+            )
+        if s.options["location"] in ["left", "right"]:
+            cmds.dockControl(s.wrapper, e=True, a=s.options["location"], fl=False)
+
 
 # options:
 # realLabel = label that includes hashtags etc etc
