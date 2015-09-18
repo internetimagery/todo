@@ -16,14 +16,16 @@ class Controller(ctrl.Controller):
     """
     def __init__(s):
         store = crud.CRUD()
-        super(ctrl.Controller, s).__init__(
+        ctrl.Controller.__init__(
+            s,
             store.create,
             store.read,
             store.update,
             store.delete
         )
+        print s.todoTree
 
-
+Controller()
 # Begin Application
 class Start(object):
     """
@@ -161,6 +163,3 @@ def Todo(task):
         parseFilePath,
         parseObject
         ])
-
-
-Start()

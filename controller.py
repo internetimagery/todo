@@ -1,6 +1,8 @@
 # Todo functionality
 from re import match
-import todo.todoElement as te
+from shlex import split
+from uuid import uuid4
+import todo.parsersDefault as default
 
 # Provide functions for:
 # create(key, value) returns value
@@ -23,12 +25,20 @@ class Controller(object):
         s.archive = set()
 
         s.settings = s.read("TODO_SETTINGS", {})
-        s.todos = {}
-        for todoID in s.read():
-            if match(r"Task_[\w\\-]+", todoID):
-                task = s.read(todoID)
-                newTodo = s.todoCreate(task, ID=todoID)
-                s.todos[todoID] = newTodo
+        s.todos = {} # Store all todos
+        s.todoTree = {"None": []} # Store todos in heirarchy for sorting
+        for taskID in s.read():
+            if match(r"Task_[\w\\-]+", taskID):
+                task = s.read(taskID)
+                newTodo = s.todoCreate(task, ID=taskID)
+                meta = newTodo.getMeta()
+                if "Hashtag" in meta:
+                    for tag in meta["Hashtag"]:
+                        s.todoTree[tag] = taskID
+                else:
+                    s.todoTree["None"].append(taskID)
+                s.todos[taskID] = newTodo
+        s.todoGetAll()
 
     """
     Add a filter for parsing Todos
@@ -46,7 +56,60 @@ class Controller(object):
     Create a Todo
     """
     def todoCreate(s, task, ID=None):
-        newTodo = te.Todo(task, s.parsers)
+        newTodo = Todo(task, s.parsers)
         if ID:
             newTodo.id = ID
         return newTodo
+
+    """
+    Get todo categories
+    """
+    def getCategories(s):
+        return s.todoTree.keys()
+
+    """
+    Get a certain Todo
+    """
+    def getTodo(s, ID):
+        return s.todos[ID]
+
+
+# parser:
+# parser(token):
+# return token, ("Category", arugments)
+class Todo(object):
+    """
+    Single Todo item
+    """
+    def __init__(s, task, parsers):
+        s.task = task.strip()
+        s.parsers = parsers + default.getAllParsers()
+        s.label, s.meta = s.parse(s.task)
+        s.id = "Task_%s" % uuid4()
+
+    """
+    Get Metadata
+    """
+    def getMeta(s):
+        return s.meta
+
+    """
+    Parse out specific information from todo task
+    """
+    def parse(s, task):
+        if task:
+            tokens = split(task)
+            filtered = []
+            metadata = {}
+            for token in tokens:
+                if s.parsers:
+                    for parser in s.parsers:
+                        if token:
+                            token, meta = parser(token)
+                            if meta:
+                                tokenName, tokenArgs = meta
+                                metadata[tokenName] = tokenArgs
+                    if token:
+                        filtered.append(token)
+            return " ".join(filtered), metadata
+        return "", {}

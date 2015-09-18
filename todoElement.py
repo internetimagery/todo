@@ -14,12 +14,6 @@ class Todo(object):
         s.id = "Task_%s" % uuid4()
 
     """
-    Get label
-    """
-    def getLabel(s):
-        return s.label
-
-    """
     Get Metadata
     """
     def getMeta(s):
