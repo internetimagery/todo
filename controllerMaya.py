@@ -3,11 +3,25 @@ import maya.cmds as cmds
 from re import compile
 import todo.viewMaya as view
 import todo.todoElement as td
-import todo.modelMaya as model
+import todo.controller as ctrl
+import todo.crudMaya as crud
 
 
 # fileInfo "TODO_SETTINGS" "{\"FileArchive.active\": true, \"Todo.SectionState\": {\"animation\": false}, \"FileArchive.path\": \"/home/maczone/Desktop/backup\"}";
 # fileInfo "TODO_144249523723" "#animation right dash 1 to 10";
+
+class Controller(ctrl.Controller):
+    """
+    Controller for Maya
+    """
+    def __init__(s):
+        store = crud.CRUD()
+        super(ctrl.Controller, s).__init__(
+            store.create,
+            store.read,
+            store.update,
+            store.delete
+        )
 
 
 # Begin Application
@@ -16,7 +30,7 @@ class Start(object):
     Application
     """
     def __init__(s, location=None):
-        s.store = model.Store()
+        s.controller = Controller()
         s.settings = s.store.get("TODO_SETTINGS", {}) # Saved settings
 
         # Get our Todos

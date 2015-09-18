@@ -6,7 +6,7 @@
 # read() returns [all, keys, ...]
 # update(key, value) returns value
 # delete(key) returns None
-class Logic(object):
+class Controller(object):
     """
     Todo storage etc
     """
