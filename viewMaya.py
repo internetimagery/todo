@@ -59,6 +59,7 @@ class MainWindow(GUIElement):
             cmds.dockControl(s.window, e=True, fl=True)
         elif s.options["location"] in allowed:
             cmds.dockControl(s.window, e=True, a=s.options["location"], fl=False)
+        return s.buildTodo()
 
     """
     Build todo window

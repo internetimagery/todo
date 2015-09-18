@@ -23,9 +23,10 @@ class Controller(object):
         # Parsers and Archives
         s._parsers = set()
         s._archive = set()
-
+        # Settings
         s._settingsName = "TODO_SETTINGS"
         s._settings = s.read(s._settingsName, {})
+        # Todos
         s._todos = {} # Store all todos
         s._todoTree = {"None": set()} # Store todos in heirarchy for sorting
         for taskID in s._read():

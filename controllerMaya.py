@@ -39,37 +39,36 @@ class Start(ctrl.Controller):
         def test(*args):
             print args
         # Populate our Todo page
-        parent = s.window.buildTodo()
-        view.Todo(
-            "one",
-            parent,
-            realLabel="thing",
-            doneCallback=test,
-            editCallback=test,
-            deleteCallback=test,
-            special={
-                "description" : "what it does",
-                "icon" : "flowers.png",
-                "callback" : test
-            })
+        # parent = s.window.buildTodo()
+        # view.Todo(
+        #     "one",
+        #     parent,
+        #     realLabel="thing",
+        #     doneCallback=test,
+        #     editCallback=test,
+        #     deleteCallback=test,
+        #     special={
+        #         "description" : "what it does",
+        #         "icon" : "flowers.png",
+        #         "callback" : test
+        #     })
 
 
     """
     Build out todo page
     """
     def buildTodo(s, parent):
-        s.todoContainer = cmds.scrollLayout(bgc=[0.2, 0.2, 0.2], cr=True, p=parent)
         cmds.text(l="Added in controller")
         cmds.text(l="Also added in controller")
         cmds.text(l="Comes from in controller")
-        s.todoContainerSections = cmds.columnLayout(adj=True, p=s.todoContainer)
-        s.todoContainerUnsectioned = cmds.columnLayout(adj=True, p=s.todoContainer)
+        # s.todoContainerSections = cmds.columnLayout(adj=True, p=s.todoContainer)
+        # s.todoContainerUnsectioned = cmds.columnLayout(adj=True, p=s.todoContainer)
 
     """
     Build out settings page
     """
     def buildSettings(s, parent):
-        cmds.text(l="Todo: Insert settings stuff in here!", p=parent)
+        cmds.text(l="Todo: Insert settings stuff in here!\nLove, controller. :)", p=parent)
 
     """
     New todo requested
@@ -77,10 +76,9 @@ class Start(ctrl.Controller):
     def newTodo(s, text):
         text = text.strip()
         if text:
-            s.window.editTodo("")
-            newTodo = Todo(text)
-            s.todos[newTodo.id] = newTodo
-            s.store.set(newTodo.id, text)
+            newTodo = s.todoCreate(text)
+            if newTodo:
+                s.window.editTodo("")
         else:
             cmds.confirmDialog(title="Whoops...", message="You need to add some text for your Todo.")
 
@@ -88,15 +86,13 @@ class Start(ctrl.Controller):
     Update window position
     """
     def moveUpdate(s, location):
-        print "moved", location
-        s.settings["location"] = location
-        s.store.set("TODO_SETTINGS", s.settings)
+        s.settingsSet("location", location)
 
     """
     No real functionality
     """
     def closeUpdate(s):
-        print "closed"
+        print "closed window"
 
 
 """
