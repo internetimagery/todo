@@ -183,7 +183,7 @@ class Todo(GUIElement):
                 style="iconOnly",
                 w=30,
                 ann=s.options["special"]["description"],
-                c=lambda x: s.options["special"]["callback"](ID)
+                c=lambda: s.options["special"]["callback"](ID)
                 )
         cmds.iconTextButton(
             image="setEdEditMode.png",
@@ -206,6 +206,7 @@ class Todo(GUIElement):
     """
     def editTodo(s, *trash):
         s.removeUI()
+        ID = s.options["ID"]
         s.wrapper = cmds.rowLayout(nc=2, ad4=0, p=s.parent)
         text = cmds.textField(tx=s.options["realLabel"])
         cmds.button(l="Ok", c=lambda x: s.options["editCallback"](ID, cmds.textField(text, q=True, tx=True)))

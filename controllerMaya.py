@@ -49,6 +49,7 @@ class Start(ctrl.Controller):
         view.Todo(
             "one",
             parent,
+            ID="STUFF",
             realLabel="thing",
             doneCallback=test,
             editCallback=test,
