@@ -36,23 +36,6 @@ class Start(ctrl.Controller):
             newTodoCallback       = s.newTodo
             )
 
-        def test(*args):
-            print args
-        # Populate our Todo page
-        # parent = s.window.buildTodo()
-        # view.Todo(
-        #     "one",
-        #     parent,
-        #     realLabel="thing",
-        #     doneCallback=test,
-        #     editCallback=test,
-        #     deleteCallback=test,
-        #     special={
-        #         "description" : "what it does",
-        #         "icon" : "flowers.png",
-        #         "callback" : test
-        #     })
-
 
     """
     Build out todo page
@@ -61,6 +44,20 @@ class Start(ctrl.Controller):
         cmds.text(l="Added in controller")
         cmds.text(l="Also added in controller")
         cmds.text(l="Comes from in controller")
+        def test(*args):
+            print "test", args
+        view.Todo(
+            "one",
+            parent,
+            realLabel="thing",
+            doneCallback=test,
+            editCallback=test,
+            deleteCallback=test,
+            special={
+                "description" : "what it does",
+                "icon" : "fileOpen.png",
+                "callback" : test
+            })
         # s.todoContainerSections = cmds.columnLayout(adj=True, p=s.todoContainer)
         # s.todoContainerUnsectioned = cmds.columnLayout(adj=True, p=s.todoContainer)
 

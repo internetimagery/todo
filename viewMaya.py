@@ -151,6 +151,7 @@ class MainWindow(GUIElement):
             s.options["closeCallback"]()
 
 # options:
+# ID = Identification of the todo
 # realLabel = label that includes hashtags etc etc
 # doneCallback = ticked off todo
 # editCallback = changed todo name
@@ -165,6 +166,7 @@ class Todo(GUIElement):
     """
     def buildElement(s):
         s.removeUI()
+        ID = s.options["ID"]
         s.wrapper = cmds.rowLayout(nc=4, ad4=1, p=s.parent)
         cmds.iconTextButton(
             image="fileSave.png",
@@ -173,7 +175,7 @@ class Todo(GUIElement):
             label=s.label,
             fn="fixedWidthFont",
             ann="Click to check off and save.\nTODO: %s" % s.label,
-            c=lambda: s.options["doneCallback"]()
+            c=lambda: s.options["doneCallback"](ID)
             )
         if s.options["special"]:
             cmds.iconTextButton(
@@ -181,32 +183,32 @@ class Todo(GUIElement):
                 style="iconOnly",
                 w=30,
                 ann=s.options["special"]["description"],
-                c=lambda: s.options["special"]["callback"]
+                c=lambda x: s.options["special"]["callback"](ID)
                 )
         cmds.iconTextButton(
             image="setEdEditMode.png",
             style="iconOnly",
             w=30,
             ann="Edit Todo.",
-            c=lambda: s.editTodo()
+            c=s.editTodo
             )
         cmds.iconTextButton(
             image="removeRenderable.png",
             style="iconOnly",
             w=30,
             ann="Delete Todo without saving.",
-            c=lambda: s.deleteTodo()
+            c=lambda: s.deleteTodo(ID)
             )
         return s.wrapper
 
     """
     edit todo
     """
-    def editTodo(s):
+    def editTodo(s, *trash):
         s.removeUI()
         s.wrapper = cmds.rowLayout(nc=2, ad4=0, p=s.parent)
         text = cmds.textField(tx=s.options["realLabel"])
-        cmds.button(l="Ok", c=lambda x: s.options["editCallback"](cmds.textField(text, q=True, tx=True)))
+        cmds.button(l="Ok", c=lambda x: s.options["editCallback"](ID, cmds.textField(text, q=True, tx=True)))
 
     """
     delete the todo
