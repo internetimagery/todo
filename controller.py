@@ -1,4 +1,6 @@
 # Todo functionality
+from re import match
+import todo.todoElement as te
 
 # Provide functions for:
 # create(key, value) returns value
@@ -23,7 +25,10 @@ class Controller(object):
         s.settings = s.read("TODO_SETTINGS", {})
         s.todos = {}
         for todoID in s.read():
-            
+            if match(r"Task_[\w\\-]+", todoID):
+                task = s.read(todoID)
+                newTodo = s.todoCreate(task, ID=todoID)
+                s.todos[todoID] = newTodo
 
     """
     Add a filter for parsing Todos
@@ -36,3 +41,12 @@ class Controller(object):
     """
     def addArchive(s, archive):
         s.archive.add(archive)
+
+    """
+    Create a Todo
+    """
+    def todoCreate(s, task, ID=None):
+        newTodo = te.Todo(task, s.parsers)
+        if ID:
+            newTodo.id = ID
+        return newTodo
