@@ -27,15 +27,17 @@ class Start(object):
     Build out todo page
     """
     def buildTodo(s, parent):
-        cmds.text(l="Added in controller", p=parent)
-        print "todo page", parent
+        s.todoContainer = cmds.scrollLayout(bgc=[0.2, 0.2, 0.2], cr=True, p=parent)
+        cmds.text(l="Added in controller")
+        s.todoContainerSections = cmds.columnLayout(adj=True, p=s.todoContainer)
+        s.todoContainerUnsectioned = cmds.columnLayout(adj=True, p=s.todoContainer)
+
 
     """
     Build out settings page
     """
     def buildSettings(s, parent):
-        cmds.text(l="Added in controller", p=parent)
-        print "settings page", parent
+        cmds.text(l="Todo: Insert settings stuff in here!", p=parent)
 
     """
     New todo requested
