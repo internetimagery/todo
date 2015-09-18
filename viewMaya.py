@@ -6,9 +6,11 @@ class GUIElement(object):
     Base gui class
     """
     def __init__(s, label, parent, **kwargs):
+        print "hello there"
         s.label = label
         s.parent = parent
         s.options = kwargs
+        print kwargs
         s.wrapper = ""
         s.buildElement()
 
@@ -40,20 +42,23 @@ class MainWindow(GUIElement):
     build window
     """
     def buildElement(s):
-        window = cmds.window(title=title, rtf=True)
+        window = cmds.window(title=s.options["title"], rtf=True)
         s.outerContainer = cmds.columnLayout(adj=True)
         s.window = cmds.dockControl(
             s.label,
-            a="float",
             content=window,
+            a="left",
             aa=["left", "right"],
             fl=True,
             l=s.options["title"],
             fcc=s.moveDock,
             vcc=s.closeDock
             )
-        if s.options["location"] in ["left", "right"]:
-            cmds.dockControl(s.wrapper, e=True, a=s.options["location"], fl=False)
+        allowed = ["left", "right"]
+        if s.options["location"] == 'float':
+            cmds.dockControl(s.window, e=True, fl=True)
+        elif s.options["location"] in allowed:
+            cmds.dockControl(s.window, e=True, a=s.options["location"], fl=False)
         return s.buildTodo()
 
     """
@@ -83,7 +88,7 @@ class MainWindow(GUIElement):
             label="Create a new TODO",
             h=20,
             ann="Type a task into the box.",
-            c=lambda x: s.options["newTodoCallback"](cmds.textField(s.todoText, q=True, tx=True)
+            c=lambda x: s.options["newTodoCallback"](cmds.textField(s.todoText, q=True, tx=True))
             )
         cmds.setParent("..")
         return s.wrapper
@@ -119,12 +124,12 @@ class MainWindow(GUIElement):
     Keep track of dock movement
     """
     def moveDock(s):  # Update dock location information
-        if cmds.dockControl(s.wrapper, q=True, fl=True):
+        if cmds.dockControl(s.window, q=True, fl=True):
             s.options["location"] = "float"
             s.options["moveCallback"]("float")
             print "Floating Dock."
         else:
-            area = cmds.dockControl(s.wrapper, q=True, a=True)
+            area = cmds.dockControl(s.window, q=True, a=True)
             s.options["location"] = area
             s.options["moveCallback"](area)
             print "Docking %s." % area
@@ -133,9 +138,9 @@ class MainWindow(GUIElement):
     Close window
     """
     def closeDock(s, *loop):
-        visible = cmds.dockControl(s.wrapper, q=True, vis=True)
+        visible = cmds.dockControl(s.window, q=True, vis=True)
         if not visible and loop:
-            cmds.scriptJob(ie=s.closeDock, p=s.wrapper, ro=True)
+            cmds.scriptJob(ie=s.closeDock, p=s.window, ro=True)
         elif not visible:
             print "Window closed."
             cmds.deleteUI(s.window)
