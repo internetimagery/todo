@@ -197,7 +197,7 @@ class Todo(GUIElement):
             style="iconOnly",
             w=30,
             ann="Delete Todo without saving.",
-            c=lambda: s.deleteTodo(ID)
+            c=s.deleteTodo
             )
         return s.wrapper
 
@@ -206,16 +206,20 @@ class Todo(GUIElement):
     """
     def editTodo(s, *trash):
         s.removeUI()
-        ID = s.options["ID"]
         s.wrapper = cmds.rowLayout(nc=2, ad4=0, p=s.parent)
         text = cmds.textField(tx=s.options["realLabel"])
-        cmds.button(l="Ok", c=lambda x: s.options["editCallback"](ID, cmds.textField(text, q=True, tx=True)))
+        cmds.button(
+            l="Ok",
+            c=lambda x: s.options["editCallback"](
+                s.options["ID"],
+                cmds.textField(text, q=True, tx=True)
+                ))
 
     """
     delete the todo
     """
-    def deleteTodo(s):
-        s.options["deleteCallback"]()
+    def deleteTodo(s, *trash):
+        s.options["deleteCallback"](s.options["ID"])
         s.removeUI()
 
 # options:
