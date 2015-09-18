@@ -12,7 +12,7 @@ temp = {} # Temp variable to hold info if needed
 Hashtag
 """
 temp["hashtag"] = set()
-def parseHashTag(token):
+def parseHashTag(token, ID):
     if 1 < len(token) and token[:1] == "#":
         temp["hashtag"].add(token[1:])
         return "", ("Hashtag", temp["hashtag"])
@@ -22,7 +22,7 @@ def parseHashTag(token):
 Website URL
 """
 temp["url"] = set()
-def parseUrl(token):
+def parseUrl(token, ID):
     url = urlparse(token)
     if url.scheme and url.netloc:
         temp["url"].add(token)
@@ -34,7 +34,7 @@ Frame Range
 """
 temp["framerange"] = []
 rangeNames = ["to", "through", "-", ":", "and", "->"] # Names that create a range
-def parseFrame(token):
+def parseFrame(token, ID):
     try:
         num = int(token)
     except ValueError:

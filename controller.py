@@ -16,63 +16,107 @@ class Controller(object):
     """
     def __init__(s, create, read, update, delete):
         # Set up our CRUD
-        s.create = create
-        s.read = read
-        s.update = update
-        s.delete = delete
+        s._create = create
+        s._read = read
+        s._update = update
+        s._delete = delete
         # Parsers and Archives
-        s.parsers = set()
-        s.archive = set()
+        s._parsers = set()
+        s._archive = set()
 
-        s.settings = s.read("TODO_SETTINGS", {})
-        s.todos = {} # Store all todos
-        s.todoTree = {"None": []} # Store todos in heirarchy for sorting
-        for taskID in s.read():
+        s._settingsName = "TODO_SETTINGS"
+        s._settings = s.read(s._settingsName, {})
+        s._todos = {} # Store all todos
+        s._todoTree = {"None": set()} # Store todos in heirarchy for sorting
+        for taskID in s._read():
             if match(r"Task_[\w\\-]+", taskID):
-                task = s.read(taskID)
-                newTodo = s.todoCreate(task, ID=taskID)
-                meta = newTodo.getMeta()
-                if "Hashtag" in meta:
-                    for tag in meta["Hashtag"]:
-                        s.todoTree[tag] = taskID
-                else:
-                    s.todoTree["None"].append(taskID)
-                s.todos[taskID] = newTodo
-        s.todoGetAll()
+                task = s._read(taskID)
+                s.todoCreate(task, ID=taskID)
 
     """
     Add a filter for parsing Todos
     """
     def addFilter(s, parser):
-        s.parsers.add(parser)
+        s._parsers.add(parser)
 
     """
     Add an archive for storing data after task complete
     """
     def addArchive(s, archive):
-        s.archive.add(archive)
+        s._archive.add(archive)
+
+    """
+    Validate a todos text (placeholder)
+    """
+    def todoValidate(s, task):
+        ok = True # TODO add validation rules or override in subclass
+        return task if ok else False
 
     """
     Create a Todo
     """
     def todoCreate(s, task, ID=None):
-        newTodo = Todo(task, s.parsers)
-        if ID:
-            newTodo.id = ID
-        return newTodo
+        if s.todoValidate(task):
+            newTodo = Todo(task, s._parsers)
+            if ID:
+                newTodo.id = ID
+            else:
+                s._create(ID, newTodo.label
+            s._todos[ID] = newTodo
+            if "Hashtag" in newTodo.meta:
+                for tag in newTodo.meta["Hashtag"]:
+                    s._todoTree[tag] = s._todoTree.get(tag, set())
+                    s._todoTree[tag].add(ID)
+            else:
+                s._todoTree["None"].add(ID)
+            return newTodo
+
+    """
+    Remove a Todo
+    """
+    def todoRemove(s, ID):
+        if ID in s._todos:
+            del s._todos[ID]
+            s._delete(ID)
+            for cat in s._todoTree:
+                if ID in s._todoTree[cat]:
+                    del s._todoTree[cat][ID]
+
+    """
+    Get a todo from its ID
+    """
+    def todoGet(s, ID):
+        return s._todos[ID] if ID in s._todos else None
+
+    """
+    Archive file completing a todo
+    """
+    def todoArchive(s, ID):
+        if s._archive and ID in s._todos:
+            for arch in s._archive:
+                arch(s.todoGet(ID))
 
     """
     Get todo categories
     """
     def getCategories(s):
-        return s.todoTree.keys()
+        return s._todoTree.keys()
 
     """
-    Get a certain Todo
+    Get settings
     """
-    def getTodo(s, ID):
-        return s.todos[ID]
-
+    def settingsGet(s, key=None, default=None):
+        if key:
+            return s._settings[key] if s._settings[key] else default
+        else:
+            return s._settings
+    """
+    Set settings parameter
+    """
+    def settingsSet(s, key, value):
+        s._settings[key] = value
+        s._update(s._settingsName, s._settings)
+        return value
 
 # parser:
 # parser(token):
@@ -84,28 +128,22 @@ class Todo(object):
     def __init__(s, task, parsers):
         s.task = task.strip()
         s.parsers = parsers + default.getAllParsers()
-        s.label, s.meta = s.parse(s.task)
         s.id = "Task_%s" % uuid4()
-
-    """
-    Get Metadata
-    """
-    def getMeta(s):
-        return s.meta
+        s.label, s.meta = s.parse(s.task)
 
     """
     Parse out specific information from todo task
     """
-    def parse(s, task):
-        if task:
-            tokens = split(task)
+    def parse(s):
+        if s.task:
+            tokens = split(s.task)
             filtered = []
             metadata = {}
             for token in tokens:
                 if s.parsers:
                     for parser in s.parsers:
                         if token:
-                            token, meta = parser(token)
+                            token, meta = parser(token, s.id)
                             if meta:
                                 tokenName, tokenArgs = meta
                                 metadata[tokenName] = tokenArgs

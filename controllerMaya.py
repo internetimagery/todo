@@ -2,7 +2,6 @@
 import maya.cmds as cmds
 from re import compile
 import todo.viewMaya as view
-import todo.todoElement as td
 import todo.controller as ctrl
 import todo.crudMaya as crud
 
@@ -10,11 +9,12 @@ import todo.crudMaya as crud
 # fileInfo "TODO_SETTINGS" "{\"FileArchive.active\": true, \"Todo.SectionState\": {\"animation\": false}, \"FileArchive.path\": \"/home/maczone/Desktop/backup\"}";
 # fileInfo "TODO_144249523723" "#animation right dash 1 to 10";
 
-class Controller(ctrl.Controller):
+# Begin Application
+class Start(ctrl.Controller):
     """
-    Controller for Maya
+    Application
     """
-    def __init__(s):
+    def __init__(s, location=None):
         store = crud.CRUD()
         ctrl.Controller.__init__(
             s,
@@ -23,32 +23,12 @@ class Controller(ctrl.Controller):
             store.update,
             store.delete
         )
-        print s.todoTree
-
-Controller()
-# Begin Application
-class Start(object):
-    """
-    Application
-    """
-    def __init__(s, location=None):
-        s.controller = Controller()
-        s.settings = s.store.get("TODO_SETTINGS", {}) # Saved settings
-
-        # Get our Todos
-        reg = compile(r"Task_[\w\\-]+")
-        s.todos = {} # Todos
-        for task in s.store.cache:
-            if reg.match(task):
-                newTodo = Todo(s.store.get(task, ""))
-                newTodo.id = task
-                s.todos[task] = newTodo
 
         s.window = view.MainWindow(
             "Todo_Window",
             "",
             title                 = "grab from file",
-            location              = s.settings["location"] if "location" in s.settings else "float",
+            location              = s.settingsGet("location", "float"),
             moveCallback          = s.moveUpdate,
             closeCallback         = s.closeUpdate,
             buildTodoCallback     = s.buildTodo,
@@ -58,6 +38,7 @@ class Start(object):
 
         def test(*args):
             print args
+        # Populate our Todo page
         parent = s.window.buildTodo()
         view.Todo(
             "one",
@@ -72,16 +53,6 @@ class Start(object):
                 "callback" : test
             })
 
-
-        # options:
-        # realLabel = label that includes hashtags etc etc
-        # doneCallback = ticked off todo
-        # editCallback = changed todo name
-        # deleteCallback = deleted todo
-        # special = button
-        #   description = describe button
-        #   icon = button icon
-        #   callback = run when pressed
 
     """
     Build out todo page
