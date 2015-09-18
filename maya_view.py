@@ -1,7 +1,42 @@
 # Maya UI Elements
 import maya.cmds as cmds
 
-# kwargs:
+class GUIElement(object):
+    """
+    Base gui class
+    """
+    def __init__(s, label, parent, **kwargs):
+        s.label = label
+        s.parent = parent
+        s.options = kwargs
+        s.wrapper = ""
+        s.buildElement()
+
+    """
+    Clear UI for refreshing
+    """
+    def removeUI(s):
+        try:
+            cmds.deleteUI(s.wrapper)
+        except RuntimeError:
+            pass
+
+    """
+    dummy build function
+    """
+    def buildElement(s):
+        print "Need to override the build element function"
+
+# options:
+#
+class MainWindow(GUIElement):
+    """
+    build window
+    """
+    def buildElement(s):
+        pass
+
+# options:
 # realLabel = label that includes hashtags etc etc
 # doneCallback = ticked off todo
 # editCallback = changed todo name
@@ -10,28 +45,12 @@ import maya.cmds as cmds
 #   description = describe button
 #   icon = button icon
 #   callback = run when pressed
-class Todo(object):
-    """
-    Single Todo UI element
-    """
-    def __init__(s, label, parent, **kwargs):
-        s.label = label
-        s.parent = parent
-        s.options = kwargs
-        s.wrapper = ""
-
-    """
-    Clear todo
-    """
-    def clearTodo(s):
-        if cmds.rowLayout(s.wrapper, ex=True):
-            cmds.deleteUI(s.wrapper)
-
+class Todo(GUIElement):
     """
     Build the todo
     """
-    def buildTodo(s):
-        s.clearTodo()
+    def buildElement(s):
+        s.removeUI()
         s.wrapper = cmds.rowLayout(nc=4, ad4=1, p=s.parent)
         cmds.iconTextButton(
             image="fileSave.png",
@@ -64,12 +83,13 @@ class Todo(object):
             ann="Delete Todo without saving.",
             c=lambda: s.deleteTodo()
             )
+        return s.wrapper
 
     """
     edit todo
     """
     def editTodo(s):
-        s.clearTodo()
+        s.removeUI()
         s.wrapper = cmds.rowLayout(nc=2, ad4=0, p=s.parent)
         text = cmds.textField(tx=s.options["realLabel"])
         cmds.button(l="Ok", c=lambda x: s.options["editCallback"](cmds.textField(text, q=True, tx=True)))
@@ -79,38 +99,41 @@ class Todo(object):
     """
     def deleteTodo(s):
         s.options["deleteCallback"]()
-        s.clearTodo()
+        s.removeUI()
 
-# kwargs:
+# options:
 # openCallback = run when opening
 # closeCallback = run when closing
-class TodoSection(object):
-    """
-    section to place todos
-    """
-    def __init__(s, label, parent, **kwargs):
-        s.label = label
-        s.parent = parent
-        s.options = kwargs
-        s.element = ""
-
-    """
-    remove section
-    """
-    def removeSection(s):
-        if cmds.frameLayout(s.element, ex=True):
-            cmds.deleteUI(s.element)
-
+class TodoSection(GUIElement):
     """
     build section
     """
-    def buildSection(s, open):
-        s.removeSection()
-        s.element = cmds.frameLayout(
+    def buildElement(s):
+        s.removeUI()
+        s.wrapper = cmds.frameLayout(
             l=s.label,
             p=s.parent,
             cll=True,
-            cl=open,
+            cl=False,
             cc=lambda: s.options["closeCallback"](),
             ec=lambda: s.options["openCallback"]()
         )
+        return s.wrapper
+
+    def open(s):
+        cmds.frameLayout(s.wrapper, e=True, cl=False)
+
+    def close(s):
+        cmds.frameLayout(s.wrapper, e=True, cl=True)
+
+
+# options:
+# [
+#
+# ]
+class setting(GUIElement):
+    """
+    Build Elements
+    """
+    def buildElement(s):
+        pass
