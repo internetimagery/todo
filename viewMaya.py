@@ -40,6 +40,8 @@ class MainWindow(GUIElement):
     build window
     """
     def buildElement(s):
+        if cmds.dockControl(s.label, ex=True):
+            cmds.deleteUI(s.label)
         window = cmds.window(title=s.options["title"], rtf=True)
         s.outerContainer = cmds.columnLayout(adj=True)
         s.window = cmds.dockControl(

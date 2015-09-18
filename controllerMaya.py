@@ -13,18 +13,19 @@ class Start(object):
     def __init__(s, location=None):
         s.store = model.Store()
         s.settings = s.store.get("TODO_SETTINGS", {}) # Saved settings
+        s.todos = []
 
-        # s.window = view.MainWindow(
-        #     "Todo_window_Temporaryname",
-        #     "",
-        #     title                 = "grab from file",
-        #     location              = s.settings["location"] if "location" in s.settings else "float",
-        #     moveCallback          = s.moveUpdate,
-        #     closeCallback         = s.closeUpdate,
-        #     buildTodoCallback     = s.buildTodo,
-        #     buildSettingsCallback = s.buildSettings,
-        #     newTodoCallback       = s.newTodo
-        #     )
+        s.window = view.MainWindow(
+            "Todo_window_Temporaryname",
+            "",
+            title                 = "grab from file",
+            location              = s.settings["location"] if "location" in s.settings else "float",
+            moveCallback          = s.moveUpdate,
+            closeCallback         = s.closeUpdate,
+            buildTodoCallback     = s.buildTodo,
+            buildSettingsCallback = s.buildSettings,
+            newTodoCallback       = s.newTodo
+            )
 
     """
     Build out todo page
