@@ -2,6 +2,8 @@
 from re import match
 from shlex import split
 from uuid import uuid4
+from os.path import dirname, join, realpath
+from json import load, dump
 import todo.parsersDefault as default
 
 # Provide functions for:
@@ -26,6 +28,13 @@ class Controller(object):
         # Settings
         s._settingsName = "TODO_SETTINGS"
         s._settings = s._read(s._settingsName, {})
+        # Global Settings
+        s._globalSettingsName = join(dirname(realpath(__file__)), "settings.json")
+        try:
+            with open(s._globalSettingsName, "r") as f:
+                s._globalSettingsName = load(f)
+        except (IOError, ValueError, KeyError):
+            s._globalSettings = {}
         # Todos
         s._todos = {} # Store all todos
         s._todoTree = {"None": set()} # Store todos in heirarchy for sorting
@@ -118,6 +127,22 @@ class Controller(object):
     def settingsSet(s, key, value):
         s._settings[key] = value
         s._update(s._settingsName, s._settings)
+        return value
+    """
+    Get global settings
+    """
+    def globalSettingsGet(s, key=None, default=None):
+        if key:
+            return s._globalSettings[key] if key in s._globalSettings else default
+        else:
+            return s._globalSettings
+    """
+    Set global settings
+    """
+    def globalSettingsSet(s, key, value):
+        s._globalSettings[key] = value
+        with open(s._globalSettingsName, "w") as f:
+            dump(s._globalSettings, f)
         return value
 
 # parser:
