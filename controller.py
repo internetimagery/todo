@@ -4,6 +4,7 @@ from shlex import split
 from uuid import uuid4
 from os.path import dirname, join, realpath
 from json import load, dump
+from random import choice
 
 # Provide functions for:
 # create(key, value) returns value
@@ -25,16 +26,25 @@ class Controller(object):
         s._parsers = []
         s._archive = []
         s.addParser(parseCategory) # Default "always on" parser
+        # Path
+        localPath = dirname(realpath(__file__))
         # Settings
         s._settingsName = "TODO_SETTINGS"
         s._settings = s._read(s._settingsName, {})
         # Global Settings
-        s._globalSettingsName = join(dirname(realpath(__file__)), "settings.json")
+        s._globalSettingsName = join(localPath, "settings.json")
         try:
             with open(s._globalSettingsName, "r") as f:
                 s._globalSettingsName = load(f)
         except (IOError, ValueError, KeyError):
             s._globalSettings = {}
+        # Quotes
+        try:
+            with open(join(localPath, "quotes.json"), "r") as f:
+                quotes = load(f)
+        except (IOError, ValueError, KeyError):
+            quotes = ["What will we do today?"]
+        s.quote = choice(quotes)
         # Todos
         s._todos = set() # Store all todos
         s._todoTree = {"None": []} # Store todos in heirarchy for sorting
@@ -83,8 +93,9 @@ class Controller(object):
     """
     def todoRemove(s, task):
         try:
+            s._delete(task.id)
             s._todos.remove(task)
-        except KeyError:
+        except (KeyError, RuntimeError):
             print "Task not found for removal"
         s._todoTree = dict((cat, filter(lambda x: x != task, s._todoTree[cat])) for cat in s._todoTree)
 

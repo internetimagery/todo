@@ -30,7 +30,7 @@ class Start(ctrl.Controller):
         s.window = view.MainWindow(
             "Todo_Window",
             "",
-            title                 = "grab from file",
+            title                 = s.quote,
             location              = s.globalSettingsGet("location", "float"),
             moveCallback          = s.moveUpdate,
             closeCallback         = s.closeUpdate,
@@ -77,28 +77,32 @@ class Start(ctrl.Controller):
                 closeCallback=closeSection
                 )
         def addTodo(section, task):
-            def test(*args):
-                print args
-            def edit(ID, text):
+            def done(todoElement):
+                print "Ticked off", task.label
+                delete(todoElement)
+            def delete(todoElement):
+                s.todoRemove(task)
+                todoElement.removeUI()
+            def edit(todoElement, text):
                 text = text.strip()
                 if text:
                     task.parse(text)
                     todoElement.label = task.label
                     todoElement.buildElement()
-            todoElement = view.Todo(
+            return view.Todo(
                 task.label,
                 section,
                 ID="STUFF",
                 realLabel=task.task,
-                doneCallback=test,
+                doneCallback=done,
                 editCallback=edit,
-                deleteCallback=test,
-                special={
-                    "description" : "what it does",
-                    "icon" : "fileOpen.png",
-                    "callback" : test
-                })
-            return todoElement
+                deleteCallback=delete,
+                special={}
+                #     "description" : "what it does",
+                #     "icon" : "fileOpen.png",
+                #     "callback" : test
+                # }
+                )
 
         tree = s.todoGetTree()
         for cat in sorted(tree.keys()):
