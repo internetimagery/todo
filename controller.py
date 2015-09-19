@@ -22,8 +22,8 @@ class Controller(object):
         s._update = update
         s._delete = delete
         # Parsers and Archives
-        s._parsers = set()
-        s._archive = set()
+        s._parsers = []
+        s._archive = []
         s.addParser(parseCategory) # Default "always on" parser
         # Settings
         s._settingsName = "TODO_SETTINGS"
@@ -36,8 +36,8 @@ class Controller(object):
         except (IOError, ValueError, KeyError):
             s._globalSettings = {}
         # Todos
-        s._todos = {} # Store all todos
-        s._todoTree = {"None": set()} # Store todos in heirarchy for sorting
+        s._todos = set() # Store all todos
+        s._todoTree = {"None": []} # Store todos in heirarchy for sorting
         for taskID in s._read():
             if match(r"Task_[\w\\-]+", taskID):
                 task = s._read(taskID)
@@ -47,7 +47,7 @@ class Controller(object):
     Add a filter for parsing Todos
     """
     def addParser(s, parser):
-        s._parsers.add(parser)
+        s._parsers.append(parser)
 
     """
     Add an archive for storing data after task complete
@@ -70,24 +70,24 @@ class Controller(object):
             newTodo = Todo(task, s._parsers, ID=ID)
             if not ID:
                 s._create(newTodo.id, newTodo.label)
-            s._todos[newTodo.id] = newTodo
+            s._todos.add(newTodo)
             if "Category" in newTodo.meta:
                 for tag in newTodo.meta["Category"]:
-                    s._todoTree[tag] = s._todoTree.get(tag, set())
-                    s._todoTree[tag].add(newTodo.id)
+                    s._todoTree[tag] = s._todoTree.get(tag, [])
+                    s._todoTree[tag].append(newTodo)
             else:
-                s._todoTree["None"].add(newTodo.id)
+                s._todoTree["None"].append(newTodo)
             return newTodo
     """
     Remove a Todo
     """
-    def todoRemove(s, ID):
-        if ID in s._todos:
-            del s._todos[ID]
-            s._delete(ID)
-            for cat in s._todoTree:
-                if ID in s._todoTree[cat]:
-                    del s._todoTree[cat][ID]
+    def todoRemove(s, task):
+        try:
+            s._todos.remove(task)
+        except KeyError:
+            print "Task not found for removal"
+        s._todoTree = dict((cat, filter(lambda x: x != task, s._todoTree[cat])) for cat in s._todoTree)
+
     """
     Get a todo from its ID
     """
@@ -97,7 +97,7 @@ class Controller(object):
     Get todo category tree
     """
     def todoGetTree(s):
-        return s._todoTree
+        return dict((k, sorted(s._todoTree[k])) for k in s._todoTree)
     """
     Archive file completing a todo
     """
@@ -145,12 +145,11 @@ def parseCategory(tokens):
     filteredToken = []
     for token in tokens:
         # Check for #Hashtags
-        if 1 < len(token) and token[:1] = "#":
+        if 1 < len(token) and token[:1] == "#":
             tags.add(token[1:])
         else:
             filteredToken.append(token)
-    return token, {"Category": tags} if tags else None
-
+    return filteredToken, {"Category": tags if tags else ["None"]}
 
 # parser:
 # parser(token):

@@ -41,18 +41,42 @@ class Start(ctrl.Controller):
     Build out todo page
     """
     def buildTodoContainer(s, parent):
-        # set up some containers
-        s.todoContainerSections = cmds.columnLayout(adj=True, p=parent)
-        s.todoContainerUnsectioned = cmds.columnLayout(adj=True, p=parent)
-        s.todoSections = {}
-        # insert todos
-        for cat in s.getCategories():
+        # set up our container
+        s.todoContainer = cmds.scrollLayout(bgc=[0.2, 0.2, 0.2], cr=True)
+        # Insert Todos
+        s.refreshTodo()
+
+    """
+    Refresh the todo list
+    """
+    def refreshTodo(s):
+        clear = cmds.scrollLayout(s.todoContainer, q=True, ca=True)
+        if clear:
+            cmds.deleteUI(clear)
+        todoContainerGrouped = cmds.columnLayout(adj=True, p=s.todoContainer)
+        todoContainerUngrouped = cmds.columnLayout(adj=True, p=s.todoContainer)
+
+        tree = s.todoGetTree()
+        todoSections = {}
+        for cat in sorted(tree.keys()):
             if cat == "None":
-                print s.todoGetCategory(cat)
-                print "here"
+                for task in tree[cat]:
+                    cmds.text(l=task.label, p=todoContainerUngrouped)
             else:
-                print s.todoGetCategory(cat)
-                print "there"
+                def openSection():
+                    print cat, "OPEN"
+                def closeSection():
+                    print cat, "Closed"
+                section = view.TodoSection(
+                    cat,
+                    todoContainerGrouped,
+                    openCallback=openSection,
+                    closeCallback=closeSection
+                    )
+                for task in tree[cat]:
+                    cmds.text(l=task.label, p=section.attach())
+        #
+        # pass
 
         # # TESTING:::
         # cmds.text(l="Added in controller")
@@ -92,6 +116,7 @@ class Start(ctrl.Controller):
             newTodo = s.todoCreate(text)
             if newTodo:
                 s.window.editTodo("")
+                s.refreshTodo()
         else:
             cmds.confirmDialog(title="Whoops...", message="You need to add some text for your Todo.")
 

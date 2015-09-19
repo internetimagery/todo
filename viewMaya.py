@@ -27,6 +27,12 @@ class GUIElement(object):
     def buildElement(s):
         print "Need to override the build element function"
 
+    """
+    Grab position to attach
+    """
+    def attach(s):
+        return s.wrapper
+
 # options:
 # title = window title
 # location = "float" or "left" or "right"
@@ -91,9 +97,9 @@ class MainWindow(GUIElement):
             c=lambda x: s.options["newTodoCallback"](cmds.textField(s.todoText, q=True, tx=True))
             )
         cmds.setParent("..")
-        todoContainer = cmds.scrollLayout(bgc=[0.2, 0.2, 0.2], cr=True)
-        s.options["buildTodoCallback"](todoContainer)
-        return todoContainer
+        container = cmds.columnLayout(adj=True)
+        s.options["buildTodoCallback"](container)
+        return container
 
     """
     Build settings window
