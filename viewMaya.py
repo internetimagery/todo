@@ -166,7 +166,6 @@ class Todo(GUIElement):
     """
     def buildElement(s):
         s.removeUI()
-        ID = s.options["ID"]
         s.wrapper = cmds.rowLayout(nc=4, ad4=1, p=s.parent)
         cmds.iconTextButton(
             image="fileSave.png",
@@ -175,7 +174,7 @@ class Todo(GUIElement):
             label=s.label,
             fn="fixedWidthFont",
             ann="Click to check off and save.\nTODO: %s" % s.label,
-            c=lambda: s.options["doneCallback"](ID)
+            c=lambda: s.options["doneCallback"](s)
             )
         if s.options["special"]:
             cmds.iconTextButton(
@@ -183,7 +182,7 @@ class Todo(GUIElement):
                 style="iconOnly",
                 w=30,
                 ann=s.options["special"]["description"],
-                c=lambda: s.options["special"]["callback"](ID)
+                c=lambda: s.options["special"]["callback"](s)
                 )
         cmds.iconTextButton(
             image="setEdEditMode.png",
@@ -211,16 +210,16 @@ class Todo(GUIElement):
         cmds.button(
             l="Ok",
             c=lambda x: s.options["editCallback"](
-                s.options["ID"],
+                s,
                 cmds.textField(text, q=True, tx=True)
-                ))
+                )
+            )
 
     """
     delete the todo
     """
     def deleteTodo(s, *trash):
-        s.options["deleteCallback"](s.options["ID"])
-        s.removeUI()
+        s.options["deleteCallback"](s)
 
 # options:
 # openCallback = run when opening

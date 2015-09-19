@@ -96,8 +96,13 @@ class Controller(object):
     """
     Get a todo from its ID
     """
-    def todoGet(s, ID):
+    def todoGetID(s, ID):
         return s._todos[ID] if ID in s._todos else None
+    """
+    Get todo from its category
+    """
+    def todoGetCategory(s, category):
+        return s._todoTree[category] if category in s._todoTree else []
 
     """
     Archive file completing a todo

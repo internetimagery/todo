@@ -31,8 +31,8 @@ class Start(ctrl.Controller):
             location              = s.globalSettingsGet("location", "float"),
             moveCallback          = s.moveUpdate,
             closeCallback         = s.closeUpdate,
-            buildTodoCallback     = s.buildTodo,
-            buildSettingsCallback = s.buildSettings,
+            buildTodoCallback     = s.buildTodoContainer,
+            buildSettingsCallback = s.buildSettingsContainer,
             newTodoCallback       = s.newTodo
             )
 
@@ -40,36 +40,47 @@ class Start(ctrl.Controller):
     """
     Build out todo page
     """
-    def buildTodo(s, parent):
-        # TESTING:::
-        cmds.text(l="Added in controller")
-        cmds.text(l="Also added in controller")
-        cmds.text(l="Comes from in controller")
-        def test(*args):
-            print "test", args
-        def edit(ID, text):
-            viewdo.label = text
-            viewdo.buildElement()
-        viewdo = view.Todo(
-            "one",
-            parent,
-            ID="STUFF",
-            realLabel="thing",
-            doneCallback=test,
-            editCallback=edit,
-            deleteCallback=test,
-            special={
-                "description" : "what it does",
-                "icon" : "fileOpen.png",
-                "callback" : test
-            })
-        # s.todoContainerSections = cmds.columnLayout(adj=True, p=s.todoContainer)
-        # s.todoContainerUnsectioned = cmds.columnLayout(adj=True, p=s.todoContainer)
+    def buildTodoContainer(s, parent):
+        # set up some containers
+        s.todoContainerSections = cmds.columnLayout(adj=True, p=parent)
+        s.todoContainerUnsectioned = cmds.columnLayout(adj=True, p=parent)
+        s.todoSections = {}
+        # insert todos
+        for cat in s.getCategories():
+            if cat == "None":
+                print s.todoGetCategory(cat)
+                print "here"
+            else:
+                print s.todoGetCategory(cat)
+                print "there"
+
+        # # TESTING:::
+        # cmds.text(l="Added in controller")
+        # cmds.text(l="Also added in controller")
+        # cmds.text(l="Comes from in controller")
+        # def test(*args):
+        #     print "test", args
+        # def edit(ID, text):
+        #     viewdo.label = text
+        #     viewdo.buildElement()
+        # viewdo = view.Todo(
+        #     "one",
+        #     parent,
+        #     ID="STUFF",
+        #     realLabel="thing",
+        #     doneCallback=test,
+        #     editCallback=edit,
+        #     deleteCallback=test,
+        #     special={
+        #         "description" : "what it does",
+        #         "icon" : "fileOpen.png",
+        #         "callback" : test
+        #     })
 
     """
     Build out settings page
     """
-    def buildSettings(s, parent):
+    def buildSettingsContainer(s, parent):
         cmds.text(l="Todo: Insert settings stuff in here!\nLove, controller. :)", p=parent)
 
     """
