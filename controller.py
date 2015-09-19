@@ -69,7 +69,7 @@ class Controller(object):
         if s.todoValidate(task):
             newTodo = Todo(task, s._parsers, ID=ID)
             if not ID:
-                s._create(newTodo.id, newTodo.label)
+                s._create(newTodo.id, newTodo.task)
             s._todos.add(newTodo)
             if "Category" in newTodo.meta:
                 for tag in newTodo.meta["Category"]:

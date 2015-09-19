@@ -24,6 +24,9 @@ class Start(ctrl.Controller):
             store.delete
         )
 
+        # Load settings
+        s.todoSectionStates = s.settingsGet("groups", {})
+
         s.window = view.MainWindow(
             "Todo_Window",
             "",
@@ -42,7 +45,7 @@ class Start(ctrl.Controller):
     """
     def buildTodoContainer(s, parent):
         # set up our container
-        s.todoContainer = cmds.scrollLayout(bgc=[0.2, 0.2, 0.2], cr=True)
+        s.wrapper = parent
         # Insert Todos
         s.refreshTodo()
 
@@ -50,56 +53,62 @@ class Start(ctrl.Controller):
     Refresh the todo list
     """
     def refreshTodo(s):
-        clear = cmds.scrollLayout(s.todoContainer, q=True, ca=True)
+        # Build our Todo section
+        clear = cmds.columnLayout(s.wrapper, q=True, ca=True)
         if clear:
             cmds.deleteUI(clear)
-        todoContainerGrouped = cmds.columnLayout(adj=True, p=s.todoContainer)
-        todoContainerUngrouped = cmds.columnLayout(adj=True, p=s.todoContainer)
+        todoContainer = cmds.scrollLayout(bgc=[0.2, 0.2, 0.2], cr=True, p=s.wrapper)
+        todoContainerGrouped = cmds.columnLayout(adj=True, p=todoContainer)
+        todoContainerUngrouped = cmds.columnLayout(adj=True, p=todoContainer)
+
+        def addSection(cat):
+            s.todoSectionStates[cat] = s.todoSectionStates.get(cat, True)
+            def openSection():
+                s.todoSectionStates[cat] = True
+                s.settingsSet("groups", s.todoSectionStates)
+            def closeSection():
+                s.todoSectionStates[cat] = False
+                s.settingsSet("groups", s.todoSectionStates)
+            return view.TodoSection(
+                cat,
+                todoContainerGrouped,
+                open=s.todoSectionStates[cat],
+                openCallback=openSection,
+                closeCallback=closeSection
+                )
+        def addTodo(section, task):
+            def test(*args):
+                print args
+            def edit(ID, text):
+                text = text.strip()
+                if text:
+                    task.parse(text)
+                    todoElement.label = task.label
+                    todoElement.buildElement()
+            todoElement = view.Todo(
+                task.label,
+                section,
+                ID="STUFF",
+                realLabel=task.task,
+                doneCallback=test,
+                editCallback=edit,
+                deleteCallback=test,
+                special={
+                    "description" : "what it does",
+                    "icon" : "fileOpen.png",
+                    "callback" : test
+                })
+            return todoElement
 
         tree = s.todoGetTree()
-        todoSections = {}
         for cat in sorted(tree.keys()):
             if cat == "None":
                 for task in tree[cat]:
-                    cmds.text(l=task.label, p=todoContainerUngrouped)
+                    addTodo(todoContainerUngrouped, task)
             else:
-                def openSection():
-                    print cat, "OPEN"
-                def closeSection():
-                    print cat, "Closed"
-                section = view.TodoSection(
-                    cat,
-                    todoContainerGrouped,
-                    openCallback=openSection,
-                    closeCallback=closeSection
-                    )
+                section = addSection(cat)
                 for task in tree[cat]:
-                    cmds.text(l=task.label, p=section.attach())
-        #
-        # pass
-
-        # # TESTING:::
-        # cmds.text(l="Added in controller")
-        # cmds.text(l="Also added in controller")
-        # cmds.text(l="Comes from in controller")
-        # def test(*args):
-        #     print "test", args
-        # def edit(ID, text):
-        #     viewdo.label = text
-        #     viewdo.buildElement()
-        # viewdo = view.Todo(
-        #     "one",
-        #     parent,
-        #     ID="STUFF",
-        #     realLabel="thing",
-        #     doneCallback=test,
-        #     editCallback=edit,
-        #     deleteCallback=test,
-        #     special={
-        #         "description" : "what it does",
-        #         "icon" : "fileOpen.png",
-        #         "callback" : test
-        #     })
+                    addTodo(section.attach(), task)
 
     """
     Build out settings page

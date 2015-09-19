@@ -240,7 +240,7 @@ class TodoSection(GUIElement):
             l=s.label,
             p=s.parent,
             cll=True,
-            cl=False,
+            cl=False if s.options["open"] else True,
             cc=lambda: s.options["closeCallback"](),
             ec=lambda: s.options["openCallback"]()
         )
