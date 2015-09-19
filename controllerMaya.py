@@ -28,7 +28,7 @@ class Start(ctrl.Controller):
             "Todo_Window",
             "",
             title                 = "grab from file",
-            location              = s.settingsGet("location", "float"),
+            location              = s.globalSettingsGet("location", "float"),
             moveCallback          = s.moveUpdate,
             closeCallback         = s.closeUpdate,
             buildTodoCallback     = s.buildTodo,
@@ -88,7 +88,7 @@ class Start(ctrl.Controller):
     Update window position
     """
     def moveUpdate(s, location):
-        s.settingsSet("location", location)
+        s.globalSettingsSet("location", location)
 
     """
     No real functionality
