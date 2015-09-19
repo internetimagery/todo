@@ -4,7 +4,6 @@ from shlex import split
 from uuid import uuid4
 from os.path import dirname, join, realpath
 from json import load, dump
-import todo.parsersDefault as default
 
 # Provide functions for:
 # create(key, value) returns value
@@ -25,6 +24,7 @@ class Controller(object):
         # Parsers and Archives
         s._parsers = set()
         s._archive = set()
+        s.addParser(parseCategory) # Default "always on" parser
         # Settings
         s._settingsName = "TODO_SETTINGS"
         s._settings = s._read(s._settingsName, {})
@@ -46,7 +46,7 @@ class Controller(object):
     """
     Add a filter for parsing Todos
     """
-    def addFilter(s, parser):
+    def addParser(s, parser):
         s._parsers.add(parser)
 
     """
@@ -67,21 +67,17 @@ class Controller(object):
     """
     def todoCreate(s, task, ID=None):
         if s.todoValidate(task):
-            newTodo = Todo(task, s._parsers)
-            if ID:
-                newTodo.id = ID
-            else:
-                ID = newTodo.id
-                s._create(ID, newTodo.label)
-            s._todos[ID] = newTodo
-            if "Hashtag" in newTodo.meta:
-                for tag in newTodo.meta["Hashtag"]:
+            newTodo = Todo(task, s._parsers, ID=ID)
+            if not ID:
+                s._create(newTodo.id, newTodo.label)
+            s._todos[newTodo.id] = newTodo
+            if "Category" in newTodo.meta:
+                for tag in newTodo.meta["Category"]:
                     s._todoTree[tag] = s._todoTree.get(tag, set())
-                    s._todoTree[tag].add(ID)
+                    s._todoTree[tag].add(newTodo.id)
             else:
-                s._todoTree["None"].add(ID)
+                s._todoTree["None"].add(newTodo.id)
             return newTodo
-
     """
     Remove a Todo
     """
@@ -92,18 +88,16 @@ class Controller(object):
             for cat in s._todoTree:
                 if ID in s._todoTree[cat]:
                     del s._todoTree[cat][ID]
-
     """
     Get a todo from its ID
     """
     def todoGetID(s, ID):
         return s._todos[ID] if ID in s._todos else None
     """
-    Get todo from its category
+    Get todo category tree
     """
-    def todoGetCategory(s, category):
-        return s._todoTree[category] if category in s._todoTree else []
-
+    def todoGetTree(s):
+        return s._todoTree
     """
     Archive file completing a todo
     """
@@ -111,13 +105,6 @@ class Controller(object):
         if s._archive and ID in s._todos:
             for arch in s._archive:
                 arch(s.todoGet(ID))
-
-    """
-    Get todo categories
-    """
-    def getCategories(s):
-        return s._todoTree.keys()
-
     """
     Get settings
     """
@@ -150,37 +137,46 @@ class Controller(object):
             dump(s._globalSettings, f)
         return value
 
+"""
+Common parser, parsing categories
+"""
+def parseCategory(tokens):
+    tags = set()
+    filteredToken = []
+    for token in tokens:
+        # Check for #Hashtags
+        if 1 < len(token) and token[:1] = "#":
+            tags.add(token[1:])
+        else:
+            filteredToken.append(token)
+    return token, {"Category": tags} if tags else None
+
+
 # parser:
 # parser(token):
-# return token, ("Category", arugments)
+# return filteredToken, {"Category": arugments}
 class Todo(object):
     """
     Single Todo item
     """
-    def __init__(s, task, parsers):
-        s.task = task.strip()
-        s.parsers = set(default.getAllParsers())
-        s.parsers |= parsers
-        s.id = "Task_%s" % uuid4()
-        s.label, s.meta = s.parse()
+    def __init__(s, task, parsers, ID=None):
+        s.parsers = parsers
+        s.id = ID if ID else "Task_%s" % uuid4()
+        s.parse(task)
 
     """
     Parse out specific information from todo task
     """
-    def parse(s):
-        if s.task:
-            tokens = split(s.task)
-            filtered = []
-            metadata = {}
-            for token in tokens:
-                if s.parsers:
-                    for parser in s.parsers:
-                        if token:
-                            token, meta = parser(token, s.id)
-                            if meta:
-                                tokenName, tokenArgs = meta
-                                metadata[tokenName] = tokenArgs
-                    if token:
-                        filtered.append(token)
-            return " ".join(filtered), metadata
-        return "", {}
+    def parse(s, task):
+        task = task.strip()
+        s.label = ""
+        s.meta = {}
+        if task and s.parsers:
+            s.task = task
+            tokens = split(task)
+            for parse in s.parsers:
+                tokens, meta = parse(tokens)
+                if meta:
+                    s.meta = dict(s.meta, **meta) # Join metadata
+            if tokens:
+                s.label = " ".join(tokens)
