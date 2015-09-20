@@ -3,7 +3,7 @@
 # Default Todo Parsers
 
 from urlparse import urlparse
-from os import dirname, realpath, join, basename
+from os.path import dirname, realpath, join, basename
 import maya.cmds as cmds
 
 

@@ -1,5 +1,6 @@
 # Maya UI Elements
 import maya.cmds as cmds
+from time import sleep
 
 class GUIElement(object):
     """
@@ -232,13 +233,13 @@ class Todo(GUIElement):
     """
     def removeUI(s): # Animate todo closed. Fancy!
         if cmds.layout(s.wrapper, ex=True):
-        height = cmds.layout(s.wrapper, q=True, h=True)
-        for i in range(20):
-            i = (100 - i*5) / 100.0
-            cmds.layout(s.wrapper, e=True, h=height * i)
-            cmds.refresh()
-            time.sleep(0.01)
-        cmds.deleteUI(s.wrapper)
+            height = cmds.layout(s.wrapper, q=True, h=True)
+            for i in range(20):
+                i = (100 - i*5) / 100.0
+                cmds.layout(s.wrapper, e=True, h=height * i)
+                cmds.refresh()
+                sleep(0.01)
+            cmds.deleteUI(s.wrapper)
 
 
 # options:
