@@ -227,6 +227,20 @@ class Todo(GUIElement):
     def deleteTodo(s, *trash):
         s.options["deleteCallback"](s)
 
+    """
+    Remove Todo Fancy
+    """
+    def removeUI(s): # Animate todo closed. Fancy!
+        if cmds.layout(s.wrapper, ex=True):
+        height = cmds.layout(s.wrapper, q=True, h=True)
+        for i in range(20):
+            i = (100 - i*5) / 100.0
+            cmds.layout(s.wrapper, e=True, h=height * i)
+            cmds.refresh()
+            time.sleep(0.01)
+        cmds.deleteUI(s.wrapper)
+
+
 # options:
 # openCallback = run when opening
 # closeCallback = run when closing
