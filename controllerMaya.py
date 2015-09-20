@@ -5,10 +5,7 @@ from re import compile
 import todo.viewMaya as view
 import todo.controller as ctrl
 import todo.crudMaya as crud
-
-
-# fileInfo "TODO_SETTINGS" "{\"FileArchive.active\": true, \"Todo.SectionState\": {\"animation\": false}, \"FileArchive.path\": \"/home/maczone/Desktop/backup\"}";
-# fileInfo "TODO_144249523723" "#animation right dash 1 to 10";
+import todo.parsersMaya as parsers
 
 # Begin Application
 class Start(ctrl.Controller):
@@ -27,6 +24,9 @@ class Start(ctrl.Controller):
 
         # Load settings
         s.todoSectionStates = s.settingsGet("groups", {})
+        # Load Parsers
+        for parser in parsers.export():
+            s.addParser(parser)
 
         s.window = view.MainWindow(
             "Todo_Window",
@@ -153,42 +153,5 @@ class Start(ctrl.Controller):
     """
     def closeUpdate(s):
         print "closed window"
-
-
-"""
-Todo with Maya specific parsers
-"""
-from os.path import dirname, realpath, join, isfile, basename
-
-def Todo(task):
-    temp = {}
-    """
-    File parser
-    """
-    temp["file"] = temp.get("file", set())
-    def parseFilePath(token):
-        fileName = cmds.file(q=True, sn=True)
-        if "/" in token:
-            root = dirname(fileName) if fileName else ""
-            path = realpath(join(root, token))
-            if isfile(path):
-                temp["file"].add(path)
-                return basename(token), ("File", temp["file"])
-        return token, None
-
-    """
-    Object Lookup
-    """
-    temp["obj"] = temp.get("obj", set())
-    def parseObject(token):
-        obj = cmds.ls(token, r=True)
-        if obj:
-            temp["obj"] |= set(obj)
-            return "", ("Object", temp["obj"])
-        return token, None
-    return td.Todo(task, [
-        parseFilePath,
-        parseObject
-        ])
 
 Start()

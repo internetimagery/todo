@@ -88,6 +88,7 @@ class Controller(object):
             else:
                 s._todoTree["None"].append(newTodo)
             return newTodo
+
     """
     Remove a Todo
     """
@@ -105,11 +106,13 @@ class Controller(object):
     def todoGetID(s, ID):
         pass
         # return s._todos[ID] if ID in s._todos else None
+
     """
     Get todo category tree
     """
     def todoGetTree(s):
         return dict((k, sorted(s._todoTree[k])) for k in s._todoTree)
+
     """
     Archive file completing a todo
     """
@@ -117,6 +120,7 @@ class Controller(object):
         if s._archive:
             for arch in s._archive:
                 arch(task)
+
     """
     Get settings
     """
@@ -125,6 +129,7 @@ class Controller(object):
             return s._settings[key] if key in s._settings else default
         else:
             return s._settings
+
     """
     Set settings parameter
     """
@@ -132,6 +137,7 @@ class Controller(object):
         s._settings[key] = value
         s._update(s._settingsName, s._settings)
         return value
+
     """
     Get global settings
     """
@@ -140,6 +146,7 @@ class Controller(object):
             return s._globalSettings[key] if key in s._globalSettings else default
         else:
             return s._globalSettings
+
     """
     Set global settings
     """
@@ -153,7 +160,7 @@ class Controller(object):
 Common parser, parsing categories
 """
 def parseCategory(tokens):
-    tags = set()
+    tags = set(["None"])
     filteredToken = []
     for token in tokens:
         # Check for #Hashtags
@@ -161,7 +168,7 @@ def parseCategory(tokens):
             tags.add(token[1:])
         else:
             filteredToken.append(token)
-    return filteredToken, {"Category": tags if tags else ["None"]}
+    return filteredToken, {"Category": tags}
 
 # parser:
 # parser(token):
