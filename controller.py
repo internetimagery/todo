@@ -32,10 +32,10 @@ class Controller(object):
         s._settingsName = "TODO_SETTINGS"
         s._settings = s._read(s._settingsName, {})
         # Global Settings
-        s._globalSettingsName = join(localPath, "settings.json")
+        s.globalSettingsFile = join(localPath, "settings.json")
         try:
-            with open(s._globalSettingsName, "r") as f:
-                s._globalSettingsName = load(f)
+            with open(s.globalSettingsFile, "r") as f:
+                s._globalSettings = load(f)
         except (IOError, ValueError, KeyError):
             s._globalSettings = {}
         # Quotes
@@ -103,7 +103,8 @@ class Controller(object):
     Get a todo from its ID
     """
     def todoGetID(s, ID):
-        return s._todos[ID] if ID in s._todos else None
+        pass
+        # return s._todos[ID] if ID in s._todos else None
     """
     Get todo category tree
     """
@@ -112,10 +113,10 @@ class Controller(object):
     """
     Archive file completing a todo
     """
-    def todoArchive(s, ID):
-        if s._archive and ID in s._todos:
+    def todoArchive(s, task):
+        if s._archive:
             for arch in s._archive:
-                arch(s.todoGet(ID))
+                arch(task)
     """
     Get settings
     """
@@ -144,7 +145,7 @@ class Controller(object):
     """
     def globalSettingsSet(s, key, value):
         s._globalSettings[key] = value
-        with open(s._globalSettingsName, "w") as f:
+        with open(s.globalSettingsFile, "w") as f:
             dump(s._globalSettings, f)
         return value
 

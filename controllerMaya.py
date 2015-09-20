@@ -1,5 +1,6 @@
 # Controller for Maya
 import maya.cmds as cmds
+import maya.utils as utils
 from re import compile
 import todo.viewMaya as view
 import todo.controller as ctrl
@@ -66,9 +67,11 @@ class Start(ctrl.Controller):
             def openSection():
                 s.todoSectionStates[cat] = True
                 s.settingsSet("groups", s.todoSectionStates)
+                utils.executeDeferred(s.refreshTodo())
             def closeSection():
                 s.todoSectionStates[cat] = False
                 s.settingsSet("groups", s.todoSectionStates)
+                utils.executeDeferred(s.refreshTodo())
             return view.TodoSection(
                 cat,
                 todoContainerGrouped,
@@ -89,6 +92,7 @@ class Start(ctrl.Controller):
                     task.parse(text)
                     todoElement.label = task.label
                     todoElement.buildElement()
+            print task.meta
             return view.Todo(
                 task.label,
                 section,
