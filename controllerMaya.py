@@ -40,7 +40,6 @@ class Start(ctrl.Controller):
             newTodoCallback       = s.newTodo
             )
 
-
     """
     Build out todo page
     """
@@ -71,7 +70,6 @@ class Start(ctrl.Controller):
             def closeSection():
                 s.todoSectionStates[cat] = False
                 s.settingsSet("groups", s.todoSectionStates)
-                utils.executeDeferred(s.refreshTodo())
             return view.TodoSection(
                 cat,
                 todoContainerGrouped,
@@ -81,7 +79,7 @@ class Start(ctrl.Controller):
                 )
         def addTodo(section, task):
             def done(todoElement):
-                print "Ticked off", task.label
+                s.todoComplete(task)
                 delete(todoElement)
             def delete(todoElement):
                 s.todoRemove(task)
@@ -136,6 +134,13 @@ class Start(ctrl.Controller):
                 s.refreshTodo()
         else:
             cmds.confirmDialog(title="Whoops...", message="You need to add some text for your Todo.")
+
+    """
+    Check off a todo and run archives
+    """
+    def todoComplete(s, task):
+        print "Complete:", task.label
+        s.todoArchive(task)
 
     """
     Update window position
