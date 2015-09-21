@@ -116,8 +116,8 @@ class Controller(object):
     """
     Archive file completing a todo
     """
-    def todoArchive(s, task):
-        if s._archive:
+    def todoArchive(s, task, filename):
+        if s._archive and filename:
             for arch in s._archive:
                 arch(task)
 

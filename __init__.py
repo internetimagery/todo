@@ -594,7 +594,6 @@ class MainWindow(object):
         Create a new Todo
         """
         f = cmds.file(q=True, sn=True)
-        print todo.Todo(txt, f).tokens
         name = "%(name)s_%(stamp)s" % {"name": "TODO", "stamp": int(time.time() * 100)}
         meta = s._parseTodo(txt, uid=name)
         if meta["label"]:
