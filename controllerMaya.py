@@ -158,20 +158,6 @@ class Start(ctrl.Controller):
             cmds.confirmDialog(title="Whoops...", message="You need to add some text for your Todo.")
 
     """
-    Check off a todo and run archives
-    """
-    def todoComplete(s, task):
-        message = """
-        <div>- This Scene was last saved on <em>%(time)s</em>.</div>
-        <div>- Completing the task: <code>%(todo)s</code></div>
-        <div>- The file <strong>has not been modified since.</strong></div><br>
-        """ % {"time": ctime(), "todo": task.label}
-        with Popup(message):
-            cmds.file(save=True)  # Save the scene
-            print "Complete:", task.label
-        s.todoArchive(task, filename)
-
-    """
     Update window position
     """
     def moveUpdate(s, location):
