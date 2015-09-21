@@ -5,6 +5,7 @@ from re import compile
 from time import time, ctime
 from random import choice
 from os.path import join, dirname, isfile, realpath
+from base64 import b64encode
 from os import listdir
 import todo.viewMaya as view
 import todo.controller as ctrl
@@ -218,12 +219,12 @@ def embedImage():
     """
     Grab a random image and embed it in the scene.
     """
-    path = join(os.path.dirname(__file__), "images")
+    path = join(dirname(__file__), "images")
     images = [join(path, f) for f in listdir(path) if f.endswith(".png")]
     if images:
         image = choice(images)
         with open(image, "rb") as f:
-            image = "<img src=\\\"data:image/png;base64,%s\\\">" % base64.b64encode(f.read())
+            image = "<img src=\\\"data:image/png;base64,%s\\\">" % b64encode(f.read())
         return "cmds.text(hl=True, l=\"%s\", h=100, w=100)" % image
     else:
         return "cmds.iconTextStaticLabel(image=\"envChrome.svg\", h=100, w=100)  # file.svg looks nice too..."
