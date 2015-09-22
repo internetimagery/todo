@@ -267,6 +267,32 @@ class TodoSection(GUIElement):
     def close(s):
         cmds.frameLayout(s.wrapper, e=True, cl=True)
 
+# options:
+# message = text to put in the box
+# image = html image
+# responseCallback = response
+class PopupDialog(GUIElement):
+    """
+    A simple popup dialog with questions
+    """
+    def buildElement(s):
+         s.options["responseCallback"](cmds.layoutDialog(ui=savePrompt, t=s.label))
+
+    def buildContent(s):
+        p = cmds.setParent(q=True)
+        cmds.columnLayout(adj=True, p=p)
+        cmds.rowLayout(nc=2)
+        cmds.columnLayout()
+        s.options["image"]
+        cmds.setParent("..")
+        cmds.columnLayout(adj=True)
+        cmds.text(al="left", hl=True, l=s.options["message"], h=70)
+        cmds.rowLayout(nc=3, h=30)
+        cmds.button(l="Yes please!".center(20), c="cmds.layoutDialog(dismiss=\"yes\")")
+        cmds.button(l="No Thanks".center(20), c="cmds.layoutDialog(dismiss=\"no\")")
+        cmds.button(l="Cancel".center(20), c="cmds.layoutDialog(dismiss=\"cancel\")")
+        cmds.setParent("..")
+        cmds.setParent("..")
 
 # options:
 # [

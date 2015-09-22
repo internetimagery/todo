@@ -7,6 +7,7 @@ from random import choice
 from os.path import join, dirname, isfile, realpath
 from base64 import b64encode
 from os import listdir
+import webbrowser
 import todo.viewMaya as view
 import todo.controller as ctrl
 import todo.crudMaya as crud
@@ -113,7 +114,6 @@ class Start(ctrl.Controller):
                     task.parse(text)
                     todoElement.label = task.label
                     todoElement.buildElement()
-            print task.meta
             return view.Todo(
                 task.label,
                 section,
@@ -122,11 +122,7 @@ class Start(ctrl.Controller):
                 doneCallback=done,
                 editCallback=edit,
                 deleteCallback=delete,
-                special={}
-                #     "description" : "what it does",
-                #     "icon" : "fileOpen.png",
-                #     "callback" : test
-                # }
+                special=s.pickMetadata(task)
                 )
 
         tree = s.todoGetTree()
@@ -157,6 +153,42 @@ class Start(ctrl.Controller):
                 s.refreshTodo()
         else:
             cmds.confirmDialog(title="Whoops...", message="You need to add some text for your Todo.")
+
+    """
+    Pick a single metadata special button
+    """
+    def pickMetadata(task):
+        if "File" in task.meta and task.meta["File"]:
+            f = task.meta["File"][0]
+            return {
+                "description"   : "Open file: %s" % f,
+                "icon"          : "openScript.png",
+                "callback"      : lambda: fileOpen(f)
+            }
+        elif "Url" in task.meta and task.meta["Url"]:
+            url = task.meta["Url"][0]
+            return {
+                "description"   : "Open url: %s" % url,
+                "icon"          : "SP_ComputerIcon.png",
+                "callback"      : lambda: webbrowser.open(url, new=2)
+            }
+        elif "Range" in task.meta and task.meta["Range"]:
+            mini = task.meta["Range"][0][0]
+            maxi = task.meta["Range"][0][1]
+            return {
+                "description"   : "Jump to frame range (%s, %s)." % (mini, maxi),
+                "icon"          : "traxFrameRange.png",
+                "callback"      : lambda: cmds.playbackOptions(e=True, min=mini,max=maxi)
+            }
+        elif "Frame" in task.meta and task.meta["Frame"]:
+            frame = task.meta["Frame"][0]
+            return {
+                "description"   : "Go to Frame: %s" % frame,
+                "icon"          : "centerCurrentTime.png",
+                "callback"      : lambda: cmds.currentTime(frame)
+            }
+        else:
+            return {}
 
     """
     Update window position
@@ -228,5 +260,57 @@ def embedImage():
         return "cmds.text(hl=True, l=\"%s\", h=100, w=100)" % image
     else:
         return "cmds.iconTextStaticLabel(image=\"envChrome.svg\", h=100, w=100)  # file.svg looks nice too..."
+
+def fileOpen(path):
+    if os.path.isfile(path):
+        if path[-3:] in [".ma", ".mb"]:  # Make a special exception for maya files.
+            if cmds.file(mf=True, q=True):  # File is modified. Need to make some changes.
+                def ask(answer):
+                    if answer == "yes":
+                        if not cmds.file(q=True, sn=True):
+                            loc = saveAs()
+                            if loc:
+                                cmds.file(rn=loc[0])
+                            else:
+                                return
+                        cmds.file(save=True)
+                    elif answer == "no":
+                        cmds.file(path, o=True, f=True)
+                    else:
+                        return
+                view.PopupDialog(
+                    "Excuse me one moment...",
+                    "",
+                    message="""
+<h3>There are unsaved changes in your scene.</h3>
+<div>Would you like to save before leaving?</div>
+""",
+                    image=eval(embedImage()),
+                    responseCallback=ask
+                    )
+            else:
+                cmds.file(path, o=True, f=True)
+        else:
+            universalOpen(path)
+
+def saveAs():
+    """
+    Save prompt
+    """
+    return cmds.fileDialog2(ds=2, sff="Maya ASCII", ff="Maya Files (*.ma *.mb);;Maya ASCII (*.ma);;Maya Binary (*.mb);;")
+
+def universalOpen(command):
+    """
+    Open file in different OS's
+    """
+    try:
+        os.startfile(command)  # Open file on windows
+    except AttributeError:  # Open file on anything else
+        for com in [["open"], ["xdg-open"], ["gnome-open"], ["kde-open"], ["exo-open"]]:
+            try:
+                return subprocess.Popen(com + [command])
+            except OSError:
+                pass
+            webbrowser.open(command)
 
 Start()
