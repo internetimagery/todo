@@ -85,7 +85,7 @@ class Start(ctrl.Controller):
                 )
         def addTodo(section, task):
             def done(todoElement):
-                scene = realpath(cmds.fileInfo(q=True, sn=True))
+                scene = realpath(cmds.file(q=True, sn=True))
                 if isfile(scene): # If file exists then save
                     process = cmds.scriptJob(e=['SceneSaved', lambda: s.todoArchive(task, scene)], ro=True)
                     try:
@@ -157,7 +157,7 @@ class Start(ctrl.Controller):
     """
     Pick a single metadata special button
     """
-    def pickMetadata(task):
+    def pickMetadata(todoElement, task):
         if "File" in task.meta and task.meta["File"]:
             f = task.meta["File"][0]
             return {
