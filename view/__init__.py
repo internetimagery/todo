@@ -26,6 +26,8 @@ class Element(object):
     Base class to build gui elements off for consistency.
     """
     def __init__(s, **kwargs):
+        s.wrapper = "" # Outer layer element
+        s.attach = "" # innter layer element for parenting
         s.attributes = kwargs
         s.children = []
         if s.required():
@@ -36,8 +38,16 @@ class Element(object):
         print "Check args match required args. Return true if so, else false."
     def build(s):
         print "Build the GUI element."
+    def attach(s, element):
+        s.children.append(element)
+        s.runAttach(element)
+    def parent(s, element):
+        print "Parent the element to this one"
     def clear(s):
-        print "Clear element of all children."
+        if s.children:
+            for child in s.children:
+                s.children[child].remove()
+            s.children = []
     def remove(s):
         print "Remove element entirely."
     def update(s, k, v):
