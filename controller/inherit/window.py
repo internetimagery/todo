@@ -6,12 +6,12 @@ from random import choice
 import todo.view.maya as view # import view specific to the GUI needed
 
 
-class Window(object):
+class Window(Control):
     """
     Create the main window! Two Panels: Todo / Settings
     Override functions beginning with "_"
     """
-    def __init__(s, view):
+    def _buildCtrl(s):
         quote = choice(quotes)
         s.window = s.view.window.Window(
             attributes={
