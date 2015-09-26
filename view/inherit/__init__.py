@@ -11,7 +11,7 @@ class Element(object):
         s.attributes = attributes # This elements attributes
         s.events = events # GUI events triggered by this element
         # Hierarchy
-        s.children = [] # Children of this element
+        s.children = set() # Children of this element
         s.parent = None # Parent of this element
         # Sctructure
         s.attach = None # Attachment point where applicable for children
@@ -37,7 +37,7 @@ class Element(object):
         Attach another element to this one
         """
         if s.attach:
-            s.children.append(element)
+            s.children.add(element)
             element._parent(s.attach)
     def detatch(s, element):
         """
