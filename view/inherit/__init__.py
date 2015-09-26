@@ -31,12 +31,11 @@ class Element(object):
             if s.attributesCache[key] != value:
                 s.attributeCache[key] = check
                 s.attributes[key] = value
-                s._updateGUI(key, value)
+                s._updateGUI(key)
             else:
                 print "%s's value unchanged. Skipping update." % key.title()
-        elif s.attributes:
-            for key in s.attributes:
-                s._updateGUI(key, s.attributes[key])
+        else:
+            s._updateGUI(None)
     def delete(s):
         """
         Delete element from the GUI
@@ -64,19 +63,20 @@ class Element(object):
         Build out the gui framework bare bones.
         Bind events from s._events
         """
-        print "Building the GUI. Not putting in information yet though."
-    def _updateGUI(s, attribute, value):
+        pass
+    def _updateGUI(s, attribute):
         """
-        Using s._attributes fill-out/refresh gui information.
+        Either update a single attribute if provided, or the whole thing.
+        Using s.attributes to get information
         """
-        print "Adding information to the GUI."
+        pass
     def _deleteGUI(s):
         """
         Remove GUI element
         """
-        print "Deleting element"
+        pass
     def _parentGUI(s, structure):
         """
         Attach this element to another GUI element
         """
-        print "attaching element to another"
+        pass

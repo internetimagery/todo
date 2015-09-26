@@ -7,9 +7,9 @@ class Window(MayaElement):
     """
     Empty Main window with docking functionality. Woo!
     Attributes:
-        Name    : Name of the window
-        Title   : Title of the window
-        Location: (optional) Starting Dock location
+        name    : Name of the window
+        title   : Title of the window
+        location: (optional) Starting Dock location
     """
     def _buildGUI(s):
         """
@@ -34,23 +34,18 @@ class Window(MayaElement):
             vcc=s.closeDock
             )
 
-    def _updateGUI(s, attribute, value):
+    def _updateGUI(s, att=None):
         """
         Update Gui information
         """
-        if attribute == "title":
-            cmds.dockControl(
-                s.root,
-                e=True,
-                l=value
-                )
-        if attribute == "location":
-            cmds.dockControl(
-                s.root,
-                e=True,
-                fl=False if value in s.allowed else True,
-                a=value if value in s.allowed else None
-                )
+        location = s.attributes["location"]
+        cmds.dockControl(
+            s.root,
+            e=True,
+            l=s.attributes["title"],
+            fl=False if location in s.allowed else True,
+            a=location if location in s.allowed else None
+            )
 
     def getLocation(s):
         """
