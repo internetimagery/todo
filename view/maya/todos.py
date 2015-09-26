@@ -19,7 +19,7 @@ class HeroTextField(MayaElement):
         s.root = cmds.columnLayout(adj=True)
         s.textfield = cmds.textFieldGrp(
             h=30,
-            tcc=s.updateText
+            tcc=s.updateText,
             cc=trigger
             )
         s.button = cmds.button(
@@ -31,7 +31,7 @@ class HeroTextField(MayaElement):
         cmds.textFieldGrp(
             s.textfield,
             e=True,
-            tx=s.attributes["text"]
+            tx=s.attributes["text"],
             ann=annotation,
             )
         cmds.button(
@@ -168,7 +168,7 @@ class TodoEdit(MayaElement):
     def _buildGUI(s):
         edit = s.events["edit"]
         s.root = cmds.textFieldButtonGrp(
-            bl="Update"
+            bl="Update",
             h=30,
             tcc=s.updateText,
             cc=edit, # TODO THIS MIGHT CAUSE A CRASH IF REMOVED ON THIS FUNCTION
