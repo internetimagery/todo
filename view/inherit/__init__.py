@@ -21,6 +21,8 @@ class Element(object):
         """
         Update information on the GUI element. Then update the display.
         """
+        # TODO : Keep a copy of the s.attributes value here as a cache
+        # Check for changes, and if none have been made don't update the gui.
         if key:
             s.attributes[key] = value
         s._updateGUI()
