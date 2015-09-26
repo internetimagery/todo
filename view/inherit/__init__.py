@@ -15,6 +15,8 @@ class Element(object):
         s.attributes = attributes # This elements attributes
         s.attributeCache = dict((k, dumps(s.attributes[k])) for k in s.attributes)
         s.events = events # GUI events triggered by this element
+        s.isVisible = True # GUI visibility
+        s.isEnabled = True # GUI enability ... not a word?
         # Hierarchy
         s.children = set() # Children of this element
         s.parent = None # Parent of this element
@@ -58,6 +60,34 @@ class Element(object):
         if element in s.children:
             s.children.remove(element)
             element.delete()
+    def show(s):
+        """
+        Make element visible
+        """
+        if not s.isVisible:
+            s.isVisible = True
+            s._visible(True)
+    def hide(s):
+        """
+        Make element invisible
+        """
+        if s.isVisible:
+            s.isVisible = False
+            s._visible(False)
+    def enabled(s):
+        """
+        Enable element
+        """
+        if not s.isEnabled:
+            s.isEnabled = True
+            s._active(True)
+    def disable(s):
+        """
+        Disable element
+        """
+        if s.isEnabled:
+            s.isEnabled = False
+            s._active(False)
     def _buildGUI(s):
         """
         Build out the gui framework bare bones.
@@ -78,5 +108,15 @@ class Element(object):
     def _parentGUI(s, structure):
         """
         Attach this element to another GUI element
+        """
+        pass
+    def _visible(s, show):
+        """
+        Make element visible or invisible. True = visible
+        """
+        pass
+    def _active(s, enable):
+        """
+        Make element active/enabled or not. True = active
         """
         pass
