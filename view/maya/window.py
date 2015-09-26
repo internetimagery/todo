@@ -34,16 +34,23 @@ class Window(MayaElement):
             vcc=s.closeDock
             )
 
-    def _updateGUI(s):
-        title = s.attributes["title"]
-        location = s.attributes["location"]
-        cmds.dockControl(
-            s.root,
-            e=True,
-            l=title,
-            fl=False if location in s.allowed else True,
-            a=location if location in s.allowed else None
-            )
+    def _updateGUI(s, attribute, value):
+        """
+        Update Gui information
+        """
+        if attribute == "title":
+            cmds.dockControl(
+                s.root,
+                e=True,
+                l=value
+                )
+        if attribute == "location":
+            cmds.dockControl(
+                s.root,
+                e=True,
+                fl=False if value in s.allowed else True,
+                a=value if value in s.allowed else None
+                )
 
     def getLocation(s):
         """

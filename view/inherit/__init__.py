@@ -1,4 +1,8 @@
 # Base class element to be inherited on various other GUI interfaces.
+try:
+    from cPickle import dumps
+except ImportError:
+    from pickle import dumps
 
 class Element(object):
     """
@@ -9,6 +13,7 @@ class Element(object):
     def __init__(s, attributes={}, events={}):
         # Format
         s.attributes = attributes # This elements attributes
+        s.attributeCache = dict((k, dumps(s.attributes[k])) for k in s.attributes)
         s.events = events # GUI events triggered by this element
         # Hierarchy
         s.children = set() # Children of this element
@@ -19,13 +24,17 @@ class Element(object):
         s._updateGUI()
     def update(s, key=None, value=None):
         """
-        Update information on the GUI element. Then update the display.
+        Update changes to the information on the GUI element.
         """
-        # TODO : Keep a copy of the s.attributes value here as a cache
-        # Check for changes, and if none have been made don't update the gui.
-        if key:
-            s.attributes[key] = value
-        s._updateGUI()
+        if key in s.attributes:
+            check = dumps(value)
+            if s.attributesCache[key] != value:
+                s.attributeCache[key] = check
+                s.attributes[key] = value
+                s._updateGUI(key, value)
+        elif s.attributes:
+            for key in s.attributes:
+                s._updateGUI(key, s.attributes[key])
     def delete(s):
         """
         Delete element from the GUI
@@ -54,7 +63,7 @@ class Element(object):
         Bind events from s._events
         """
         print "Building the GUI. Not putting in information yet though."
-    def _updateGUI(s):
+    def _updateGUI(s, attribute, value):
         """
         Using s._attributes fill-out/refresh gui information.
         """
@@ -64,7 +73,7 @@ class Element(object):
         Remove GUI element
         """
         print "Deleting element"
-    def _parent(s, structure):
+    def _parentGUI(s, structure):
         """
         Attach this element to another GUI element
         """

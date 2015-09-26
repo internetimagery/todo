@@ -30,17 +30,25 @@ class Panel(MayaElement):
         cmds.separator()
         s.attach = cmds.columnLayout(adj=True)
 
-    def _updateGUI(s):
+    def _updateGUI(s, attribute, value):
         """
         Set the windows information
         """
-        label = s.attributes["label"]
-        annotation = s.attributes["annotation"]
-        image = s.attributes["image"]
-        cmds.iconTextButton(
-            s.button,
-            e=True,
-            ann=annotation,
-            image=image,
-            label=label,
-            )
+        if attribute == "label":
+            cmds.iconTextButton(
+                s.button,
+                e=True,
+                label=value,
+                )
+        if attribute == "annotation":
+            cmds.iconTextButton(
+                s.button,
+                e=True,
+                ann=value,
+                )
+        if attribute == "image":
+            cmds.iconTextButton(
+                s.button,
+                e=True,
+                image=image,
+                )

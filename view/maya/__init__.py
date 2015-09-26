@@ -13,7 +13,7 @@ class MayaElement(Element):
         if s.root:
             if cmds.layout(s.root, ex=True) or cmds.window(s.root, ex=True) or cmds.control(s.root, ex=True):
                 cmds.deleteUI(s.root)
-    def _parent(s, structure):
+    def _parentGUI(s, structure):
         """
         Reparent the layout or control element to the provided one.
         """
