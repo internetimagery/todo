@@ -16,7 +16,7 @@ class Element(object):
         # Sctructure
         s.attach = None # Attachment point where applicable for children
         s._buildGUI()
-        s.update()
+        s._updateGUI()
     def update(s, key=None, value=None):
         """
         Update information on the GUI element. Then update the display.
@@ -30,6 +30,7 @@ class Element(object):
         """
         if s.parent and s in s.parent.children:
             s.parent.children.remove(s)
+            s.children = []
         s._deleteGUI()
     def attach(s, element):
         """

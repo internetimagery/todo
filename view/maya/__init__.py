@@ -1,14 +1,24 @@
-# Base element for maya GUI
-import todo.view as view
+# Base class for GUI elements for Maya
+from todo.view.inherit import Element
 import maya.cmds as cmds
 
-class Element(view.Element):
+class MayaElement(Element):
     """
-    Base class to derive gui elements from
+    Use s.root to store the outermost gui element. Be it a layout or control
     """
-    def parent(s, element):
-        if cmds.layout(element.wrapper, ex=True) and cmds.layout(s.attach, ex=True):
-            cmds.layout(element.wrapper, e=True, p=s.attach)
-    def remove(s):
-        if cmds.layout(s.wrapper, ex=True):
-            cmds.deleteUI(s.wrapper)
+    def _deleteGUI(s):
+        """
+        Remove the s.root element.
+        """
+        if s.root:
+            if cmds.layout(s.root, ex=True) or cmds.window(s.root, ex=True) or cmds.control(s.root, ex=True):
+                cmds.deleteUI(s.root)
+    def _parent(s, structure):
+        """
+        Reparent the layout or control element to the provided one.
+        """
+        if s.root:
+            if cmds.layout(s.root, ex=True):
+                cmds.layout(s.root, e=True, p=structure)
+            elif cmds.conrol(s.root, ex=True):
+                cmds.control(s.root, e=True, p=structure)
