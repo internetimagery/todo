@@ -1,4 +1,4 @@
-# Base class element to be inherited on various other GUI interfaces.
+# Base class element to be inherited on various GUI interfaces.
 try:
     from cPickle import dumps
 except ImportError:
