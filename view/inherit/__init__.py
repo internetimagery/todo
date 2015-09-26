@@ -32,6 +32,8 @@ class Element(object):
                 s.attributeCache[key] = check
                 s.attributes[key] = value
                 s._updateGUI(key, value)
+            else:
+                print "%s's value unchanged. Skipping update." % key.title()
         elif s.attributes:
             for key in s.attributes:
                 s._updateGUI(key, s.attributes[key])
