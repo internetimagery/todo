@@ -110,12 +110,12 @@ class Element(object):
         Attach this element to another GUI element
         """
         pass
-    def _visible(s, show):
+    def _visibleGUI(s, show):
         """
         Make element visible or invisible. True = visible
         """
         pass
-    def _active(s, enable):
+    def _enableGUI(s, enable):
         """
         Make element active/enabled or not. True = active
         """

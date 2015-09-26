@@ -22,3 +22,21 @@ class MayaElement(Element):
                 cmds.layout(s.root, e=True, p=structure)
             elif cmds.conrol(s.root, ex=True):
                 cmds.control(s.root, e=True, p=structure)
+    def _visibleGUI(s, show):
+        """
+        Make element visible or invisible
+        """
+        if s.root:
+            if cmds.layout(s.root, ex=True):
+                cmds.layout(s.root, e=True, m=show)
+            elif cmds.conrol(s.root, ex=True):
+                cmds.control(s.root, e=True, m=show)
+    def _enableGUI(s, enable):
+        """
+        Enable or disable the element
+        """
+        if s.root:
+            if cmds.layout(s.root, ex=True):
+                cmds.layout(s.root, e=True, en=enable)
+            elif cmds.conrol(s.root, ex=True):
+                cmds.control(s.root, e=True, en=enable)
