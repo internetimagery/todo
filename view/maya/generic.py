@@ -6,7 +6,7 @@ class PlaceHolder(MayaElement):
     """
     An empty placeholder
     """
-    def _buildGUI(s):
+    def O_buildGUI(s):
         s.root = cmds.columnLayout(adj=True)
         s.attach = s.root
 
@@ -17,12 +17,12 @@ class Title(MayaElement):
         title   : The title text. Duh!
         align   : (optional) Where is the text? "left" , "right" , "center"
     """
-    def _buildGUI(s):
+    def O_buildGUI(s):
         s.attributes["align"] = s.attributes.get("align", "center")
         s.root = cmds.columnLayout(adj=True)
         s.title = cmds.text()
         cmds.separator()
-    def _updateGUI(s, attr):
+    def O_updateGUI(s, attr):
         align = s.attributes["align"]
         cmds.text(
             s.title,

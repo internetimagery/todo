@@ -6,14 +6,14 @@ class MayaElement(Element):
     """
     Use s.root to store the outermost gui element. Be it a layout or control
     """
-    def _deleteGUI(s):
+    def O_deleteGUI(s):
         """
         Remove the s.root element.
         """
         if s.root:
             if cmds.layout(s.root, ex=True) or cmds.window(s.root, ex=True) or cmds.control(s.root, ex=True):
                 cmds.deleteUI(s.root)
-    def _parentGUI(s, structure):
+    def O_parentGUI(s, structure):
         """
         Reparent the layout or control element to the provided one.
         """
@@ -22,7 +22,7 @@ class MayaElement(Element):
                 cmds.layout(s.root, e=True, p=structure)
             elif cmds.conrol(s.root, ex=True):
                 cmds.control(s.root, e=True, p=structure)
-    def _visibleGUI(s, show):
+    def O_visibleGUI(s, show):
         """
         Make element visible or invisible
         """
@@ -31,7 +31,7 @@ class MayaElement(Element):
                 cmds.layout(s.root, e=True, m=show)
             elif cmds.conrol(s.root, ex=True):
                 cmds.control(s.root, e=True, m=show)
-    def _enableGUI(s, enable):
+    def O_enableGUI(s, enable):
         """
         Enable or disable the element
         """

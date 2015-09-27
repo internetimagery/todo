@@ -11,7 +11,7 @@ class Window(MayaElement):
         title   : Title of the window
         location: (optional) Starting Dock location
     """
-    def _buildGUI(s):
+    def O_buildGUI(s):
         """
         Build Empty window that docks.
         """
@@ -29,12 +29,11 @@ class Window(MayaElement):
             a="left",
             aa=s.allowed,
             fl=True,
-            l="Default Title",
             fcc=s.moveDock,
             vcc=s.closeDock
             )
 
-    def _updateGUI(s, att=None):
+    def O_updateGUI(s, att=None):
         """
         Update Gui information
         """

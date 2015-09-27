@@ -12,12 +12,12 @@ class CheckSection(MayaElement):
     Events:
         change : Checkbox changing state
     """
-    def _buildGUI(s):
+    def O_buildGUI(s):
         change = s.events["change"]
         s.root = cmds.columnLayout(adj=True)
         s.box = cmds.checkBox(cc=change)
         s.attach = cmds.columnLayout(adj=True)
-    def _updateGUI(s, attr):
+    def O_updateGUI(s, attr):
         checked = s.attributes["checked"]
         if attr == "checked" or attr == "label" or attr == None:
             cmds.checkBox(

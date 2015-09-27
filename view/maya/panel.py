@@ -13,7 +13,7 @@ class Panel(MayaElement):
     Events:
         trigger     : Triggered when panel switching button is pressed
     """
-    def _buildGUI(s):
+    def O_buildGUI(s):
         """
         Build the window.
         """
@@ -30,7 +30,7 @@ class Panel(MayaElement):
         cmds.separator()
         s.attach = cmds.columnLayout(adj=True)
 
-    def _updateGUI(s, attr=None):
+    def O_updateGUI(s, attr=None):
         """
         Set the windows information
         """
