@@ -10,8 +10,7 @@ class Window(Control):
     Create the main window! Two Panels: Todo / Settings
     Elements:
         window          : The Main window!
-        todoPanel       : Todo panel
-        settingsPanel   : Settings panel
+        panel       : Todo / Settings panels
     Events:
         todo            : Todo panel active
         settings        : Settings panel active
