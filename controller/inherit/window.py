@@ -37,9 +37,10 @@ class Window(Control):
             events={
                 "trigger"   : s.buildSettings
             }
-        )#.parent(s.window)
-        for e in dir(s.panel):
-            print e, s.panel.__getattribute__(e)
+        )
+        s.window.parent(s.panel)
+        # for e in dir(s.panel):
+        #     print e, s.panel.__getattribute__(e)
     def buildSettings(s):
         if s.panel:
             s.panel.delete()
@@ -52,7 +53,8 @@ class Window(Control):
             events={
                 "trigger"   : s.buildTodo
             }
-        ).parent(s.window)
+        )
+        s.window.parent(s.panel)
     def _getImage(s, name):
         """
         Override this to get images for the GUI elements

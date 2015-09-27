@@ -20,7 +20,7 @@ class MayaElement(Element):
         if s.root:
             if cmds.layout(s.root, ex=True):
                 cmds.layout(s.root, e=True, p=structure)
-            elif cmds.conrol(s.root, ex=True):
+            elif cmds.control(s.root, ex=True):
                 cmds.control(s.root, e=True, p=structure)
     def O_visibleGUI(s, show):
         """

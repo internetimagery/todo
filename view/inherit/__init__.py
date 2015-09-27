@@ -54,7 +54,7 @@ class Element(object):
         """
         if s.attach:
             s._children.add(element)
-            element.O_parent(s.attach)
+            element.O_parentGUI(s.attach)
         return s
     def unparent(s, element):
         """
