@@ -9,8 +9,9 @@ class Element(object):
     Override all functions starting with "O_"
     Attributes: Dict with keys and values corresponding to GUI elements.
     Events: Callback functions that fire on user input.
+    Parent: Element to attach this to.
     """
-    def __init__(s, attributes={}, events={}):
+    def __init__(s, attributes={}, events={}, parent=None):
         # Format
         s.attributes = attributes # This elements attributes
         s._attributeCache = dict((k, dumps(s.attributes[k])) for k in s.attributes)
@@ -18,8 +19,10 @@ class Element(object):
         s._isVisible = True # GUI visibility
         s._isEnabled = True # GUI enability ... not a word?
         # Hierarchy
-        s._children = set() # Children of this element
-        s._parent = None # Parent of this element
+        s.children = set() # Children of this element
+        s.parent = parent # Parent ELEMENT of this element
+        if parent:
+            parent.children.add(s)
         # Sctructure
         s.attach = None # Attachment point where applicable for children
         s.O_buildGUI()
@@ -43,26 +46,10 @@ class Element(object):
         """
         Delete element from the GUI
         """
-        if s._parent and s in s._parent.children:
-            s._parent.children.remove(s)
-            s._children = []
+        if s.parent and s in s.parent.children:
+            s.parent.children.remove(s)
+            s.children = []
         s.O_deleteGUI()
-        return s
-    def parent(s, element):
-        """
-        Attach another element to this one
-        """
-        if s.attach:
-            s._children.add(element)
-            element.O_parentGUI(s.attach)
-        return s
-    def unparent(s, element):
-        """
-        Detatch an element from this one
-        """
-        if element in s._children:
-            s._children.remove(element)
-            element.delete()
         return s
     def show(s):
         """
@@ -111,11 +98,6 @@ class Element(object):
     def O_deleteGUI(s):
         """
         Remove GUI element
-        """
-        pass
-    def O_parentGUI(s, structure):
-        """
-        Attach this element to another GUI element
         """
         pass
     def O_visibleGUI(s, show):

@@ -18,7 +18,7 @@ class Panel(MayaElement):
         Build the window.
         """
         trigger = s.events["trigger"]
-        s.root = cmds.columnLayout(adj=True)
+        s.root = cmds.columnLayout(adj=True, p=s.parent)
         s.button = cmds.iconTextButton(
             h=30,
             ann="Default Description",

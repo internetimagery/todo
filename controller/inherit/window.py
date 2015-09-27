@@ -8,7 +8,6 @@ from random import choice
 class Window(Control):
     """
     Create the main window! Two Panels: Todo / Settings
-    Override functions beginning with "_"
     Elements:
         window          : The Main window!
         todoPanel       : Todo panel
@@ -38,9 +37,9 @@ class Window(Control):
             },
             events={
                 "trigger"   : s.buildSettings
-            }
+            },
+            parent=s.window
         )
-        s.window.parent(s.panel)
         s.events["todo"](s.panel)
     def buildSettings(s):
         if s.panel:
@@ -53,9 +52,9 @@ class Window(Control):
             },
             events={
                 "trigger"   : s.buildTodo
-            }
+            },
+            parent=s.window
         )
-        s.window.parent(s.panel)
         s.events["settings"](s.panel)
 
 def setA(*Arg):

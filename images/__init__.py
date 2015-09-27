@@ -23,4 +23,3 @@ class IconStore(object):
         return s.icons.get(key, s.icons["error"])
 
 icon = IconStore()
-print icon.icons

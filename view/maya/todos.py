@@ -16,7 +16,7 @@ class HeroTextField(MayaElement):
     def O_buildGUI(s):
         trigger = s.events["trigger"]
         s.attributes["text"] = s.attributes.get("text", "")
-        s.root = cmds.columnLayout(adj=True)
+        s.root = cmds.columnLayout(adj=True, p=s.parent)
         s.textfield = cmds.textFieldGrp(
             h=30,
             tcc=s.updateText,
@@ -51,7 +51,8 @@ class HeroScrollBox(MayaElement):
         s.root = cmds.scrollLayout(
             bgc=[0.2, 0.2, 0.2],
             cr=True,
-            h=400
+            h=400,
+            p=s.parent
             )
         s.attach = s.root
 

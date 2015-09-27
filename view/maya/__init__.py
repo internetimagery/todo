@@ -13,15 +13,6 @@ class MayaElement(Element):
         if s.root:
             if cmds.layout(s.root, ex=True) or cmds.window(s.root, ex=True) or cmds.control(s.root, ex=True):
                 cmds.deleteUI(s.root)
-    def O_parentGUI(s, structure):
-        """
-        Reparent the layout or control element to the provided one.
-        """
-        if s.root:
-            if cmds.layout(s.root, ex=True):
-                cmds.layout(s.root, e=True, p=structure)
-            elif cmds.control(s.root, ex=True):
-                cmds.control(s.root, e=True, p=structure)
     def O_visibleGUI(s, show):
         """
         Make element visible or invisible

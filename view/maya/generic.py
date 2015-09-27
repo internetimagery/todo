@@ -7,7 +7,7 @@ class PlaceHolder(MayaElement):
     An empty placeholder
     """
     def O_buildGUI(s):
-        s.root = cmds.columnLayout(adj=True)
+        s.root = cmds.columnLayout(adj=True, p=s.parent)
         s.attach = s.root
 
 class Title(MayaElement):
@@ -19,7 +19,7 @@ class Title(MayaElement):
     """
     def O_buildGUI(s):
         s.attributes["align"] = s.attributes.get("align", "center")
-        s.root = cmds.columnLayout(adj=True)
+        s.root = cmds.columnLayout(adj=True, p=s.parent)
         s.title = cmds.text()
         cmds.separator()
     def O_updateGUI(s, attr):
