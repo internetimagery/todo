@@ -38,6 +38,7 @@ class Element(object):
                 print "%s's value unchanged. Skipping update." % key.title()
         else:
             s._updateGUI(None)
+        return s
     def delete(s):
         """
         Delete element from the GUI
@@ -46,6 +47,7 @@ class Element(object):
             s.parent.children.remove(s)
             s.children = []
         s._deleteGUI()
+        return s
     def attach(s, element):
         """
         Attach another element to this one
@@ -53,6 +55,7 @@ class Element(object):
         if s.attach:
             s.children.add(element)
             element._parent(s.attach)
+        return s
     def detatch(s, element):
         """
         Detatch an element from this one
@@ -60,6 +63,7 @@ class Element(object):
         if element in s.children:
             s.children.remove(element)
             element.delete()
+        return s
     def show(s):
         """
         Make element visible
@@ -67,6 +71,7 @@ class Element(object):
         if not s.isVisible:
             s.isVisible = True
             s._visible(True)
+        return s
     def hide(s):
         """
         Make element invisible
@@ -74,6 +79,7 @@ class Element(object):
         if s.isVisible:
             s.isVisible = False
             s._visible(False)
+        return s
     def enabled(s):
         """
         Enable element
@@ -81,6 +87,7 @@ class Element(object):
         if not s.isEnabled:
             s.isEnabled = True
             s._active(True)
+        return s
     def disable(s):
         """
         Disable element
@@ -88,6 +95,7 @@ class Element(object):
         if s.isEnabled:
             s.isEnabled = False
             s._active(False)
+        return s
     def _buildGUI(s):
         """
         Build out the gui framework bare bones.

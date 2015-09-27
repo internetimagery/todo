@@ -36,6 +36,7 @@ class Window(Control):
                 "trigger"   : s.buildSettings
             }
         )
+        s.panel.attach(s.window)
     def buildSettings(s):
         if s.panel:
             s.panel.delete()
@@ -49,6 +50,7 @@ class Window(Control):
                 "trigger"   : s.buildTodo
             }
         )
+        s.panel.attach(s.window)
     def _getImage(s, name):
         """
         Override this to get images for the GUI elements
