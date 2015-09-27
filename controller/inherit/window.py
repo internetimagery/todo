@@ -5,6 +5,7 @@ from random import choice
 
 # TEMP! For testing!
 from todo.view.maya.window import Window as El_window
+from todo.view.maya.panel import Panel as El_panel
 
 class Window(Control):
     """
@@ -23,10 +24,11 @@ class Window(Control):
             }
         )
         s.panel = None
+        s.buildTodo()
     def buildTodo(s):
         if s.panel:
             s.panel.delete()
-        s.panel = s.view.panel.Panel(
+        s.panel = s.elements["panel"](
             attributes={
                 "label"     : "Settings ->",
                 "annotation": "Click to view the Todo scripts settings. Settings are saved with the Maya scene, so you will need to set them for each scene.",
@@ -36,11 +38,13 @@ class Window(Control):
                 "trigger"   : s.buildSettings
             }
         )
-        s.panel.attach(s.window)
+        print s.panel.attach
+        print dir(s.panel)
+        # .attach(s.window)
     def buildSettings(s):
         if s.panel:
             s.panel.delete()
-        s.panel = s.view.panel.Panel(
+        s.panel = s.elements["panel"](
             attributes={
                 "label"     : "<- Todo",
                 "annotation": "Click to return to your Todo list.",
@@ -49,8 +53,7 @@ class Window(Control):
             events={
                 "trigger"   : s.buildTodo
             }
-        )
-        s.panel.attach(s.window)
+        ).attach(s.window)
     def _getImage(s, name):
         """
         Override this to get images for the GUI elements
@@ -61,5 +64,8 @@ class Window(Control):
             return "attributes.png"
 
 Window(
-    elements={"window": El_window}
+    elements={
+        "window": El_window,
+        "panel" : El_panel
+        }
 )

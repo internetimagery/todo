@@ -61,9 +61,8 @@ class Window(MayaElement):
         """
         Store new dock location
         """
-        if location in s.allowed:
-            with open(s.settingsPath, "w") as f:
-                f.write(location)
+        with open(s.settingsPath, "w") as f:
+            f.write(location)
 
     def moveDock(s):
         """

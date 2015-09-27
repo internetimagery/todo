@@ -48,7 +48,7 @@ class Element(object):
             s.children = []
         s._deleteGUI()
         return s
-    def attach(s, element):
+    def parent(s, element):
         """
         Attach another element to this one
         """
