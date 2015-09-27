@@ -23,8 +23,8 @@ class Element(object):
         s.parent = parent # Parent ELEMENT of this element
         if parent:
             parent.children.add(s)
-        # Sctructure
         s.attach = None # Attachment point where applicable for children
+        # Build
         s.O_buildGUI()
         s.O_updateGUI()
     def update(s, key=None, value=None):

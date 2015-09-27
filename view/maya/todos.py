@@ -16,7 +16,7 @@ class HeroTextField(MayaElement):
     def O_buildGUI(s):
         trigger = s.events["trigger"]
         s.attributes["text"] = s.attributes.get("text", "")
-        s.root = cmds.columnLayout(adj=True, p=s.parent)
+        s.root = cmds.columnLayout(adj=True, p=s.parent.attach)
         s.textfield = cmds.textFieldGrp(
             h=30,
             tcc=s.updateText,
@@ -49,6 +49,7 @@ class HeroScrollBox(MayaElement):
     """
     def O_buildGUI(s):
         s.root = cmds.scrollLayout(
+            p=s.parent.attach,
             bgc=[0.2, 0.2, 0.2],
             cr=True,
             h=400,
@@ -67,6 +68,7 @@ class CollapsableGroup(MayaElement):
     """
     def O_buildGUI(s):
         s.root = cmds.frameLayout(
+            p=s.parent.attach,
             cll=True,
             cc=lambda: s.positionChange(False),
             ec=lambda: s.positionChange(True)
@@ -102,7 +104,7 @@ class Todo(MayaElement):
         special = s.events["special"]
         delete = s.events["delete"]
         edit = s.events["edit"]
-        s.root = cmds.rowLayout(nc=4, ad4=1)
+        s.root = cmds.rowLayout(nc=4, ad4=1, p=s.parent.attach)
         s.labelBtn = cmds.iconTextButton(
             image="fileSave.png",
             h=30,
@@ -169,6 +171,7 @@ class TodoEdit(MayaElement):
     def O_buildGUI(s):
         edit = s.events["edit"]
         s.root = cmds.textFieldButtonGrp(
+            p=s.parent.attach
             bl="Update",
             h=30,
             tcc=s.updateText,

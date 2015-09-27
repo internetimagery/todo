@@ -14,7 +14,7 @@ class CheckSection(MayaElement):
     """
     def O_buildGUI(s):
         change = s.events["change"]
-        s.root = cmds.columnLayout(adj=True)
+        s.root = cmds.columnLayout(adj=True, p=s.parent.attach)
         s.box = cmds.checkBox(cc=change)
         s.attach = cmds.columnLayout(adj=True)
     def O_updateGUI(s, attr):
