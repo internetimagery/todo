@@ -41,19 +41,3 @@ class Panel(MayaElement):
             ann=s.attributes["annotation"],
             image=s.attributes["image"]
             )
-
-class TodoPanel(Panel):
-    """
-    Todo specificly styled panel
-    """
-    def O_buildGUI(s):
-        s.attributes["image"] = s.attributes.get("image", "revealSelected.png")
-        Panel.O_buildGUI(s)
-
-class SettingsPanel(Panel):
-    """
-    Settings specificly styled panel
-    """
-    def O_buildGUI(s):
-        s.attributes["image"] = s.attributes.get("image", "attributes.png")
-        Panel.O_buildGUI(s)

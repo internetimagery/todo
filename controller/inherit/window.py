@@ -1,6 +1,7 @@
 # The main window!
 from todo.controller.inherit import Control
 from todo.quotes import quotes
+from todo.images import icon
 from random import choice
 
 
@@ -29,10 +30,11 @@ class Window(Control):
     def buildTodo(s):
         if s.panel:
             s.panel.delete()
-        s.panel = s.elements["todoPanel"](
+        s.panel = s.elements["panel"](
             attributes={
                 "label"     : "Settings ->",
                 "annotation": "Click to view the Todo scripts settings. Settings are saved with the Maya scene, so you will need to set them for each scene.",
+                "image"     : icon.get("settings_22")
             },
             events={
                 "trigger"   : s.buildSettings
@@ -43,10 +45,11 @@ class Window(Control):
     def buildSettings(s):
         if s.panel:
             s.panel.delete()
-        s.panel = s.elements["settingsPanel"](
+        s.panel = s.elements["panel"](
             attributes={
                 "label"     : "<- Todo",
                 "annotation": "Click to return to your Todo list.",
+                "image"     : icon.get("todo_22")
             },
             events={
                 "trigger"   : s.buildTodo
@@ -62,15 +65,13 @@ def todoA(*arg):
 
 # TEMP! For testing!
 from todo.view.maya.window import Window as El_window
-from todo.view.maya.panel import TodoPanel as El_todoPanel
-from todo.view.maya.panel import SettingsPanel as El_settingsPanel
+from todo.view.maya.panel import Panel as El_panel
 
 
 Window(
     elements={
         "window": El_window,
-        "todoPanel" : El_todoPanel,
-        "settingsPanel" : El_settingsPanel
+        "panel" : El_panel,
         },
     events={
         "todo": todoA,
