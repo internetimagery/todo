@@ -8,8 +8,8 @@ class Control(object):
     events = fired upon things happening
     data = data needed to build out the control
     """
-    def __init__(s, view, events={}, data={}):
-        s.view = view
+    def __init__(s, elements={}, events={}, data={}):
+        s.elements = elements
         s.events = events
         s.data = data
         s.root = ""

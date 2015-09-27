@@ -19,3 +19,4 @@ CVS
 
 *.pyc
 settings.json
+view/maya/docklocation.settings

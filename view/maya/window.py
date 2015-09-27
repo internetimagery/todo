@@ -21,7 +21,7 @@ class Window(MayaElement):
         s.attributes["location"] = s.attributes.get("location", s.getLocation())
         if cmds.dockControl(name, ex=True):
             cmds.deleteUI(name)
-        window = cmds.window(t="Default Title", rtf=True)
+        window = cmds.window(rtf=True)
         s.attach = cmds.columnLayout(adj=True) # Attachment Point
         s.root = cmds.dockControl(
             name,
@@ -52,7 +52,7 @@ class Window(MayaElement):
         Get previously stored docking location
         """
         try:
-            while open(s.settingsPath, "r") as f:
+            with open(s.settingsPath, "r") as f:
                 return f.read()
         except IOError:
             return "float"

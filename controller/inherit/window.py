@@ -3,17 +3,20 @@ from todo.controller.inherit import Control
 from todo.quotes import quotes
 from random import choice
 
-import todo.view.maya as view # import view specific to the GUI needed
-
+# TEMP! For testing!
+from todo.view.maya.window import Window as El_window
 
 class Window(Control):
     """
     Create the main window! Two Panels: Todo / Settings
     Override functions beginning with "_"
+    Elements:
+        window  : The Main window!
+        panel   : Settings / Todo panel
     """
     def _buildCtrl(s):
         quote = choice(quotes)
-        s.window = s.view.window.Window(
+        s.window = s.elements["window"](
             attributes={
                 "name"      : "TODO_MAIN_WINDOW",
                 "title"     : quote
@@ -55,4 +58,6 @@ class Window(Control):
         if name == "settings":
             return "attributes.png"
 
-Window(view)
+Window(
+    elements={"window": El_window}
+)
