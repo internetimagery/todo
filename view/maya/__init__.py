@@ -1,5 +1,5 @@
 # Base class for GUI elements for Maya
-from todo.view.inherit import Element
+from todo.view import Element
 import maya.cmds as cmds
 
 class MayaElement(Element):

@@ -10,7 +10,7 @@ class Window(Control):
     Create the main window! Two Panels: Todo / Settings
     Elements:
         window          : The Main window!
-        panel       : Todo / Settings panels
+        panel           : Todo / Settings panels
     Events:
         todo            : Todo panel active
         settings        : Settings panel active
@@ -55,24 +55,3 @@ class Window(Control):
             parent=s.window
         )
         s.events["settings"](s.panel)
-
-def setA(*Arg):
-    print "settings"
-def todoA(*arg):
-    print "todo"
-
-# TEMP! For testing!
-from todo.view.maya.window import Window as El_window
-from todo.view.maya.panel import Panel as El_panel
-
-
-Window(
-    elements={
-        "window": El_window,
-        "panel" : El_panel,
-        },
-    events={
-        "todo": todoA,
-        "settings": setA
-        }
-)
