@@ -151,8 +151,10 @@ class Settings(object):
     def __init__(s, CRUD):
         s.crud = CRUD
         s._settings = {}
-    def get(s, k, default): return s.crud.read(k, default)
+    def _prefix(s, k): return "setting_%s" % k
+    def get(s, k, default): return s.crud.read(s._prefix(k), default)
     def set(s, k, v):
+        k = s._prefix(k)
         try:
             s.crud.update(k, v)
         except:
