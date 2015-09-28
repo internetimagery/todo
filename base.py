@@ -1,4 +1,6 @@
-# Todo app functionality
+# Base Todo Classes
+# Created Jason Dixon 29/09/15
+# http:internetimagery.com
 
 import time
 import shlex
