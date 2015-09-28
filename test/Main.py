@@ -19,27 +19,106 @@ class Main(object):
         s.arcives = Archives # run when todos are checked off
 
         s.todos = [] # Hold our Todos!
-    def createTodo(s, task, id=None):
-        """
-        Create a new Todo
-        """
-        if task in s.todos:
-            print "Todo already exists, %s. Skipping." % task
-        else:
-            todo = Todo(
-                id=id,
-                task=task,
-                parsers=s.parsers
-            )
-            s.todos.append(todo)
-            s.crud.create(todo.id, task)
-        return todo
-    def updateTodo(s, todo, task):
-        """
-        Update an existing Todo
-        """
-        todo.task = task
-        s.crud
+
+import collections
+
+class TodoContainer(collections.MutableSequence):
+    """
+    A container for Todos. Sorts them and groups them.
+    (optional) callback triggered on each change
+    """
+    def __init__(s, todos=[], callback=None):
+        s.callback = callback
+        s._todos = list(todos)
+        s.groups = {}
+    def __getitem__(s, k): return s._todos[k]
+    def __len__(s): return len(s._todos)
+    def __str__(s): return str(s._todos)
+    def __delitem__(s, k):
+        for g in s.groups:
+            s.groups[g].remove(s._todos[k])
+        del s._todos[k]
+        s.callback(s.groups)
+    def __setitem__(s, k, v):
+        s._addTodo(v)
+        s._todos[k] = v
+    def insert(s, k, v):
+        s._addTodo(v)
+        s._todos.insert(k, v)
+    def _addTodo(s, todo):
+        groups = todo.metadata["Group"]
+        if not groups:
+            groups = ["none"]
+        for g in groups:
+            s.groups[g] = s.groups.get(g, [])
+            s.groups[g].append(todo)
+            s.groups[g].sort(key=lambda x: x.label)
+        s.callback(s.groups)
+
+c = TodoContainer()
+c.append("stuff")
+c.append("another")
+for d in c:
+    print d
+c.reverse()
+# class TypedList(collections.MutableSequence):
+#
+#     def __init__(self, oktypes, *args):
+#         self.oktypes = oktypes
+#         self.list = list()
+#         self.extend(list(args))
+#
+#     def check(self, v):
+#         if not isinstance(v, self.oktypes):
+#             raise TypeError, v
+#
+#     def __len__(self): return len(self.list)
+#
+#     def __getitem__(self, i): return self.list[i]
+#
+#     def __delitem__(self, i): del self.list[i]
+#
+#     def __setitem__(self, i, v):
+#         self.check(v)
+#         self.list[i] = v
+#
+#     def insert(self, i, v):
+#         self.check(v)
+#         self.list.insert(i, v)
+#
+#     def __str__(self):
+#         return str(self.list)
+
+
+
+# class TodoContainer(object):
+#     """
+#     A container for Todos. Sorts them and groups them.
+#     """
+#     def __init__(s, sortMethod=""):
+#         s.sortingMethods = ["alphabetical"]
+#         s.sortMethod = sortMethod
+#
+#     def add(s, todo):
+#         """
+#         Add a new todo
+#         """
+#
+# # add, remove, __contains__, __str__, update, __iter__
+#
+#     def sortMethod():
+#         doc = "Method of sorting todos."
+#         def fget(self):
+#             return self._sortMethod
+#         def fset(self, value):
+#             if value not in s.sortingMethods:
+#                 value = s.sortingMethods[0]
+#             self._sortMethod = value
+#         def fdel(self):
+#             del self._sortMethod
+#         return locals()
+#     sortMethod = property(**sortMethod())
+
 
 class Todo(object):
     """
@@ -92,7 +171,6 @@ class Todo(object):
         return locals()
     task = property(**task())
 
-def parseGroups(tokens):
     """
     Parse out groups from tasks. Also serves as an example parser...
     """
