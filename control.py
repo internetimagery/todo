@@ -1,24 +1,31 @@
 # Control the app
 
 import re
+import random
 
-from todo.base import Settings, TodoContainer, Todo
+import todo.base as base
+import todo.quotes as quotes
 
-# "^TODO_\d+"
-
+# import sys
+# for mod in sys.modules.values():
+#     if type(mod) == "module":
+#         print "reloading %s" % mod
+#         reload(mod)
 
 class Main(object):
     def __init__(s, software):
         # Set up our interfaces
-        s.settings = Settings()
         if software == "maya":
             # Set up Crud
-            from todo.maya.crud import CRUD
-            s.crud = CRUD()
+            from todo.mayaInterface.gui import GUI
+            from todo.mayaInterface.crud import CRUD
         else:
             raise RuntimeError, "Unknown Software: %s." % software
-        # Initialize our todos
-        s.todos = TodoContainer([t for t in s.crud.read() if re.match(r"^TODO_\d+", t)])
+        title = random.choice(quotes.quotes)
+        s.gui = GUI(title)
+        s.crud = CRUD()
+        s.settings = base.Settings(s.crud)
+        s.todos = base.TodoContainer([t for t in s.crud.read() if re.match(r"^TODO_\d+", t)])
 
 
 Main("maya")
