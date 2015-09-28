@@ -1,4 +1,6 @@
 # CRUD opperations in Maya
+# Created 29/09/15 Jason Dixon
+# http://internetimagery.com
 
 import maya.cmds as cmds
 from json import dumps, loads
