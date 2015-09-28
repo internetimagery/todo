@@ -8,10 +8,11 @@ class Control(object):
     events = fired upon things happening
     data = data needed to build out the control
     """
-    def __init__(s, elements={}, events={}, data={}):
+    def __init__(s, elements={}, events={}, data={}, parent=None):
         s.elements = elements
         s.events = events
         s.data = data
+        s.parent = parent
         s.root = ""
         s._buildCtrl()
     def delete(s):

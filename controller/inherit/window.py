@@ -1,23 +1,23 @@
 # The main window!
-from todo.controller.inherit import Control
+from todo.view import Element
 from todo.quotes import quotes
 from todo.images import icon
 from random import choice
 
 
-class Window(Control):
+class Window(Element):
     """
     Create the main window! Two Panels: Todo / Settings
-    Elements:
+    Attributes:
         window          : The Main window!
         panel           : Todo / Settings panels
     Events:
         todo            : Todo panel active
         settings        : Settings panel active
     """
-    def _buildCtrl(s):
+    def _buildGUI(s):
         quote = choice(quotes)
-        s.window = s.elements["window"](
+        s.window = s.attributes["window"](
             attributes={
                 "name"      : "TODO_MAIN_WINDOW",
                 "title"     : quote
@@ -28,7 +28,7 @@ class Window(Control):
     def buildTodo(s):
         if s.panel:
             s.panel.delete()
-        s.panel = s.elements["panel"](
+        s.panel = s.attributes["panel"](
             attributes={
                 "label"     : "Settings ->",
                 "annotation": "Click to view the Todo scripts settings. Settings are saved with the Maya scene, so you will need to set them for each scene.",
@@ -43,7 +43,7 @@ class Window(Control):
     def buildSettings(s):
         if s.panel:
             s.panel.delete()
-        s.panel = s.elements["panel"](
+        s.panel = s.attributes["panel"](
             attributes={
                 "label"     : "<- Todo",
                 "annotation": "Click to return to your Todo list.",

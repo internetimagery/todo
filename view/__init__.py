@@ -26,7 +26,7 @@ class Element(object):
         s.attach = None # Attachment point where applicable for children
         # Build
         s.O_buildGUI()
-        s.O_updateGUI()
+        s.O_updateGUI(None)
     def update(s, key=None, value=None):
         """
         Update changes to the information on the GUI element.

@@ -3,35 +3,33 @@
 class Main(object):
     """
     Start the app here!
+    Controllers:
+        "window"    : Main window
+        "todopanel" : Todo panel
     """
     def __init__(s, controllers={}):
         s.controllers = controllers
         s.window = s.controllers["window"](
-
+            events={
+                "todo"      : s.requestTodo,
+                "settings"  : s.requestSettings
+            }
         )
+    def requestTodo(s, panel):
+        s.panel = s.controllers["todopanel"](
+            events={
+                "new"   : ""
+                },
+            parent=panel
+            )
+        print "todo"
+    def requestSettings(s, panel):
+        print "settings"
 
-from todo.controller.inherit.window import Window
-from todo.view.maya.window import Window as WinView
-from todo.view.maya.panel import Panel as PanView
+from todo.controller.maya.window import Window as ctrlWindows
+from todo.controller.maya.panel import TodoPanel as ctrlTodoPanel
 
 Main({
-    "window": Window
+    "window"    : ctrlWindows,
+    "todopanel" : ctrlTodoPanel
 })
-
-
-
-# TEMP! For testing!
-from todo.view.maya.window import Window as El_window
-from todo.view.maya.panel import Panel as El_panel
-
-
-Window(
-    elements={
-        "window": El_window,
-        "panel" : El_panel,
-        },
-    events={
-        "todo": todoA,
-        "settings": setA
-        }
-)

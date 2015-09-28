@@ -52,8 +52,7 @@ class HeroScrollBox(MayaElement):
             p=s.parent.attach,
             bgc=[0.2, 0.2, 0.2],
             cr=True,
-            h=400,
-            p=s.parent
+            h=400
             )
         s.attach = s.root
 
@@ -171,7 +170,7 @@ class TodoEdit(MayaElement):
     def O_buildGUI(s):
         edit = s.events["edit"]
         s.root = cmds.textFieldButtonGrp(
-            p=s.parent.attach
+            p=s.parent.attach,
             bl="Update",
             h=30,
             tcc=s.updateText,
