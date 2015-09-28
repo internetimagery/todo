@@ -2,25 +2,8 @@
 
 import time
 import shlex
-
-
-class Main(object):
-    """
-    Run the Todo App
-    GuiAdapter = software specific interface for GUI
-    CrudAdapter = sotware specific interface for CRUD
-    Parsers = software specific parsers
-    Archives = archive methods
-    """
-    def __init__(s, GuiAdapter, CrudAdaper, Parsers=[], Archives=[]):
-        s.gui = GuiAdapter # Gui interface
-        s.crud = CrudAdaper # data interface
-        s.parsers = Parsers # passed onto Todos
-        s.arcives = Archives # run when todos are checked off
-
-        s.todos = [] # Hold our Todos!
-
 import collections
+
 
 class TodoContainer(collections.MutableSequence):
     """
@@ -61,9 +44,6 @@ class TodoContainer(collections.MutableSequence):
             s.callback(s.groups)
         except (AttributeError, TypeError):
             pass
-
-
-
 
 class Todo(object):
     """
@@ -161,3 +141,17 @@ class CRUD(object):
         Delete an existing key
         """
         pass
+
+class Settings(object):
+    """
+    Interface to get and set settings.
+    """
+    def __init__(s, CRUD):
+        s.crud = CRUD
+        s._settings = {}
+    def get(s, k, default): return s.crud.read(k, default)
+    def set(s, k, v):
+        try:
+            s.crud.update(k, v)
+        except:
+            s.crud.create(k, v)
