@@ -1,9 +1,9 @@
 # Main window related GUI elements
 import maya.cmds as cmds
-from os.path import join, dirname
-from todo.view.maya.base import MayaElement
+import os.path
+import element
 
-class Window(MayaElement):
+class Window(element.MayaElement):
     """
     Empty Main window with docking functionality. Woo!
     Attributes:
@@ -16,7 +16,7 @@ class Window(MayaElement):
         """
         name = "window_%s" % s._attr["name"] # Name of the window to keep only one window open
         s.allowed = ["left", "right"] # Allowed docking areas
-        s.settingsPath = join(dirname(__file__), "docklocation.settings")
+        s.settingsPath = os.path.join(os.path.dirname(__file__), "docklocation.settings")
         s._attr["location"] = s._attr.get("location", s.getLocation())
         if cmds.dockControl(name, ex=True):
             cmds.deleteUI(name)

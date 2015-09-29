@@ -1,8 +1,8 @@
 # Generic Elements
 import maya.cmds as cmds
-from todo.view.maya.base import MayaElement
+import element as element
 
-class PlaceHolder(MayaElement):
+class PlaceHolder(element.MayaElement):
     """
     An empty placeholder
     """
@@ -10,7 +10,7 @@ class PlaceHolder(MayaElement):
         s._root = cmds.columnLayout(adj=True, p=parent)
         s._attach = s._root
 
-class Title(MayaElement):
+class Title(element.MayaElement):
     """
     A title underlined. Striking!
     Attributes:

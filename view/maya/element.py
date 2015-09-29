@@ -1,9 +1,9 @@
 # Maya GUI Base
 
-from todo.base import GUIElement
+import todo.base as base
 import maya.cmds as cmds
 
-class MayaElement(GUIElement):
+class MayaElement(base.GUIElement):
     """
     Maya Gui base
     """

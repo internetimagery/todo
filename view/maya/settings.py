@@ -1,8 +1,8 @@
 # Controls for the settings panel
 import maya.cmds as cmds
-from todo.view.maya.base import MayaElement
+import element as element
 
-class CheckSection(MayaElement):
+class CheckSection(element.MayaElement):
     """
     A checkboxed section. Enable/Disable depending on the checked state.
     Attributes:

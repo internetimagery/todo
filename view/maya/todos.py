@@ -1,9 +1,9 @@
 # Controls for the Todo Panel
 import maya.cmds as cmds
-from time import sleep
-from todo.view.maya.base import MayaElement
+import time
+import element
 
-class HeroTextField(MayaElement):
+class HeroTextField(element.MayaElement):
     """
     A Fancy large text field for creating new Todos.
     Attributes:
@@ -43,7 +43,7 @@ class HeroTextField(MayaElement):
     def updateText(s, text):
         s._attr["text"] = text
 
-class HeroScrollBox(MayaElement):
+class HeroScrollBox(element.MayaElement):
     """
     The main scroll box. Inserting todo groups into.
     """
@@ -56,7 +56,7 @@ class HeroScrollBox(MayaElement):
             )
         s._attach = s._root
 
-class CollapsableGroup(MayaElement):
+class CollapsableGroup(element.MayaElement):
     """
     A collapsable grouping. Sort todos by their group and hide them away.
     Attributes:
@@ -85,7 +85,7 @@ class CollapsableGroup(MayaElement):
         if s._events.has_key("position"):
             s._events["position"](pos)
 
-class Todo(MayaElement):
+class Todo(element.MayaElement):
     """
     The real hero of the show. The humble todo!
     Attributes:
@@ -157,10 +157,10 @@ class Todo(MayaElement):
                 i = (100 - i*5) / 100.0
                 cmds.layout(s._root, e=True, h=height * i)
                 cmds.refresh()
-                sleep(0.01)
-            MayaElement._GUI_Delete(s)
+                time.sleep(0.01)
+            element.MayaElement._GUI_Delete(s)
 
-class TodoEdit(MayaElement):
+class TodoEdit(element.MayaElement):
     """
     A todo in edit mode. Letting you edit inline.
     Attributes:
