@@ -36,7 +36,7 @@ class Element(object):
         if s._children:
             for child in s._children:
                 child._parent = None
-        s._GUI_Delete(s)
+        s._GUI_Delete()
     def enable():
         doc = "The enable property."
         def fget(s):

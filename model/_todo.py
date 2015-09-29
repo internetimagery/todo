@@ -49,6 +49,12 @@ class Todo(object):
                 return
         raise AttributeError, "Task is empty"
 
+    def delete(s):
+        """
+        Delete the Todo.
+        """
+        s.crud.delete(s.id)
+
     def task():
         doc = "A single todo Task"
         def fget(s):

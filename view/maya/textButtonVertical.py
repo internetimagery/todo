@@ -3,6 +3,7 @@
 # http://internetimager.com
 
 import element
+import maya.cmds as cmds
 
 class TextButtonVertical(element.MayaElement):
     """

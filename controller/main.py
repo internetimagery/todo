@@ -39,24 +39,27 @@ class Main(object):
             s.buildSettings # Settings Page
             )
 
-    def buildTodo(s, panel):
+    def buildTodo(s, element):
         s.gui.TextButtonVertical(
             attributes={
                 "label"     : "",
                 "annotation": "",
             },
             events={
-                "trigger"   : ""
+                "trigger"   : s.createTodo
             },
-            parent=panel
+            parent=element
         )
 
-    def buildSettings(s, panel):
+    def createTodo(s, element):
+        print "create todo", element.text
+
+    def buildSettings(s, element):
         s.gui.Title(
             attributes={
                 "title"     : "Settings are unique to each Maya scene."
             },
-            parent=panel
+            parent=element
         )
 
 
