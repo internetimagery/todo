@@ -2,10 +2,11 @@
 # Created 29/09/15 Jason Dixon
 # http://internetimagery.com
 
+import json
 import maya.cmds as cmds
-from json import dumps, loads
+import todo.model.crud as crud
 
-class CRUD(object):
+class CRUD(crud.CRUD):
     """
     Store information in a Maya scene
     """
@@ -14,7 +15,7 @@ class CRUD(object):
         for k, v in (lambda x: zip(x[::2], x[1::2]))(cmds.fileInfo(q=True)):
             v = v.decode("unicode_escape")
             try:
-                s.cache[k] = loads(v)
+                s.cache[k] = json.loads(v)
             except ValueError:
                 s.cache[k] = v
     """
@@ -25,7 +26,7 @@ class CRUD(object):
         if type(v) == str:
             cmds.fileInfo(k, v)
         else:
-            cmds.fileInfo(k, dumps(v))
+            cmds.fileInfo(k, json.dumps(v))
         s.cache[k] = v
         return v
     """
