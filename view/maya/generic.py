@@ -1,6 +1,6 @@
 # Generic Elements
 import maya.cmds as cmds
-from todo.view.maya import MayaElement
+from todo.view.maya.base import MayaElement
 
 class PlaceHolder(MayaElement):
     """

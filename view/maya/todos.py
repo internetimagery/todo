@@ -1,7 +1,7 @@
 # Controls for the Todo Panel
 import maya.cmds as cmds
 from time import sleep
-from todo.view.maya import MayaElement
+from todo.view.maya.base import MayaElement
 
 class HeroTextField(MayaElement):
     """

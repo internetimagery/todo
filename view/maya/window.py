@@ -1,7 +1,7 @@
 # Main window related GUI elements
 import maya.cmds as cmds
 from os.path import join, dirname
-from todo.view.maya import MayaElement
+from todo.view.maya.base import MayaElement
 
 class Window(MayaElement):
     """

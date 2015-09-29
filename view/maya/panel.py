@@ -1,7 +1,7 @@
 # Two main pages of the GUI.
 # Todo layout, and settings layout
 import maya.cmds as cmds
-from todo.view.maya import MayaElement
+from todo.view.maya.base import MayaElement
 
 class Panel(MayaElement):
     """
