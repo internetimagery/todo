@@ -25,22 +25,30 @@ class Todo(object):
         else: # No ID provided. We must be creating a new Todo
             s._task = task
             s.crud.create(s.id, task)
+        s.label = ""
+        s.metadata = {}
         s.parseTask(s._task) # Grab our metadata
 
     def parseTask(s, task):
         """
         Parse out metadata from the task
         """
-        s.label = ""
-        s.metadata = {}
-        if task and s.parsers:
+        if task:
+            metadata = {}
+            label = ""
             tokens = shlex.split(task) # break into tokens
             for parse in s.parsers:
                 tokens, meta = parse(tokens)
                 if meta:
-                    s.metadata = dict(s.metadata, **meta)
+                    metadata = dict(metadata, **meta)
             if tokens:
-                s.label = " ".join(tokens)
+                label = " ".join(tokens)
+            if label:
+                s.label = label
+                s.metadata = metadata
+                return
+        raise AttributeError, "Task is empty"
+
     def task():
         doc = "A single todo Task"
         def fget(s):

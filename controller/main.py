@@ -31,15 +31,33 @@ class Main(object):
                 "title": title
             }
         )
+        # Handle the Todo and Settings page changes
         cPanel.Panel(
             s.window, # Parent
             s.gui, # Interface
-            s.test, # Todo Page
-            s.test # Settings Page
+            s.buildTodo, # Todo Page
+            s.buildSettings # Settings Page
             )
 
-    def test(s, *args):
-        print args
+    def buildTodo(s, panel):
+        s.gui.TextButtonVertical(
+            attributes={
+                "label"     : "",
+                "annotation": "",
+            },
+            events={
+                "trigger"   : ""
+            },
+            parent=panel
+        )
+
+    def buildSettings(s, panel):
+        s.gui.Title(
+            attributes={
+                "title"     : "Settings are unique to each Maya scene."
+            },
+            parent=panel
+        )
 
 
 

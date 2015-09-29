@@ -27,11 +27,6 @@ class Panel(object):
             },
             parent=s.window
             )
-        s.gui.Title(
-            attributes={
-                "title"     : "Settings are unique to each Maya scene."
-            }
-        )
         s.settingsCallback(s.panel)
     def buildTodo(s):
         if s.panel:
