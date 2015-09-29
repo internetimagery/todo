@@ -1,7 +1,6 @@
-# Base Todo Classes
+# Settings storage
 # Created Jason Dixon 29/09/15
 # http:internetimagery.com
-
 
 class Settings(object):
     """

@@ -1,9 +1,9 @@
 # Base GUI Element Overridden with Maya settings.
 
-import todo.view as view
 import maya.cmds as cmds
+import todo.view.element
 
-class MayaElement(view.GUIElement):
+class MayaElement(todo.view.element.Element):
     """
     Maya Gui base
     """
