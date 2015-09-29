@@ -17,7 +17,7 @@ class CheckSection(MayaElement):
         s._root = cmds.columnLayout(adj=True, p=parent)
         s._box = cmds.checkBox(cc=change)
         s._attach = cmds.columnLayout(adj=True)
-    def O_updateGUI(s, attr):
+    def _GUI_Update(s, attr):
         checked = s._attr["checked"]
         if attr == "checked" or attr == "label" or attr == None:
             cmds.checkBox(

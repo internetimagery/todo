@@ -19,7 +19,7 @@ class Panel(MayaElement):
         """
         trigger = s._events["trigger"]
         s._root = cmds.columnLayout(adj=True, p=parent)
-        s.button = cmds.iconTextButton(
+        s._button = cmds.iconTextButton(
             h=30,
             ann="Default Description",
             image="vacantCell.png",
@@ -35,7 +35,7 @@ class Panel(MayaElement):
         Set the windows information
         """
         cmds.iconTextButton(
-            s.button,
+            s._button,
             e=True,
             label=s._attr["label"],
             ann=s._attr["annotation"],

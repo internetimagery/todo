@@ -13,48 +13,48 @@ class HeroTextField(MayaElement):
     Events:
         trigger     : Triggered when new text is entered or button is pressed.
     """
-    def _GUI_Create(s):
-        trigger = s.events["trigger"]
-        s.attributes["text"] = s.attributes.get("text", "")
-        s.root = cmds.columnLayout(adj=True, p=s.parent.attach)
-        s.textfield = cmds.textFieldGrp(
+    def _GUI_Create(s, parent):
+        trigger = s._events["trigger"]
+        s._attr["text"] = s._attr.get("text", "")
+        s._root = cmds.columnLayout(adj=True, p=parent)
+        s._textfield = cmds.textFieldGrp(
             h=30,
             tcc=s.updateText,
             cc=trigger
             )
-        s.button = cmds.button(
+        s._button = cmds.button(
             h=20,
-            c=lambda x: trigger(s.attributes["text"])
+            c=lambda x: trigger(s._attr["text"])
             )
-    def O_updateGUI(s, attr):
-        annotation = s.attributes["annotation"]
+    def _GUI_Update(s, attr):
+        annotation = s._attr["annotation"]
         cmds.textFieldGrp(
-            s.textfield,
+            s._textfield,
             e=True,
-            tx=s.attributes["text"],
+            tx=s._attr["text"],
             ann=annotation,
             )
         cmds.button(
-            s.button,
+            s._button,
             e=True,
-            label=s.attributes["label"],
+            label=s._attr["label"],
             ann=annotation,
             )
     def updateText(s, text):
-        s.attributes["text"] = text
+        s._attr["text"] = text
 
 class HeroScrollBox(MayaElement):
     """
     The main scroll box. Inserting todo groups into.
     """
-    def O_buildGUI(s):
-        s.root = cmds.scrollLayout(
-            p=s.parent.attach,
+    def _GUI_Create(s, parent):
+        s._root = cmds.scrollLayout(
+            p=parent,
             bgc=[0.2, 0.2, 0.2],
             cr=True,
             h=400
             )
-        s.attach = s.root
+        s._attach = s._root
 
 class CollapsableGroup(MayaElement):
     """
@@ -63,26 +63,27 @@ class CollapsableGroup(MayaElement):
         label       : Group name
         position    : Is the group open or closed? Open = True
     Events:
-        position    : Triggerd on position change.
+        position    : (optional) Triggerd on position change.
     """
-    def O_buildGUI(s):
-        s.root = cmds.frameLayout(
-            p=s.parent.attach,
+    def _GUI_Create(s, parent):
+        s._root = cmds.frameLayout(
+            p=parent,
             cll=True,
-            cc=lambda: s.positionChange(False),
-            ec=lambda: s.positionChange(True)
+            cc=lambda: s._positionChange(False),
+            ec=lambda: s._positionChange(True)
         )
-        s.attach = s.root
-    def O_updateGUI(s, attr):
+        s._attach = s._root
+    def _GUI_Update(s, attr):
         cmds.frameLayout(
-            s.root,
+            s._root,
             e=True,
-            l=s.attributes["label"],
-            cl=False if s.attributes["position"] else True
+            l=s._attr["label"],
+            cl=False if s._attr["position"] else True
             )
-    def positionChange(s, pos):
-        s.attributes["position"] = pos
-        s.events["position"](pos)
+    def _positionChange(s, pos):
+        s._attr["position"] = pos
+        if s._events.has_key("position"):
+            s._events["position"](pos)
 
 class Todo(MayaElement):
     """
@@ -98,66 +99,66 @@ class Todo(MayaElement):
         edit        : Triggered when the edit button is pressed
         delete      : Triggered when the delete button is pressed
     """
-    def O_buildGUI(s):
-        complete = s.events["complete"]
-        special = s.events["special"]
-        delete = s.events["delete"]
-        edit = s.events["edit"]
-        s.root = cmds.rowLayout(nc=4, ad4=1, p=s.parent.attach)
-        s.labelBtn = cmds.iconTextButton(
+    def _GUI_Create(s, parent):
+        complete = s._events["complete"]
+        special = s._events["special"]
+        delete = s._events["delete"]
+        edit = s._events["edit"]
+        s._root = cmds.rowLayout(nc=4, ad4=1, p=parent)
+        s._labelBtn = cmds.iconTextButton(
             image="fileSave.png",
             h=30,
             style="iconAndTextHorizontal",
             fn="fixedWidthFont",
             c=complete
             )
-        s.specialBtn = cmds.iconTextButton(
+        s._specialBtn = cmds.iconTextButton(
             style="iconOnly",
             w=30,
             m=False,
             c=special
             )
-        s.editBtn = cmds.iconTextButton(
+        s._editBtn = cmds.iconTextButton(
             image="setEdEditMode.png",
             style="iconOnly",
             w=30,
             ann="Edit Todo.",
             c=edit
             )
-        s.deleteBtn = cmds.iconTextButton(
+        s._deleteBtn = cmds.iconTextButton(
             image="removeRenderable.png",
             style="iconOnly",
             w=30,
             ann="Delete Todo without saving.",
             c=delete
             )
-    def O_updateGUI(s, attr):
+    def _GUI_Update(s, attr):
         if attr == "label" or attr == "annotation" or attr == None:
             cmds.iconTextButton(
-                s.labelBtn,
+                s._labelBtn,
                 e=True,
-                l=s.attributes["label"],
-                ann=s.attributes["annotation"]
+                l=s._attr["label"],
+                ann=s._attr["annotation"]
             )
         if attr == "specialIcon" or attr == "specialAnn" or attr == None:
             cmds.iconTextButton(
-                s.specialBtn,
+                s._specialBtn,
                 e=True,
-                image=s.attributes.get("specialIcon", "vacantCell.png"),
-                ann=s.attributes["specialAnn"]
+                image=s._attr.get("specialIcon", "vacantCell.png"),
+                ann=s._attr["specialAnn"]
                 )
-    def O_deleteGUI(s):
+    def _GUI_Delete(s):
         """
         Overriding deletion for a fancy removal animation.
         """
-        if cmds.layout(s.root, ex=True):
-            height = cmds.layout(s.root, q=True, h=True)
+        if cmds.layout(s._root, ex=True):
+            height = cmds.layout(s._root, q=True, h=True)
             for i in range(20):
                 i = (100 - i*5) / 100.0
-                cmds.layout(s.root, e=True, h=height * i)
+                cmds.layout(s._root, e=True, h=height * i)
                 cmds.refresh()
                 sleep(0.01)
-            MayaElement.O_deleteGUI(s)
+            MayaElement._GUI_Delete(s)
 
 class TodoEdit(MayaElement):
     """
@@ -167,21 +168,21 @@ class TodoEdit(MayaElement):
     Events:
         edit    : Triggered on text edit
     """
-    def O_buildGUI(s):
-        edit = s.events["edit"]
-        s.root = cmds.textFieldButtonGrp(
-            p=s.parent.attach,
+    def _GUI_Create(s, parent):
+        edit = s._events["edit"]
+        s._root = cmds.textFieldButtonGrp(
+            p=parent,
             bl="Update",
             h=30,
             tcc=s.updateText,
             cc=edit, # TODO THIS MIGHT CAUSE A CRASH IF REMOVED ON THIS FUNCTION
-            bc=lambda: edit(s.attributes["text"])
+            bc=lambda: edit(s._attr["text"])
         )
     def updateText(s, text):
-        s.attributes["text"] = text
-    def O_updateGUI(s, attr):
+        s._attr["text"] = text
+    def _GUI_Update(s, attr):
         cmds.textFieldButtonGrp(
-            s.root,
+            s._root,
             e=True,
-            tx=s.attributes["text"]
+            tx=s._attr["text"]
             )
