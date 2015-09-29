@@ -1,112 +1,101 @@
-# Base class element to be inherited on various GUI interfaces.
-try:
-    from cPickle import dumps
-except ImportError:
-    from pickle import dumps
+# A Base GUI Element to build off of!
 
-class Element(object):
+class GUIElement(object):
     """
-    Override all functions starting with "O_"
-    Attributes: Dict with keys and values corresponding to GUI elements.
-    Events: Callback functions that fire on user input.
-    Parent: Element to attach this to.
+    Interface for GUI elements / compound elements
+    Override all with "GUI" in the name.
     """
+    _attr = {} # Storage of attributes
+    _events = {} # Storage of events
+
     def __init__(s, attributes={}, events={}, parent=None):
-        # Format
-        s.attributes = attributes # This elements attributes
-        s._attributeCache = dict((k, dumps(s.attributes[k])) for k in s.attributes)
-        s.events = events # GUI events triggered by this element
-        s._isVisible = True # GUI visibility
-        s._isEnabled = True # GUI enability ... not a word?
-        # Hierarchy
-        s.children = set() # Children of this element
-        s.parent = parent # Parent ELEMENT of this element
+        s._attr = attributes
+        s._events = events
         if parent:
-            parent.children.add(s)
-        s.attach = None # Attachment point where applicable for children
-        # Build
-        s.O_buildGUI()
-        s.O_updateGUI(None)
-    def update(s, key=None, value=None):
-        """
-        Update changes to the information on the GUI element.
-        """
-        if key in s.attributes:
-            check = dumps(value)
-            if s.attributesCache[key] != value:
-                s._attributeCache[key] = check
-                s.attributes[key] = value
-                s.O_updateGUI(key)
-            else:
-                print "%s's value unchanged. Skipping update." % key.title()
+            s._parent = parent
+            parent._children.append(s)
         else:
-            s._updateGUI(None)
-        return s
+            s._parent = None
+        s._children = []
+        s._root = None # Base of the element, for removal procedures
+        s._attach = None # Attachment point for children where applicable
+        s._enable = True
+        s._visible = True
+        s._GUI_Create(
+            parent._attach if parent else None
+            )
+        s._GUI_Update(None)
     def delete(s):
         """
-        Delete element from the GUI
+        Remove element
         """
-        if s.parent and s in s.parent.children:
-            s.parent.children.remove(s)
-            s.children = []
-        s.O_deleteGUI()
-        return s
-    def show(s):
+        if s._parent:
+            s._parent._children.remove(s)
+        if s._children:
+            for child in s._children:
+                child._parent = None
+        s._GUI_Delete(s)
+    def enable():
+        doc = "The enable property."
+        def fget(s):
+            return s._enable
+        def fset(s, value):
+            s._enable = value
+            s._GUI_Enable(value)
+        def fdel(s):
+            del s._enable
+        return locals()
+    enable = property(**enable())
+    def visible():
+        doc = "The visible property."
+        def fget(s):
+            return s._visible
+        def fset(s, value):
+            s._visible = value
+            s._GUI_Visible(value)
+        def fdel(s):
+            del s._visible
+        return locals()
+    visible = property(**visible())
+    def _GUI_Create(s, parent):
         """
-        Make element visible
-        """
-        if not s._isVisible:
-            s._isVisible = True
-            s.O_visible(True)
-        return s
-    def hide(s):
-        """
-        Make element invisible
-        """
-        if s._isVisible:
-            s._isVisible = False
-            s.O_visible(False)
-        return s
-    def enabled(s):
-        """
-        Enable element
-        """
-        if not s._isEnabled:
-            s._isEnabled = True
-            s.O_active(True)
-        return s
-    def disable(s):
-        """
-        Disable element
-        """
-        if s._isEnabled:
-            s._isEnabled = False
-            s.O_active(False)
-        return s
-    def O_buildGUI(s):
-        """
-        Build out the gui framework bare bones.
-        Bind events from s._events
+        Build the gui given attributes, events and a parent
         """
         pass
-    def O_updateGUI(s, attribute):
+    def _GUI_Read(s, k):
         """
-        Either update a single attribute if provided, or the whole thing.
-        Using s.attributes to get information
+        Get attribute value from GUI.
+        Only need to override this if the attributes aren't tracking the GUI
         """
-        pass
-    def O_deleteGUI(s):
+        return s._attr[k]
+    def _GUI_Update(s, attr):
         """
-        Remove GUI element
-        """
-        pass
-    def O_visibleGUI(s, show):
-        """
-        Make element visible or invisible. True = visible
+        Update GUI value given an attribute
         """
         pass
-    def O_enableGUI(s, enable):
+    def _GUI_Delete(s):
         """
-        Make element active/enabled or not. True = active
+        Remove gui element
         """
         pass
+    def _GUI_Enable(s, state):
+        """
+        Enable or Disable the element
+        """
+        pass
+    def _GUI_Visible(s, state):
+        """
+        Enable or Disable the elements visibility
+        """
+        pass
+    def __getattr__(s, k):
+        if s._attr.has_key(k):
+            return s._GUI_Read(k)
+        else:
+            raise AttributeError, "No attribute exists named %s." % k
+    def __setattr__(s, k, v):
+        if s._attr.has_key(k):
+            s._attr[k] = v
+            s._GUI_Update(k)
+        else:
+            object.__setattr__(s, k, v)

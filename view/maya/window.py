@@ -14,7 +14,7 @@ class Window(element.MayaElement):
         """
         Build Empty window that docks.
         """
-        name = "window_%s" % s._attr["name"] # Name of the window to keep only one window open
+        name = "window_%s" % s._attr["title"] # Name of the window to keep only one window open
         s.allowed = ["left", "right"] # Allowed docking areas
         s.settingsPath = os.path.join(os.path.dirname(__file__), "docklocation.settings")
         s._attr["location"] = s._attr.get("location", s.getLocation())
