@@ -22,10 +22,10 @@ class Main(object):
         else:
             raise RuntimeError, "Unknown Software: %s." % software
         title = random.choice(todo.quotes.quotes)
-        s.crud = model.CRUD
+        s.model = model
         s.gui = gui
         s.settings = mSettings.Settings(gui)
-        s.todos = mTodoContainer.TodoContainer([t for t in s.crud.read() if re.match(r"^TODO_\d+", t)])
+        s.todos = mTodoContainer.TodoContainer([t for t in s.model.CRUD.read() if re.match(r"^TODO_\d+", t)])
         s.window = s.gui.Window(
             attributes={
                 "title": title
