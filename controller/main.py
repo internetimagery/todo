@@ -11,7 +11,7 @@ import todo.model._todo as mTodo
 import todo.model.todoContainer as mTodoContainer
 import todo.model.settings as mSettings
 
-
+import todo.controller.panel as cPanel
 
 class Main(object):
     def __init__(s, software):
@@ -31,6 +31,15 @@ class Main(object):
                 "title": title
             }
         )
+        cPanel.Panel(
+            s.window, # Parent
+            s.gui, # Interface
+            s.test, # Todo Page
+            s.test # Settings Page
+            )
+
+    def test(s, *args):
+        print args
 
 
 
