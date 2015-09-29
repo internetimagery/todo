@@ -13,7 +13,7 @@ class HeroTextField(MayaElement):
     Events:
         trigger     : Triggered when new text is entered or button is pressed.
     """
-    def O_buildGUI(s):
+    def _GUI_Create(s):
         trigger = s.events["trigger"]
         s.attributes["text"] = s.attributes.get("text", "")
         s.root = cmds.columnLayout(adj=True, p=s.parent.attach)

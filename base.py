@@ -178,7 +178,10 @@ class GUIElement(object):
         s._attach = None # Attachment point for children where applicable
         s._enable = True
         s._visible = True
-        s._GUI_Create()
+        s._GUI_Create(
+            parent._attach if parent else None
+            )
+        s._GUI_Update(None)
     def delete(s):
         """
         Remove element
@@ -211,7 +214,7 @@ class GUIElement(object):
             del s._visible
         return locals()
     visible = property(**visible())
-    def _GUI_Create(s):
+    def _GUI_Create(s, parent):
         """
         Build the gui given attributes, events and a parent
         """
@@ -249,4 +252,4 @@ class GUIElement(object):
             raise AttributeError, "No attribute exists named %s." % k
     def __setattr__(s, k, v):
         s._attr[k] = v
-        s._GUI_Update(k, v)
+        s._GUI_Update(k)

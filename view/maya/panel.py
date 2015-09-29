@@ -13,12 +13,12 @@ class Panel(MayaElement):
     Events:
         trigger     : Triggered when panel switching button is pressed
     """
-    def O_buildGUI(s):
+    def _GUI_Create(s, parent):
         """
         Build the window.
         """
-        trigger = s.events["trigger"]
-        s.root = cmds.columnLayout(adj=True, p=s.parent.attach)
+        trigger = s._events["trigger"]
+        s._root = cmds.columnLayout(adj=True, p=parent)
         s.button = cmds.iconTextButton(
             h=30,
             ann="Default Description",
@@ -28,16 +28,16 @@ class Panel(MayaElement):
             c=trigger
             )
         cmds.separator()
-        s.attach = cmds.columnLayout(adj=True)
+        s._attach = cmds.columnLayout(adj=True)
 
-    def O_updateGUI(s, attr=None):
+    def _GUI_Update(s, attr):
         """
         Set the windows information
         """
         cmds.iconTextButton(
             s.button,
             e=True,
-            label=s.attributes["label"],
-            ann=s.attributes["annotation"],
-            image=s.attributes["image"]
+            label=s._attr["label"],
+            ann=s._attr["annotation"],
+            image=s._attr["image"]
             )

@@ -10,7 +10,7 @@ class Window(MayaElement):
         title   : Title of the window
         location: (optional) Starting Dock location
     """
-    def _GUI_Build(s, parent):
+    def _GUI_Create(s, parent):
         """
         Build Empty window that docks.
         """
