@@ -31,8 +31,10 @@ class Element(object):
         """
         Remove element
         """
-        if s._parent:
+        try:
             s._parent._children.remove(s)
+        except (AttributeError, ValueError):
+            pass
         if s._children:
             for child in s._children:
                 child._parent = None

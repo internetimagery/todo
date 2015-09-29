@@ -42,17 +42,26 @@ class Main(object):
     def buildTodo(s, element):
         s.gui.TextButtonVertical(
             attributes={
-                "label"     : "",
-                "annotation": "",
+                "label"     : "Create a new TODO",
+                "annotation": "Type a task into the box.",
             },
             events={
                 "trigger"   : s.createTodo
             },
             parent=element
         )
+        todoWrapper = s.gui.ScrollField(
+            parent=element
+        )
+        s.populateTodo(todoWrapper)
+
+    def populateTodo(s, element):
+        pass
 
     def createTodo(s, element):
         print "create todo", element.text
+        # VALIDATE TODO HERE!!!!
+        element.text = ""
 
     def buildSettings(s, element):
         s.gui.Title(

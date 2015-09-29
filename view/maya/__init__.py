@@ -5,5 +5,6 @@
 from todo.view.maya.window import Window
 from todo.view.maya.panel import Panel
 from todo.view.maya.textButtonVertical import TextButtonVertical
+from todo.view.maya.scrollField import ScrollField
 
 from todo.view.maya.title import Title
