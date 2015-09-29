@@ -218,7 +218,8 @@ class GUIElement(object):
         pass
     def _GUI_Read(s, k):
         """
-        Get attribute value from GUI
+        Get attribute value from GUI.
+        Only need to override this if the attributes aren't tracking the GUI
         """
         return s._attr[k]
     def _GUI_Update(s, attr, value):
