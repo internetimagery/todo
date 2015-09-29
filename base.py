@@ -160,7 +160,7 @@ class Settings(object):
         except:
             s.crud.create(k, v)
 
-class Element(object):
+class GUIElement(object):
     """
     Interface for GUI elements / compound elements
     Override all with "GUI" in the name.
@@ -176,6 +176,8 @@ class Element(object):
         s._events = events
         s._root = None # Base of the element, for removal procedures
         s._attach = None # Attachment point for children where applicable
+        s._enable = True
+        s._visible = True
         s._GUI_Create()
     def delete(s):
         """
@@ -187,6 +189,28 @@ class Element(object):
             for child in s._children:
                 child._parent = None
         s._GUI_Delete(s)
+    def enable():
+        doc = "The enable property."
+        def fget(s):
+            return s._enable
+        def fset(s, value):
+            s._enable = value
+            s._GUI_Enable(value)
+        def fdel(s):
+            del s._enable
+        return locals()
+    enable = property(**enable())
+    def visible():
+        doc = "The visible property."
+        def fget(s):
+            return s._visible
+        def fset(s, value):
+            s._visible = value
+            s._GUI_Visible(value)
+        def fdel(s):
+            del s._visible
+        return locals()
+    visible = property(**visible())
     def _GUI_Create(s):
         """
         Build the gui given attributes, events and a parent
@@ -205,6 +229,16 @@ class Element(object):
     def _GUI_Delete(s):
         """
         Remove gui element
+        """
+        pass
+    def _GUI_Enable(s, state):
+        """
+        Enable or Disable the element
+        """
+        pass
+    def _GUI_Visible(s, state):
+        """
+        Enable or Disable the elements visibility
         """
         pass
     def __getattr__(s, k):
