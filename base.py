@@ -159,3 +159,59 @@ class Settings(object):
             s.crud.update(k, v)
         except:
             s.crud.create(k, v)
+
+class Element(object):
+    """
+    Interface for GUI elements / compound elements
+    Override all with "GUI" in the name.
+    """
+    def __init__(s, attributes={}, events={}, parent=None):
+        if parent:
+            s._parent = parent
+            parent._children.append(s)
+        else:
+            s._parent = None
+        s._children = []
+        s._attr = attributes
+        s._events = events
+        s._root = None # Base of the element, for removal procedures
+        s._attach = None # Attachment point for children where applicable
+        s._GUI_Create()
+    def delete(s):
+        """
+        Remove element
+        """
+        if s._parent:
+            s._parent._children.remove(s)
+        if s._children:
+            for child in s._children:
+                child._parent = None
+        s._GUI_Delete(s)
+    def _GUI_Create(s):
+        """
+        Build the gui given attributes, events and a parent
+        """
+        pass
+    def _GUI_Read(s, k):
+        """
+        Get attribute value from GUI
+        """
+        return s._attr[k]
+    def _GUI_Update(s, attr, value):
+        """
+        Update GUI value given an attribute
+        """
+        pass
+    def _GUI_Delete(s):
+        """
+        Remove gui element
+        """
+        pass
+    def __getattr__(s, k):
+        if s._attr.has_key(k):
+            return s._GUI_Read(k)
+        else:
+            raise AttributeError, "No attribute exists named %s." % k
+    def __setattr__(s, k, v):
+        s._attr[k] = v
+        s._GUI_Update(k, v)

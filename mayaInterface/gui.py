@@ -8,8 +8,9 @@ class GUI(object):
     """
     Gui for Maya
     """
-    def __init__(s, title):
+    def __init__(s, title, events={}):
         name = "window_%s" % title
+        s.events = events
         s._allowed = ["left", "right"] # Allowed docking areas
         s._dockMemory = os.path.join(os.path.dirname(__file__), "docklocation.settings")
         try:
@@ -30,6 +31,16 @@ class GUI(object):
             fcc=s._moveDock,
             vcc=s._closeDock
             )
+
+    def buildPanel(s, parent):
+        return cmds.columnLayout(adj=True, p=parent)
+
+    def _fire(s, event, *args):
+        """
+        Fire off an event
+        """
+        if event in s.events:
+            s.events[event](*args)
 
     def _dockMemorySave(s, loc):
         """
