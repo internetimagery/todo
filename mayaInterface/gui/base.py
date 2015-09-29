@@ -7,10 +7,10 @@ class Element(object):
     def __init__(s, attributes={}, events={}, parent=None):
         s._attr = attributes
         s._events = events
-        s._parent = parent.root if parent else None
+        s._parent = parent
         s._root = None # base of control
         s._attach = None # attachment point if applicable
-        s._build(s._parent)
+        s._build(parent.root if parent else None)
     def _build(s, parent):
         """
         Build Element

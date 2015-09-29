@@ -7,23 +7,22 @@ class Window(MayaElement):
     """
     Empty Main window with docking functionality. Woo!
     Attributes:
-        name    : Name of the window
         title   : Title of the window
         location: (optional) Starting Dock location
     """
-    def O_buildGUI(s):
+    def _GUI_Build(s, parent):
         """
         Build Empty window that docks.
         """
-        name = s.attributes["name"] # Name of the window to keep only one window open
+        name = "window_%s" % s._attr["name"] # Name of the window to keep only one window open
         s.allowed = ["left", "right"] # Allowed docking areas
         s.settingsPath = join(dirname(__file__), "docklocation.settings")
-        s.attributes["location"] = s.attributes.get("location", s.getLocation())
+        s._attr["location"] = s._attr.get("location", s.getLocation())
         if cmds.dockControl(name, ex=True):
             cmds.deleteUI(name)
         window = cmds.window(rtf=True)
-        s.attach = cmds.columnLayout(adj=True) # Attachment Point
-        s.root = cmds.dockControl(
+        s._attach = cmds.columnLayout(adj=True) # Attachment Point
+        s._root = cmds.dockControl(
             name,
             content=window,
             a="left",
@@ -33,15 +32,15 @@ class Window(MayaElement):
             vcc=s.closeDock
             )
 
-    def O_updateGUI(s, att=None):
+    def _GUI_Update(s, attr):
         """
         Update Gui information
         """
-        location = s.attributes["location"]
+        location = s._attr["location"]
         cmds.dockControl(
-            s.root,
+            s._root,
             e=True,
-            l=s.attributes["title"],
+            l=s._attr["title"],
             fl=False if location in s.allowed else True,
             a=location if location in s.allowed else None
             )
@@ -67,11 +66,11 @@ class Window(MayaElement):
         """
         Track dock movement
         """
-        if cmds.dockControl(s.root, q=True, fl=True):
+        if cmds.dockControl(s._root, q=True, fl=True):
             s.setLocation("float")
             print "Floating Dock."
         else:
-            area = cmds.dockControl(s.root, q=True, a=True)
+            area = cmds.dockControl(s._root, q=True, a=True)
             s.setLocation(area)
             print "Docking %s." % area
 
@@ -79,9 +78,9 @@ class Window(MayaElement):
         """
         Cleanly closing the window
         """
-        visible = cmds.dockControl(s.root, q=True, vis=True)
+        visible = cmds.dockControl(s._root, q=True, vis=True)
         if not visible and loop:
-            cmds.scriptJob(ie=s.closeDock, p=s.root, ro=True)
+            cmds.scriptJob(ie=s.closeDock, p=s._root, ro=True)
         elif not visible:
             print "Window closed."
             s.delete()
