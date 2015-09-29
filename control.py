@@ -18,13 +18,19 @@ class Main(object):
         if software == "maya":
             # Set up Crud
             from todo.mayaInterface.crud import CRUD
+            import todo.view.maya as GUI
         else:
             raise RuntimeError, "Unknown Software: %s." % software
         title = random.choice(quotes.quotes)
         s.crud = CRUD()
+        s.gui = GUI
         s.settings = base.Settings(s.crud)
         s.todos = base.TodoContainer([t for t in s.crud.read() if re.match(r"^TODO_\d+", t)])
-
+        s.window = s.gui.Window(
+            attributes={
+                "title": title
+            }
+        )
 
 
 Main("maya")

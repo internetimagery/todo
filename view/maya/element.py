@@ -1,4 +1,4 @@
-# Maya GUI Base
+# Base GUI Element Overridden with Maya settings.
 
 import todo.base as base
 import maya.cmds as cmds

@@ -165,15 +165,18 @@ class GUIElement(object):
     Interface for GUI elements / compound elements
     Override all with "GUI" in the name.
     """
+    _attr = {} # Storage of attributes
+    _events = {} # Storage of events
+
     def __init__(s, attributes={}, events={}, parent=None):
+        s._attr = attributes
+        s._events = events
         if parent:
             s._parent = parent
             parent._children.append(s)
         else:
             s._parent = None
         s._children = []
-        s._attr = attributes
-        s._events = events
         s._root = None # Base of the element, for removal procedures
         s._attach = None # Attachment point for children where applicable
         s._enable = True
@@ -225,7 +228,7 @@ class GUIElement(object):
         Only need to override this if the attributes aren't tracking the GUI
         """
         return s._attr[k]
-    def _GUI_Update(s, attr, value):
+    def _GUI_Update(s, attr):
         """
         Update GUI value given an attribute
         """
@@ -251,5 +254,8 @@ class GUIElement(object):
         else:
             raise AttributeError, "No attribute exists named %s." % k
     def __setattr__(s, k, v):
-        s._attr[k] = v
-        s._GUI_Update(k)
+        if s._attr.has_key(k):
+            s._attr[k] = v
+            s._GUI_Update(k)
+        else:
+            object.__setattr__(s, k, v)
