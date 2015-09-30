@@ -242,16 +242,18 @@ class TodoScroller(object):
                     }
                 )
 
-
     def todoComplete(s, todo, todoView, todoEdit, layout):
-        print "complete"
-    def todoSpecial(s, todo, todoView, todoEdit, layout):
-        print "special"
-    def todoEdit(s, todo, todoView, todoEdit, layout):
-        print "edit"
-    def todoDelete(s, todo, todoView, todoEdit, layout):
-        print "delete"
+        print "Task Complete %s: %s." % (todo.id, todo.task)
+        s.todoDelete(todo, todoView, todoEdit, layout)
 
+    def todoSpecial(s, todo, todoView, todoEdit, layout):
+        print "Special Function not defined yet!"
+
+    def todoDelete(s, todo, todoView, todoEdit, layout):
+        print "Removing %s: %s." % (todo.id, todo.task)
+        s.container.remove(todo)
+        layout.delete()
+        todo.delete()
 
 
 Main("maya")
