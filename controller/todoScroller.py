@@ -2,6 +2,8 @@
 # Created 30/09/15 Jason Dixon
 # http://internetimagery.com
 
+from todo.images import icon
+
 class TodoScroller(object):
     """
     Todos displayed in scroll field
@@ -35,7 +37,7 @@ class TodoScroller(object):
                 for g in grp:
                     new[g] = new.get(g, {})
                     new[g][todo] = None
-            add, remove = s.diffStructure(new, s.todoStructure)
+            # add, remove = s.diffStructure(new, s.todoStructure)
             # TODO: Add logic to deal with differences
 
             # Too many differences. Build em!
@@ -108,10 +110,10 @@ class TodoScroller(object):
             attributes={
                 "label"         : label,
                 "annotation"    : "Click to check off and save.\nTODO: %s" % label,
-                "icon"          : "fileSave.png",
-                "editIcon"      : "setEdEditMode.png",
+                "icon"          : icon.get("save_16"), #"fileSave.png",
+                "editIcon"      : icon.get("todo_16"), #"setEdEditMode.png",
                 "editAnnotaion" : "Edit Task.",
-                "delIcon"       : "removeRenderable.png",
+                "delIcon"       : icon.get("brush_16"), #"removeRenderable.png",
                 "delAnnotation" : "Delete Todo without saving."
                 },
             events={
