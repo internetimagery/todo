@@ -21,6 +21,8 @@ class Todo(element.MayaElement):
         delete      : Triggered when the delete button is pressed
     """
     def _GUI_Create(s, parent):
+        s._attr["specialIcon"] = s._attr.get("specialIcon", None)
+        s._attr["specialAnn"] = s._attr.get("specialAnn", None)
         complete = s._events["complete"]
         special = s._events["special"]
         delete = s._events["delete"]
@@ -62,11 +64,13 @@ class Todo(element.MayaElement):
                 ann=s._attr["annotation"]
             )
         if attr == "specialIcon" or attr == "specialAnn" or attr == None:
+            managed = True if s._attr["specialIcon"] and s._attr["specialAnn"] else False
             cmds.iconTextButton(
                 s._specialBtn,
                 e=True,
-                image=s._attr.get("specialIcon", "vacantCell.png"),
-                ann=s._attr["specialAnn"]
+                m=managed,
+                image=s._attr["specialIcon"] if s._attr["specialIcon"] else"vacantCell.png",
+                ann=s._attr["specialAnn"] if s._attr["specialAnn"] else "You cannot use this button."
                 )
     def _GUI_Delete(s):
         """

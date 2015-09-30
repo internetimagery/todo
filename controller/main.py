@@ -145,22 +145,22 @@ class TodoScroller(object):
                     s.structure["none"][todo] = s.addTodo(s.attach, todo)
 
     def addTodo(s, parent, todo):
-        label = todo.label
-        attributes = {
-            "label"         : label,
-            "annotation"    : "Click to check off and save.\nTODO: %s" % label
-            }
-        attributes["specialIcon"] = "openScript.png"
-        attributes["specialAnn"] = "Press me to do something."
+        """
+        Add a Todo Element to the Scroller
+        """
         layout = s.view.HorizontalLayout(
             parent=parent
         )
+        label = todo.label
         todoView = s.view.Todo(
-            attributes=attributes,
+            attributes={
+                "label"      : label,
+                "annotation" : "Click to check off and save.\nTODO: %s" % label
+                },
             events={
                 "complete"  : s.todoComplete,
                 "special"   : s.todoSpecial,
-                "edit"      : lambda x: s.todoModeSwitch(todo, todoView, todoEdit),
+                "edit"      : lambda x: s.todoModeSwitch(todo, todoView, todoEdit, layout),
                 "delete"    : s.todoDelete
             },
             parent=layout
@@ -170,33 +170,41 @@ class TodoScroller(object):
                 "text"  : todo.task
             },
             events={
-                "edit"  : lambda x: s.todoModeSwitch(todo, todoView, todoEdit)
+                "edit"  : lambda x: s.todoModeSwitch(todo, todoView, todoEdit, layout)
             },
             parent=layout,
             visible=False
         )
         return (layout, todoView, todoEdit)
-    def todoModeSwitch(s, todo, todoView, todoEdit):
+
+    def todoModeSwitch(s, todo, todoView, todoEdit, layout):
         view = todoView.visible
         edit = todoEdit.visible
-        try:
-            if view: # Switching off the viewer
-                task = todo.task
-                todoView.visible = False
-                todoEdit.visible = True
-                todoEdit.text = task
-            else: # Switching from edit mode back to viewer
-                task = todoEdit.text
+        if view: # Switching off the viewer
+            task = todo.task
+            todoView.visible = False
+            todoEdit.visible = True
+            todoEdit.text = task
+        else: # Switching from edit mode back to viewer
+            task = todoEdit.text
+            try:
                 todo.task = task
-                todoView.visible = True
+                groups = todo.metadata["group"].copy()
                 todoEdit.visible = False
-        except AttributeError as e:
-            s.view.Notice(
-                attributes={
-                    "title"     : "Uh oh...",
-                    "message"   : str(e)
-                }
-            )
+                todoView.visible = True
+                todoView.label = todo.label
+                if groups != todo.metadata["group"]:
+                    print "GROUP CHANGED"
+                # TODO add group check in here
+            except AttributeError as e:
+                s.view.Notice(
+                    attributes={
+                        "title"     : "Uh oh...",
+                        "message"   : str(e)
+                    }
+                )
+
+
 
     def todoComplete(s, todo):
         print "complete"
