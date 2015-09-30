@@ -110,6 +110,7 @@ class TodoScroller(object):
         s.settings = settings
         s.parent = parent
         s.attach = None
+        s.todoStructure = {}
         s.refresh(container)
 
     def refresh(s, container):
@@ -118,6 +119,29 @@ class TodoScroller(object):
         s.attach = s.view.ScrollField(
             parent=s.parent
         )
+
+        new = {} # New structure
+        if container:
+            for todo in container:
+                grp = todo.metadata["group"]
+                grp = grp if grp else ["none"]
+                for g in grp:
+                    new[g] = new.get(g, {})
+                    new[g][todo] = None
+        add, remove = s.diffStructure(new, s.todoStructure)
+
+        if container:
+            # Compare differences to see if we need to update
+            oldContainer = set(s.container)
+            newContainer = set(container)
+            addedTodo = oldContainer.difference(newContainer)
+            removedTodo = newContainer.difference(oldContainer)
+            # Compare differences to groups
+
+
+
+
+
         s.todoStructure = {} # Hold all info of our todos
         if container:
             for todo in container:
@@ -143,6 +167,34 @@ class TodoScroller(object):
             if s.todoStructure.has_key("none"):
                 for todo in sorted(s.todoStructure["none"].keys(), key=lambda x: x.label):
                     s.todoStructure["none"][todo] = s.addTodo(s.attach, todo)
+
+    def diffStructure(s, new, old):
+        """
+        Compare differences between two structures to determine GUI updates.
+        """
+        add = {}
+        remove = {}
+        # Get difference between groups
+        newGrp = set(new.keys())
+        oldGrp = set(old.keys())
+        addGrp = newGrp.difference(oldGrp)
+        delGrp = oldGrp.difference(newGrp)
+        for grp in newGrp.union(oldGrp):
+            if grp in addGrp: # New group
+                add[grp] = set(new[grp].keys())
+            elif grp in delGrp: # Whole group removed
+                remove[grp] = set(old[grp].keys())
+            else: # Test intergroup for changes
+                chk1 = set(new[grp].keys())
+                chk2 = set(old[grp].keys())
+                addChk = chk1.difference(chk2)
+                delChk = chk2.difference(chk1)
+                if addChk:
+                    add[grp] = addChk
+                if delChk:
+                    remove[grp] = delChk
+        return add, remove
+
 
     def addTodo(s, parent, todo):
         """
