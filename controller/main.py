@@ -9,6 +9,7 @@ import todo.quotes
 
 import todo.controller._todo as cTodo
 import todo.controller.todoContainer as cTodoContainer
+import todo.controller.todoScroller as cTodoScroller
 import todo.controller.settings as cSettings
 
 import todo.controller.panel as cPanel
@@ -25,7 +26,11 @@ class Main(object):
         s.model = model
         s.view = view
         s.settings = cSettings.Settings(view)
-        s.todos = cTodoContainer.TodoContainer([t for t in s.model.CRUD.read() if re.match(r"^TODO_[\d\.]+", t)])
+        s.container = [cTodo.Todo(
+            CRUD=s.model.CRUD,
+            id=t,
+            parsers=[]
+            ) for t in s.model.CRUD.read() if re.match(r"^TODO_[\d\.]+", t)]
         s.window = s.view.Window(
             attributes={
                 "title": title
@@ -40,7 +45,7 @@ class Main(object):
             )
 
     def buildTodo(s, element):
-        s.todoWrapper = s.view.TextButtonVertical(
+        wrapper = s.view.TextButtonVertical(
             attributes={
                 "label"     : "Create a new TODO",
                 "annotation": "Type a task into the box.",
@@ -50,26 +55,23 @@ class Main(object):
             },
             parent=element
         )
-        s.todoScroller = None
-        s.populateTodo()
-
-    def populateTodo(s):
-        if s.todoScroller:
-            s.todoScroller.delete()
-        s.todoScroller = s.view.ScrollField(
-            parent=s.todoWrapper
+        s.scroller = cTodoScroller.TodoScroller(
+            wrapper, # parent
+            s.view, # view
+            s.settings, # settings
+            s.container # container
         )
-        print s.todos
 
     def createTodo(s, element):
         try:
-            s.todos.append(cTodo.Todo(
+            s.container.append(cTodo.Todo(
                 task=element.text,
                 CRUD=s.model.CRUD,
                 parsers=[] # TODO. Add in parsers
             ))
             element.text = ""
-            s.populateTodo()
+            print s.container
+            s.scroller.refresh(s.container)
         except AttributeError as e:
             s.view.Notice(
                 attributes={
@@ -77,11 +79,6 @@ class Main(object):
                     "message"   : str(e)
                 }
             )
-
-    def deleteTodo(s, todo):
-        s.todos.remove(todo)
-        todo.delete()
-        s.populateTodo()
 
     def buildSettings(s, element):
         s.view.Title(

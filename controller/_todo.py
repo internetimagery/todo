@@ -26,7 +26,8 @@ class Todo(object):
                 s.crud.create(s.id, task)
         elif id: # No task provided, but ID provided
             s._task = s.crud.read(id, "")
-            s.parseTask(task)
+            print "Loaded task %s: %s." % (id, s._task)
+            s.parseTask(s._task)
         else: # Neither task nor ID provided
             raise AttributeError, "No task provided."
 
@@ -83,4 +84,4 @@ def parseGroups(tokens):
             tags.add(token[1:])
         else:
             filteredToken.append(token)
-    return filteredToken, {"Group": tags}
+    return filteredToken, {"group": tags}
