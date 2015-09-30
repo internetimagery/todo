@@ -14,11 +14,11 @@ class Element(object):
         s._attr = attributes
         s._events = events
         if parent:
-            s._parent = parent
+            s.parent = parent
             parent._children.append(s)
         else:
-            s._parent = None
-        s._children = []
+            s.parent = None
+        s.children = []
         s._root = None # Base of the element, for removal procedures
         s._attach = None # Attachment point for children where applicable
         s._enable = True
@@ -34,11 +34,11 @@ class Element(object):
         Remove element
         """
         try:
-            s._parent._children.remove(s)
+            s.parent._children.remove(s)
         except (AttributeError, ValueError):
             pass
-        if s._children:
-            for child in s._children:
+        if s.children:
+            for child in s.children:
                 child._parent = None
         s._GUI_Delete()
     def enable():

@@ -118,15 +118,15 @@ class TodoScroller(object):
         s.attach = s.view.ScrollField(
             parent=s.parent
         )
-        s.structure = {} # Hold all info of our todos
+        s.todoStructure = {} # Hold all info of our todos
         if container:
             for todo in container:
                 grp = todo.metadata["group"]
                 grp = grp if grp else ["none"]
                 for g in grp:
-                    s.structure[g] = s.structure.get(g, {})
-                    s.structure[g][todo] = None
-            for group in sorted(s.structure.keys()):
+                    s.todoStructure[g] = s.todoStructure.get(g, {})
+                    s.todoStructure[g][todo] = None
+            for group in sorted(s.todoStructure.keys()):
                 if group != "none":
                     grp = s.view.CollapsableGroup(
                         attributes={
@@ -138,11 +138,11 @@ class TodoScroller(object):
                         },
                         parent=s.attach
                     )
-                    for todo in sorted(s.structure[group].keys(), key=lambda x: x.label):
-                        s.structure[group][todo] = s.addTodo(grp, todo)
-            if s.structure.has_key("none"):
-                for todo in sorted(s.structure["none"].keys(), key=lambda x: x.label):
-                    s.structure["none"][todo] = s.addTodo(s.attach, todo)
+                    for todo in sorted(s.todoStructure[group].keys(), key=lambda x: x.label):
+                        s.todoStructure[group][todo] = s.addTodo(grp, todo)
+            if s.todoStructure.has_key("none"):
+                for todo in sorted(s.todoStructure["none"].keys(), key=lambda x: x.label):
+                    s.todoStructure["none"][todo] = s.addTodo(s.attach, todo)
 
     def addTodo(s, parent, todo):
         """
@@ -188,14 +188,24 @@ class TodoScroller(object):
         else: # Switching from edit mode back to viewer
             task = todoEdit.text
             try:
+                groupsOld = todo.metadata["group"].copy() # Store groups
                 todo.task = task
-                groups = todo.metadata["group"].copy()
                 todoEdit.visible = False
                 todoView.visible = True
                 todoView.label = todo.label
-                if groups != todo.metadata["group"]:
-                    print "GROUP CHANGED"
-                # TODO add group check in here
+                groupsNew = todo.metadata["group"]
+                # Check for changes to do minimum ammount of refreshing
+                removed = groupsOld.difference(groupsNew)
+                added = groupsNew.difference(groupsOld)
+                if added: # Some new groups were added. Need to refresh.
+                    print "Damn need to refresh..."
+                elif removed:
+                    for remove in removed: # Remove Todos directly
+                        if len(s.todoStructure[remove]) < 2: # Removing this todo will empty the group
+                            print "group:", s.todoStructure[remove][todo][0].parent
+                        else: # Remove just the Todo
+                            pass
+
             except AttributeError as e:
                 s.view.Notice(
                     attributes={
