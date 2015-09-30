@@ -10,7 +10,7 @@ class Element(object):
     _attr = {} # Storage of attributes
     _events = {} # Storage of events
 
-    def __init__(s, attributes={}, events={}, parent=None):
+    def __init__(s, attributes={}, events={}, parent=None, visible=True, enable=True):
         s._attr = attributes
         s._events = events
         if parent:
@@ -27,6 +27,8 @@ class Element(object):
             parent._attach if parent else None
             )
         s._GUI_Update(None)
+        s.visible = visible
+        s.enable = enable
     def delete(s):
         """
         Remove element
