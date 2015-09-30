@@ -25,7 +25,7 @@ class Main(object):
         title = random.choice(todo.quotes.quotes)
         s.model = model
         s.view = view
-        s.settings = cSettings.Settings(view)
+        s.settings = cSettings.Settings(s.model.CRUD)
         s.container = []
         keys = s.model.CRUD.read() # Initialize our Todos
         if keys:
@@ -65,14 +65,18 @@ class Main(object):
             },
             parent=element
         )
-        s.scroller = TodoScroller(
+        s.scroller = cTodoScroller.TodoScroller(
             element, # parent
             s.view, # view
             s.settings, # settings
-            s.container # container
+            s.completeTodo # Todo complete callback
         )
+        s.scroller.refresh(s.container)
 
     def createTodo(s, element):
+        """
+        Run when creating a new todo
+        """
         try:
             todo = cTodo.Todo(
                 task=element.text,
@@ -90,6 +94,12 @@ class Main(object):
                 }
             )
 
+    def completeTodo(s, todo):
+        """
+        Todo is being checked off!
+        """
+        pass
+
     def buildSettings(s, element):
         s.view.Title(
             attributes={
@@ -97,163 +107,6 @@ class Main(object):
             },
             parent=element
         )
-
-
-class TodoScroller(object):
-    """
-    Todos displayed in scroll field
-    view = GUI interface
-    container = todo container
-    parent = place to put the scroller
-    """
-    def __init__(s, parent, view, settings, container):
-        s.view = view
-        s.settings = settings
-        s.parent = parent
-        s.attach = None
-        s.todoStructure = {}
-        s.container = []
-        s.refresh(container)
-
-    def refresh(s, container):
-        if s.attach:
-            s.attach.delete()
-        s.attach = s.view.ScrollField(
-            parent=s.parent
-        )
-
-        new = {} # New structure
-        if container:
-            for todo in container:
-                grp = todo.metadata["group"]
-                grp = grp if grp else ["none"]
-                for g in grp:
-                    new[g] = new.get(g, {})
-                    new[g][todo] = None
-            add, remove = s.diffStructure(new, s.todoStructure)
-            # TODO: Add logic to deal with differences
-
-            # Too many differences. Build em!
-            s.todoStructure = new
-            s.container = container
-            for group in sorted(s.todoStructure.keys()):
-                if group != "none":
-                    grp = s.view.CollapsableGroup(
-                        attributes={
-                            "label"     : group,
-                            "position"  : ""
-                        },
-                        events={
-                            "position"  : lambda x: x
-                        },
-                        parent=s.attach
-                    )
-                    for todo in sorted(s.todoStructure[group].keys(), key=lambda x: x.label):
-                        s.todoStructure[group][todo] = s.addTodo(grp, todo)
-            if s.todoStructure.has_key("none"):
-                for todo in sorted(s.todoStructure["none"].keys(), key=lambda x: x.label):
-                    s.todoStructure["none"][todo] = s.addTodo(s.attach, todo)
-
-    def diffStructure(s, new, old):
-        """
-        Compare group differences between two structures to determine GUI updates.
-        """
-        add = {}
-        remove = {}
-        # Get difference between groups
-        newGrp = set(new.keys())
-        oldGrp = set(old.keys())
-        addGrp = newGrp.difference(oldGrp)
-        delGrp = oldGrp.difference(newGrp)
-        for grp in newGrp.union(oldGrp):
-            if grp in addGrp: # New group
-                add[grp] = set(new[grp].keys())
-            elif grp in delGrp: # Whole group removed
-                remove[grp] = set(old[grp].keys())
-            else: # Test intergroup for changes
-                chk1 = set(new[grp].keys())
-                chk2 = set(old[grp].keys())
-                addChk = chk1.difference(chk2)
-                delChk = chk2.difference(chk1)
-                if addChk:
-                    add[grp] = addChk
-                if delChk:
-                    remove[grp] = delChk
-        return add, remove
-
-
-    def addTodo(s, parent, todo):
-        """
-        Add a Todo Element to the Scroller
-        """
-        layout = s.view.HorizontalLayout(
-            parent=parent
-        )
-        label = todo.label
-        todoView = s.view.Todo(
-            attributes={
-                "label"         : label,
-                "annotation"    : "Click to check off and save.\nTODO: %s" % label,
-                "icon"          : "fileSave.png",
-                "editIcon"      : "setEdEditMode.png",
-                "editAnnotaion" : "Edit Task.",
-                "delIcon"       : "removeRenderable.png",
-                "delAnnotation" : "Delete Todo without saving."
-                },
-            events={
-                "complete"  : lambda x: s.todoComplete(todo, todoView, todoEdit, layout),
-                "special"   : lambda x: s.todoSpecial(todo, todoView, todoEdit, layout),
-                "edit"      : lambda x: s.todoModeSwitch(todo, todoView, todoEdit, layout),
-                "delete"    : lambda x: s.todoDelete(todo, todoView, todoEdit, layout),
-            },
-            parent=layout
-        )
-        todoEdit = s.view.TodoEdit(
-            attributes={
-                "text"  : todo.task,
-                "label" : "Update"
-            },
-            events={
-                "edit"  : lambda x: s.todoModeSwitch(todo, todoView, todoEdit, layout)
-            },
-            parent=layout,
-            visible=False
-        )
-        return (layout, todoView, todoEdit)
-
-    def todoModeSwitch(s, todo, todoView, todoEdit, layout):
-        view = todoView.visible
-        edit = todoEdit.visible
-        if view: # Switching off the viewer
-            task = todo.task
-            todoView.visible = False
-            todoEdit.visible = True
-            todoEdit.text = task
-        else: # Switching from edit mode back to viewer
-            task = todoEdit.text
-            try:
-                todo.task = task
-                s.refresh(s.container)
-            except AttributeError as e:
-                s.view.Notice(
-                    attributes={
-                        "title"     : "Uh oh...",
-                        "message"   : str(e)
-                    }
-                )
-
-    def todoComplete(s, todo, todoView, todoEdit, layout):
-        print "Task Complete %s: %s." % (todo.id, todo.task)
-        s.todoDelete(todo, todoView, todoEdit, layout)
-
-    def todoSpecial(s, todo, todoView, todoEdit, layout):
-        print "Special Function not defined yet!"
-
-    def todoDelete(s, todo, todoView, todoEdit, layout):
-        print "Removing %s: %s." % (todo.id, todo.task)
-        s.container.remove(todo)
-        layout.delete()
-        todo.delete()
 
 
 Main("maya")

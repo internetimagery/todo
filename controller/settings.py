@@ -4,16 +4,16 @@
 
 class Settings(object):
     """
-    Interface to get and set settings.
+    Settings interface
     """
     def __init__(s, CRUD):
         s.crud = CRUD
-        s._settings = {}
-    def _prefix(s, k): return "setting_%s" % k
-    def get(s, k, default): return s.crud.read(s._prefix(k), default)
+        s.name = "TODO_SETTINGS"
+        s.data = s.crud.read(s.name, {})
+    def get(s, k, default): return s.data[k] if s.data.has_key(k) else default
     def set(s, k, v):
-        k = s._prefix(k)
+        s.data[k] = v
         try:
-            s.crud.update(k, v)
+            s.crud.update(s.name, s.data)
         except:
-            s.crud.create(k, v)
+            s.crud.create(s.name, s.data)
