@@ -150,7 +150,7 @@ class TodoScroller(object):
             events={
                 "complete"  : s.todoComplete,
                 "special"   : s.todoSpecial,
-                "edit"      : s.todoEdit,
+                "edit"      : lambda x: s.todoModeSwitch(todo, todoView, todoEdit),
                 "delete"    : s.todoDelete
             },
             parent=layout
@@ -160,11 +160,25 @@ class TodoScroller(object):
                 "text"  : todo.task
             },
             events={
-                "edit"  : lambda x: x
+                "edit"  : lambda x: s.todoModeSwitch(todo, todoView, todoEdit)
             },
-            parent=layout
+            parent=layout,
+            visible=False
         )
         return (layout, todoView, todoEdit)
+    def todoModeSwitch(s, todo, todoView, todoEdit):
+        view = todoView.visible
+        edit = todoEdit.visible
+        if view: # Switching off the viewer
+            task = todo.task
+            todoView.visible = False
+            todoEdit.visible = True
+            todoEdit.text = task
+        else: # Switching from edit mode back to viewer
+            task = todoEdit.text
+            todo.task = task
+            todoView.visible = True
+            todoEdit.visible = False
 
     def todoComplete(s, todo):
         print "complete"

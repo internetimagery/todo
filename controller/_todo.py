@@ -24,6 +24,7 @@ class Todo(object):
             s.parseTask(task)
             if not id: # No id provided. Expected to create Task
                 s.crud.create(s.id, task)
+                print "Creating %s: %s." % (s.id, task)
         elif id: # No task provided, but ID provided
             s._task = s.crud.read(id, "")
             print "Loaded task %s: %s." % (id, s._task)
@@ -66,6 +67,7 @@ class Todo(object):
             s._task = value
             s.crud.update(s.id, value)
             s.parseTask(value)
+            print "Updated %s: %s." % (s.id, value)
         def fdel(s):
             s.crud.delete(s.id)
             del s._task
