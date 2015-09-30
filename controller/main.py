@@ -128,28 +128,11 @@ class TodoScroller(object):
                 for g in grp:
                     new[g] = new.get(g, {})
                     new[g][todo] = None
-        add, remove = s.diffStructure(new, s.todoStructure)
+            add, remove = s.diffStructure(new, s.todoStructure)
+            # TODO: Add logic to deal with differences
 
-        if container:
-            # Compare differences to see if we need to update
-            oldContainer = set(s.container)
-            newContainer = set(container)
-            addedTodo = oldContainer.difference(newContainer)
-            removedTodo = newContainer.difference(oldContainer)
-            # Compare differences to groups
-
-
-
-
-
-        s.todoStructure = {} # Hold all info of our todos
-        if container:
-            for todo in container:
-                grp = todo.metadata["group"]
-                grp = grp if grp else ["none"]
-                for g in grp:
-                    s.todoStructure[g] = s.todoStructure.get(g, {})
-                    s.todoStructure[g][todo] = None
+            # Too many differences. Build em!
+            s.todoStructure = new
             for group in sorted(s.todoStructure.keys()):
                 if group != "none":
                     grp = s.view.CollapsableGroup(
@@ -170,7 +153,7 @@ class TodoScroller(object):
 
     def diffStructure(s, new, old):
         """
-        Compare differences between two structures to determine GUI updates.
+        Compare group differences between two structures to determine GUI updates.
         """
         add = {}
         remove = {}
@@ -240,24 +223,8 @@ class TodoScroller(object):
         else: # Switching from edit mode back to viewer
             task = todoEdit.text
             try:
-                groupsOld = todo.metadata["group"].copy() # Store groups
                 todo.task = task
-                todoEdit.visible = False
-                todoView.visible = True
-                todoView.label = todo.label
-                groupsNew = todo.metadata["group"]
-                # Check for changes to do minimum ammount of refreshing
-                removed = groupsOld.difference(groupsNew)
-                added = groupsNew.difference(groupsOld)
-                if added: # Some new groups were added. Need to refresh.
-                    print "Damn need to refresh..."
-                elif removed:
-                    for remove in removed: # Remove Todos directly
-                        if len(s.todoStructure[remove]) < 2: # Removing this todo will empty the group
-                            print "group:", s.todoStructure[remove][todo][0].parent
-                        else: # Remove just the Todo
-                            pass
-
+                s.refresh(s.todoStructure)
             except AttributeError as e:
                 s.view.Notice(
                     attributes={
@@ -265,7 +232,6 @@ class TodoScroller(object):
                         "message"   : str(e)
                     }
                 )
-
 
 
     def todoComplete(s, todo):
