@@ -15,7 +15,7 @@ class Element(object):
         s._events = events
         if parent:
             s.parent = parent
-            parent._children.append(s)
+            parent.children.append(s)
         else:
             s.parent = None
         s.children = []

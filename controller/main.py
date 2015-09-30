@@ -74,11 +74,12 @@ class Main(object):
 
     def createTodo(s, element):
         try:
-            s.container.append(cTodo.Todo(
+            todo = cTodo.Todo(
                 task=element.text,
                 CRUD=s.model.CRUD,
                 parsers=[] # TODO. Add in parsers
-            ))
+            )
+            s.container.append(todo)
             element.text = ""
             s.scroller.refresh(s.container)
         except AttributeError as e:
@@ -111,6 +112,7 @@ class TodoScroller(object):
         s.parent = parent
         s.attach = None
         s.todoStructure = {}
+        s.container = []
         s.refresh(container)
 
     def refresh(s, container):
@@ -133,6 +135,7 @@ class TodoScroller(object):
 
             # Too many differences. Build em!
             s.todoStructure = new
+            s.container = container
             for group in sorted(s.todoStructure.keys()):
                 if group != "none":
                     grp = s.view.CollapsableGroup(
@@ -189,20 +192,26 @@ class TodoScroller(object):
         label = todo.label
         todoView = s.view.Todo(
             attributes={
-                "label"      : label,
-                "annotation" : "Click to check off and save.\nTODO: %s" % label
+                "label"         : label,
+                "annotation"    : "Click to check off and save.\nTODO: %s" % label,
+                "icon"          : "fileSave.png",
+                "editIcon"      : "setEdEditMode.png",
+                "editAnnotaion" : "Edit Task.",
+                "delIcon"       : "removeRenderable.png",
+                "delAnnotation" : "Delete Todo without saving."
                 },
             events={
-                "complete"  : s.todoComplete,
-                "special"   : s.todoSpecial,
+                "complete"  : lambda x: s.todoComplete(todo, todoView, todoEdit, layout),
+                "special"   : lambda x: s.todoSpecial(todo, todoView, todoEdit, layout),
                 "edit"      : lambda x: s.todoModeSwitch(todo, todoView, todoEdit, layout),
-                "delete"    : s.todoDelete
+                "delete"    : lambda x: s.todoDelete(todo, todoView, todoEdit, layout),
             },
             parent=layout
         )
         todoEdit = s.view.TodoEdit(
             attributes={
-                "text"  : todo.task
+                "text"  : todo.task,
+                "label" : "Update"
             },
             events={
                 "edit"  : lambda x: s.todoModeSwitch(todo, todoView, todoEdit, layout)
@@ -224,7 +233,7 @@ class TodoScroller(object):
             task = todoEdit.text
             try:
                 todo.task = task
-                s.refresh(s.todoStructure)
+                s.refresh(s.container)
             except AttributeError as e:
                 s.view.Notice(
                     attributes={
@@ -234,13 +243,13 @@ class TodoScroller(object):
                 )
 
 
-    def todoComplete(s, todo):
+    def todoComplete(s, todo, todoView, todoEdit, layout):
         print "complete"
-    def todoSpecial(s, todo):
+    def todoSpecial(s, todo, todoView, todoEdit, layout):
         print "special"
-    def todoEdit(s, todo):
+    def todoEdit(s, todo, todoView, todoEdit, layout):
         print "edit"
-    def todoDelete(s, todo):
+    def todoDelete(s, todo, todoView, todoEdit, layout):
         print "delete"
 
 

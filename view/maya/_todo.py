@@ -10,10 +10,15 @@ class Todo(element.MayaElement):
     """
     The real hero of the show. The humble todo!
     Attributes:
-        label       : Name displayed on the Todo
-        annotation  : Description of the Todo
-        specialIcon : (optional) Icon for the special button
-        specialAnn  : (optional) Description for the special button
+        label           : Name displayed on the Todo
+        annotation      : Description of the Todo
+        icon            : Icon for the main button
+        editIcon        : Icon for the edit button
+        editAnnotaion   : Description of the edit button
+        delIcon         : Icon for the delete button
+        delAnnotation   : Description of the delete button
+        specialIcon     : (optional) Icon for the special button
+        specialAnn      : (optional) Description for the special button
     Events:
         complete    : Triggered when todo is marked off as complete
         special     : Triggered when the special button is pressed
@@ -29,7 +34,6 @@ class Todo(element.MayaElement):
         edit = s._events["edit"]
         s._root = cmds.rowLayout(nc=4, ad4=1, p=parent)
         s._labelBtn = cmds.iconTextButton(
-            image="fileSave.png",
             h=30,
             style="iconAndTextHorizontal",
             fn="fixedWidthFont",
@@ -42,26 +46,23 @@ class Todo(element.MayaElement):
             c=lambda: special(s)
             )
         s._editBtn = cmds.iconTextButton(
-            image="setEdEditMode.png",
             style="iconOnly",
             w=30,
-            ann="Edit Todo.",
             c=lambda: edit(s)
             )
         s._deleteBtn = cmds.iconTextButton(
-            image="removeRenderable.png",
             style="iconOnly",
             w=30,
-            ann="Delete Todo without saving.",
             c=lambda: delete(s)
             )
     def _GUI_Update(s, attr):
-        if attr == "label" or attr == "annotation" or attr == None:
+        if attr == "label" or attr == "annotation" or attr == "icon" or attr == None:
             cmds.iconTextButton(
                 s._labelBtn,
                 e=True,
                 l=s._attr["label"],
-                ann=s._attr["annotation"]
+                ann=s._attr["annotation"],
+                image=s._attr["icon"]
             )
         if attr == "specialIcon" or attr == "specialAnn" or attr == None:
             managed = True if s._attr["specialIcon"] and s._attr["specialAnn"] else False
@@ -72,6 +73,21 @@ class Todo(element.MayaElement):
                 image=s._attr["specialIcon"] if s._attr["specialIcon"] else"vacantCell.png",
                 ann=s._attr["specialAnn"] if s._attr["specialAnn"] else "You cannot use this button."
                 )
+        if attr == "editAnnotaion" or attr == "editIcon" or attr == None:
+            cmds.iconTextButton(
+                s._editBtn,
+                e=True,
+                ann=s._attr["editAnnotaion"],
+                image=s._attr["editIcon"]
+            )
+        if attr == "delAnnotation" or attr == "delIcon" or attr == None:
+            cmds.iconTextButton(
+                s._deleteBtn,
+                e=True,
+                ann=s._attr["delAnnotation"],
+                image=s._attr["delIcon"]
+            )
+
     def _GUI_Delete(s):
         """
         Overriding deletion for a fancy removal animation.
@@ -90,24 +106,34 @@ class TodoEdit(element.MayaElement):
     A todo in edit mode. Letting you edit inline.
     Attributes:
         text    : Text in the text box
+        label   : Name on the button
     Events:
         edit    : Triggered on text edit
     """
     def _GUI_Create(s, parent):
         edit = s._events["edit"]
-        s._root = cmds.textFieldButtonGrp(
-            p=parent,
-            bl="Update",
-            h=30,
-            tcc=s.updateText,
-            cc=lambda x: edit(s), # TODO THIS MIGHT CAUSE A CRASH IF REMOVED ON THIS FUNCTION
-            bc=lambda: edit(s)
+        s._root = cmds.rowLayout(nc=2, adj=1, p=parent)
+        s._txt = cmds.textField(
+            h=30
         )
-    def updateText(s, text):
-        s._attr["text"] = text
+        s._btn = cmds.button(
+            c=lambda x: s._events["edit"](s)
+        )
     def _GUI_Update(s, attr):
-        cmds.textFieldButtonGrp(
-            s._root,
-            e=True,
-            tx=s._attr["text"]
+        if attr == "text" or attr == None:
+            cmds.textField(
+                s._txt,
+                e=True,
+                tx=s._attr["text"]
             )
+        if attr == "label" or attr == None:
+            cmds.button(
+                s._btn,
+                e=True,
+                l=s._attr["label"]
+            )
+    def _GUI_Read(s, attr):
+        if attr == "text":
+            return cmds.textField(s._txt, q=True, tx=True)
+        else:
+            return s._attr[attr]

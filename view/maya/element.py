@@ -13,12 +13,14 @@ class MayaElement(todo.view.element.Element):
         except RuntimeError:
             pass
     def _GUI_Visible(s, state):
-        if cmds.layout(s._root, ex=True):
-            cmds.layout(s._root, e=True, m=state)
-        elif cmds.control(s._root, ex=True):
-            cmds.control(s._root, e=True, m=state)
+        if s._root:
+            if cmds.layout(s._root, ex=True):
+                cmds.layout(s._root, e=True, m=state)
+            elif cmds.control(s._root, ex=True):
+                cmds.control(s._root, e=True, m=state)
     def _GUI_Enable(s, state):
-        if cmds.layout(s._root, ex=True):
-            cmds.layout(s._root, e=True, en=state)
-        elif cmds.control(s._root, ex=True):
-            cmds.control(s._root, e=True, en=state)
+        if s._root:
+            if cmds.layout(s._root, ex=True):
+                cmds.layout(s._root, e=True, en=state)
+            elif cmds.control(s._root, ex=True):
+                cmds.control(s._root, e=True, en=state)

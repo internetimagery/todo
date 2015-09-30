@@ -19,9 +19,9 @@ class TextButtonVertical(element.MayaElement):
         trigger = s._events["trigger"]
         s._attr["text"] = s._attr.get("text", "")
         s._root = cmds.columnLayout(adj=True, p=parent)
-        s._textfield = cmds.textFieldGrp(
+        s._textfield = cmds.textField(
             h=30,
-            tcc=s.updateText,
+            ed=True,
             cc=lambda x: trigger(s)
             )
         s._button = cmds.button(
@@ -30,7 +30,7 @@ class TextButtonVertical(element.MayaElement):
             )
     def _GUI_Update(s, attr):
         annotation = s._attr["annotation"]
-        cmds.textFieldGrp(
+        cmds.textField(
             s._textfield,
             e=True,
             tx=s._attr["text"],
@@ -42,5 +42,8 @@ class TextButtonVertical(element.MayaElement):
             label=s._attr["label"],
             ann=annotation,
             )
-    def updateText(s, text):
-        s._attr["text"] = text
+    def _GUI_Read(s, attr):
+        if attr == "text":
+            return cmds.textField(s._textfield, q=True, tx=True)
+        else:
+            return s._attr[attr]
