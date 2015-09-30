@@ -26,11 +26,21 @@ class Main(object):
         s.model = model
         s.view = view
         s.settings = cSettings.Settings(view)
-        s.container = [cTodo.Todo(
-            CRUD=s.model.CRUD,
-            id=t,
-            parsers=[]
-            ) for t in s.model.CRUD.read() if re.match(r"^TODO_[\d\.]+", t)]
+        s.container = []
+        keys = s.model.CRUD.read() # Initialize our Todos
+        if keys:
+            for key in keys:
+                if re.match(r"^TODO_[\d\.]+", key):
+                    try:
+                        s.container.append(cTodo.Todo(
+                            CRUD=s.model.CRUD,
+                            id=key,
+                            parsers=[]
+                            )
+                        )
+                    except AttributeError as e:
+                        print "Error loading %s: %s" % (key, e)
+
         s.window = s.view.Window(
             attributes={
                 "title": title
@@ -169,16 +179,24 @@ class TodoScroller(object):
     def todoModeSwitch(s, todo, todoView, todoEdit):
         view = todoView.visible
         edit = todoEdit.visible
-        if view: # Switching off the viewer
-            task = todo.task
-            todoView.visible = False
-            todoEdit.visible = True
-            todoEdit.text = task
-        else: # Switching from edit mode back to viewer
-            task = todoEdit.text
-            todo.task = task
-            todoView.visible = True
-            todoEdit.visible = False
+        try:
+            if view: # Switching off the viewer
+                task = todo.task
+                todoView.visible = False
+                todoEdit.visible = True
+                todoEdit.text = task
+            else: # Switching from edit mode back to viewer
+                task = todoEdit.text
+                todo.task = task
+                todoView.visible = True
+                todoEdit.visible = False
+        except AttributeError as e:
+            s.view.Notice(
+                attributes={
+                    "title"     : "Uh oh...",
+                    "message"   : str(e)
+                }
+            )
 
     def todoComplete(s, todo):
         print "complete"
