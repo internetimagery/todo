@@ -8,3 +8,4 @@ from todo.view.maya.textButtonVertical import TextButtonVertical
 from todo.view.maya.scrollField import ScrollField
 
 from todo.view.maya.title import Title
+from todo.view.maya.notice import Notice
