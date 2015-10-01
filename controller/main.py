@@ -35,7 +35,7 @@ class Main(object):
                 if re.match(r"^TODO_[\d\.]+", key):
                     try:
                         s.container.append(cTodo.Todo(
-                            CRUD=s.model.CRUD,
+                            model=s.model,
                             id=key,
                             parsers=s.parsers
                             )
@@ -45,7 +45,8 @@ class Main(object):
 
         s.window = s.view.Window(
             attributes={
-                "title": title
+                "name"  : "TODO_WINDOW",
+                "title" : title
             }
         )
         # Handle the Todo and Settings page changes
@@ -84,7 +85,7 @@ class Main(object):
         try:
             todo = cTodo.Todo(
                 task=element.text,
-                CRUD=s.model.CRUD,
+                model=s.model,
                 parsers=s.parsers
             )
             s.container.append(todo)

@@ -8,7 +8,7 @@ class Group(parser.Parser):
     def start(s):
         s.description = "Todos Grouped. This is a special Parser."
         s.name = "group"
-        s.icon = ""
+        s.icon = "todo.delete"
         s.priority = 0
         s.tags = set() # Store groups
     def update(s, token):

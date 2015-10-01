@@ -72,7 +72,7 @@ class Todo(element.MayaElement):
                 image=s._attr["specialIcon"] if s._attr["specialIcon"] else"vacantCell.png",
                 ann=s._attr["specialAnn"] if s._attr["specialAnn"] else "You cannot use this button."
                 )
-        if attr == "editAnnotaion" attr == "editIcon" or attr == None:
+        if attr == "editAnnotaion" or attr == "editIcon" or attr == None:
             cmds.iconTextButton(
                 s._editBtn,
                 e=True,

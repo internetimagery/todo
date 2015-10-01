@@ -2,8 +2,6 @@
 # Created 30/09/15 Jason Dixon
 # http://internetimagery.com
 
-from todo.images import icon
-
 class TodoScroller(object):
     """
     Todos displayed in scroll field
@@ -110,10 +108,10 @@ class TodoScroller(object):
         todoAttributes={
             "label"         : label,
             "annotation"    : "Click to check off and save.\nTODO: %s" % label,
-            "icon"          : s.model.icon["todo.save"]
-            "editIcon"      : s.model.icon["todo.edit"]
+            "icon"          : s.model.icon["todo.save"],
+            "editIcon"      : s.model.icon["todo.edit"],
             "editAnnotaion" : "Edit Task.",
-            "delIcon"       : s.model.icon["todo.delete"]
+            "delIcon"       : s.model.icon["todo.delete"],
             "delAnnotation" : "Delete Todo without saving."
             }
         if todo.special:
@@ -161,7 +159,7 @@ class TodoScroller(object):
                     todoView.visible = True
                     todoView.label = todo.label
                     if todo.special:
-                        todoView.specialIcon = todo.special.icon
+                        todoView.specialIcon = s.model.icon[todo.special.icon]
                         todoView.specialAnn = todo.special.description
                 else:
                     s.refresh(s.container)

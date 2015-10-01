@@ -21,13 +21,14 @@ class Object(Parser):
             pass
         return token
     def run(s):
+        print "RUNNING", s.objects
         if s.objects:
             def select(objs):
                 cmds.select(objs, r=True)
             if 1 < len(s.objects):
                 query(s.objects, select)
             else:
-                select(s.objects)
+                select(list(s.objects))
 
 def query(objects, callback):
     """

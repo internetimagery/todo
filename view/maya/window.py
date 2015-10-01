@@ -7,6 +7,7 @@ class Window(element.MayaElement):
     """
     Empty Main window with docking functionality. Woo!
     Attributes:
+        name    : Name of the window element
         title   : Title of the window
         location: (optional) Starting Dock location
     """
@@ -14,11 +15,12 @@ class Window(element.MayaElement):
         """
         Build Empty window that docks.
         """
-        name = "window_%s" % s._attr["title"] # Name of the window to keep only one window open
+        name = s._attr["name"]
         s.allowed = ["left", "right"] # Allowed docking areas
         s.settingsPath = os.path.join(os.path.dirname(__file__), "docklocation.settings")
         s._attr["location"] = s._attr.get("location", s.getLocation())
         if cmds.dockControl(name, ex=True):
+            print "WINDOW EXISTS. REPLACING!"
             cmds.deleteUI(name)
         window = cmds.window(rtf=True)
         s._attach = cmds.columnLayout(adj=True) # Attachment Point
