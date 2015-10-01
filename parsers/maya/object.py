@@ -7,7 +7,7 @@ import maya.cmds as cmds
 
 class Object(Parser):
     def start(s):
-        s.icon = "centerCurrentTime.png"
+        s.icon = "selectByObject.png"
         s.name = "object"
         s.objects = []
     def update(s, token):
