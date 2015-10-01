@@ -112,23 +112,30 @@ class File(_file.File):
     def _FILE_Save(s, todo):
         path = s._FILE_Running()
         if path:
-            # realpath = os.path.realpath(path)
-            def pretendArchive():
-                print "FILE ARCHIVE TO BE DONE"
-            process = cmds.scriptJob(e=['SceneSaved', pretendArchive], ro=True)
-            try:
-                message = """
+            if todo:
+                # realpath = os.path.realpath(path)
+                def pretendArchive():
+                    print "FILE ARCHIVE TO BE DONE"
+                process = cmds.scriptJob(e=['SceneSaved', pretendArchive], ro=True)
+                try:
+                    message = """
 <div>- This Scene was last saved on <em>%(time)s</em>.</div>
 <div>- Completing the task: <code>%(todo)s</code></div>
 <div>- The file <strong>has not been modified since.</strong></div><br>
 """ % {"time": time.ctime(), "todo": todo.label}
-                with Popup(message):
-                    cmds.file(save=True)  # Save the scene
-                return True
-            except RuntimeError as e:  # If scene save was canceled or failed. Reset everything
-                print "Warning: %s" % e
-                if cmds.scriptJob(ex=process):
-                    cmds.scriptJob(kill=process)
+                    with Popup(message):
+                        cmds.file(save=True)  # Save the scene
+                    return True
+                except RuntimeError as e:  # If scene save was canceled or failed. Reset everything
+                    print "Warning: %s" % e
+                    if cmds.scriptJob(ex=process):
+                        cmds.scriptJob(kill=process)
+            else:
+                try:
+                    cmds.file(save=True)
+                    return True
+                except RuntimeError as e:
+                    print "Warning: %s" % e
         else: # Nothing in the scene to save
             return True
 
