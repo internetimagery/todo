@@ -27,6 +27,7 @@ class CRUD(crud.CRUD):
         else:
             cmds.fileInfo(k, json.dumps(v))
         s.cache[k] = v
+        cmds.file(mf=True)
         return v
     """
     Get data

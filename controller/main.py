@@ -7,11 +7,11 @@ import random
 
 import todo.quotes
 
-import todo.controller._todo as cTodo
 import todo.controller.todoContainer as cTodoContainer
 import todo.controller.todoScroller as cTodoScroller
 import todo.controller.settings as cSettings
 import todo.controller.panel as cPanel
+import todo.controller._todo as cTodo
 
 
 class Main(object):
