@@ -32,7 +32,7 @@ class TodoScroller(object):
         s.groupPos = {} # Track group open close state
         if container:
             for todo in container:
-                grp = todo.metadata["group"]
+                grp = todo.groups
                 grp = grp if grp else ["none"]
                 for g in grp:
                     new[g] = new.get(g, {})

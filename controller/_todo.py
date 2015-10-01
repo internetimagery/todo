@@ -4,6 +4,7 @@
 
 import time
 import shlex
+import todo.parsers.group as defaultParser
 
 class Todo(object):
     """
@@ -15,9 +16,10 @@ class Todo(object):
     """
     def __init__(s, CRUD, id=None, task="", parsers=[]):
         s.crud = CRUD
-        s.parsers = [parseGroups] + parsers
-        s.metadata = {}
+        s.parsers = [defaultParser.Group] + parsers
         s.label = ""
+        s.groups = set()
+        s.special = None
         s.id = id if id else "TODO_%s" % time.time()
         if task: # We're given a task. Parse it out.
             s._task = task
@@ -37,18 +39,19 @@ class Todo(object):
         Parse out metadata from the task
         """
         if task:
-            metadata = {}
+            parsers = [p() for p in s.parsers] # init parsers
             label = ""
             tokens = shlex.split(task) # break into tokens
-            for parse in s.parsers:
-                tokens, meta = parse(tokens)
-                if meta:
-                    metadata = dict(metadata, **meta)
-            if tokens:
-                label = " ".join(tokens)
-            if label:
-                s.label = label
-                s.metadata = metadata
+            filteredTokens = []
+            for token in tokens:
+                for p in parsers:
+                    token = p.update(token) if token else None
+                if token:
+                    filteredTokens.append(token)
+            if filteredTokens:
+                s.label = " ".join(filteredTokens)
+                s.groups = parsers[0].tags # Get groups
+                s.special = sorted(parsers[1:], key=lambda x: x.priority)[-1] if 1 < len(parsers) else None
                 return
         raise AttributeError, "Task is empty"
 
@@ -73,17 +76,3 @@ class Todo(object):
             del s._task
         return locals()
     task = property(**task())
-
-def parseGroups(tokens):
-    """
-    Parse out groups from tasks. Also serves as an example parser...
-    """
-    tags = set()
-    filteredToken = []
-    for token in tokens:
-        # Pull out #hashtags
-        if 1 < len(token) and token[:1] == "#":
-            tags.add(token[1:])
-        else:
-            filteredToken.append(token)
-    return filteredToken, {"group": tags}

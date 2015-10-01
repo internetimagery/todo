@@ -2,7 +2,7 @@
 # Created 30/09/15 Jason Dixon
 # http://internetimagery.com
 
-class CRUD_Manager(object):
+class CRUD(object):
     """
     Override with software specific data operations
     """

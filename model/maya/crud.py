@@ -6,7 +6,7 @@ import json
 import maya.cmds as cmds
 import todo.model.crud as crud
 
-class CRUD_Manager(crud.CRUD_Manager):
+class CRUD(crud.CRUD):
     """
     Store information in a Maya scene
     """
@@ -49,4 +49,4 @@ class CRUD_Manager(crud.CRUD_Manager):
         cmds.fileInfo(rm=k)
         del s.cache[k]
 
-CRUD = CRUD_Manager() # Export out our CRUD
+CRUD = CRUD() # Export out our CRUD

@@ -107,6 +107,4 @@ class Main(object):
             },
             parent=element
         )
-
-
 Main("maya")
