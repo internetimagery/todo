@@ -5,93 +5,29 @@
 import maya.cmds as cmds
 import todo.model._file as _file
 import os.path
+import base64
+import random
+import image
+import time
 
-class File(_file.File):
+def embedImage():
     """
-    File functionality
+    Grab a random image and embed it in the scene.
     """
-    def _FILE_Setup(s):
-        s.extensions = [".ma", ".mb"]
-
-    def _FILE_Running(s):
-        f = cmds.file(q=True, sn=True)
-        return f if f else ""
-
-    def _FILE_Load(s, path):
-        if path:
-            realpath = os.path.realpath(path)
-            if os.path.isfile(realpath):
-                if cmds.file(mf=True, q=True):  # File is modified. Need to prompt a save.
-                    answer = cmds.confirmDialog(
-                        t="Save Changes",
-                        m="Save changes to %s" % "file",
-                        b=["Save", "Don't Save", "Cancel"],
-                        db="Save",
-                        cb="Cancel",
-                        ds="Cancel"
-                        )
-                    if answer == "Save":
-                        if not path:
-                            loc = cmds.fileDialog2(ds=2, sff="Maya ASCII", ff="Maya Files (*.ma *.mb);;Maya ASCII (*.ma);;Maya Binary (*.mb);;")
-                            if loc:
-                                cmds.file(rn=loc[0])
-                            else:
-                                return
-                        s._FILE_Save(None)
-                    elif answer == "Cancel":
-                        return
-                cmds.file(path, o=True, f=True)
-                return True
-        print "Could not open file: \"%s\"" % path
-
-    def _FILE_Save(s, todo):
-        path = s._FILE_Running()
-        if path:
-            # realpath = os.path.realpath(path)
-            try:
-                cmds.file(save=True)
-                return True
-            except RuntimeError as e:
-                print "Warning: %s" % e
-        else:
-            "Could not save scene."
-
-    def _FILE_SaveAs(s, todo, path):
-        if path:
-            cmds.file(rn=path)
-            return s._FILE_Save(todo)
-        else:
-            print "No path given to save."
-File = File()
-
-class safeOut(object):
-    """
-    Protect output during threads
-    """
-    def __init__(s):
-        s.oldOut = sys.stdout
-        sys.stdout = s
-
-    def write(s, *t):
-        t = "".join(t)
-        if len(t.rstrip()):
-            utils.executeDeferred(lambda: s.oldOut.write("%s\n" % t))
-
-    def __enter__(s):
-        return s
-
-    def __exit__(s, errType, errVal, trace):
-        sys.stdout = s.oldOut
-        if errType:
-            s.write("Uh oh... there was a problem. :(")
-            s.write("%s :: %s" % (errType.__name__, errVal))
-            for t in traceback.format_tb(trace):
-                s.write(t)
-        return True
+    path = os.path.join(os.path.dirname(__file__), "images")
+    img = random.choice([
+        image.Icon["assistant.1"],
+        image.Icon["assistant.2"],
+        image.Icon["assistant.3"],
+        ])
+    with open(img, "rb") as f:
+        tag = "<img src=\\\"data:image/png;base64,%s\\\">" % base64.b64encode(f.read())
+    return "cmds.text(hl=True, l=\"%s\", h=100, w=100)" % tag
+    # return "cmds.iconTextStaticLabel(image=\"envChrome.svg\", h=100, w=100)  # file.svg looks nice too..."
 
 class Popup(object):
     """
-    Create a one time popup
+    Create a one time popup. Fancy!
     """
     def __init__(s, message):
         s.uid = "TODO_POPUP_%s" % int((time.time() * 100))  # Generate unique ID
@@ -135,16 +71,96 @@ cmds.fileInfo(rm=uid)
             cmds.delete(s.job)
 
 
-#             process = cmds.scriptJob(e=['SceneSaved', performArchive], ro=True)
-#             try:
-#                 message = """
-# <div>- This Scene was last saved on <em>%(time)s</em>.</div>
-# <div>- Completing the task: <code>%(todo)s</code></div>
-# <div>- The file <strong>has not been modified since.</strong></div><br>
-# """ % {"time": time.ctime(), "todo": tempmeta["label"]}
-#                 with Popup(message):
-#                     cmds.file(save=True)  # Save the scene
-#             except RuntimeError:  # If scene save was canceled or failed. Reset everything
-#                 if cmds.scriptJob(ex=process):
-#                     cmds.scriptJob(kill=process)
-#                 s.data[uid] = temp
+class File(_file.File):
+    """
+    File functionality
+    """
+    def _FILE_Setup(s):
+        s.extensions = [".ma", ".mb"]
+
+    def _FILE_Running(s):
+        f = cmds.file(q=True, sn=True)
+        return f if f else ""
+
+    def _FILE_Load(s, path):
+        if path:
+            realpath = os.path.realpath(path)
+            if os.path.isfile(realpath):
+                if cmds.file(mf=True, q=True):  # File is modified. Need to prompt a save.
+                    answer = cmds.confirmDialog(
+                        t="Save Changes",
+                        m="Save changes to %s" % "file",
+                        b=["Save", "Don't Save", "Cancel"],
+                        db="Save",
+                        cb="Cancel",
+                        ds="Cancel"
+                        )
+                    if answer == "Save":
+                        if not path:
+                            loc = cmds.fileDialog2(ds=2, sff="Maya ASCII", ff="Maya Files (*.ma *.mb);;Maya ASCII (*.ma);;Maya Binary (*.mb);;")
+                            if loc:
+                                cmds.file(rn=loc[0])
+                            else:
+                                return
+                        s._FILE_Save(None)
+                    elif answer == "Cancel":
+                        return
+                cmds.file(path, o=True, f=True)
+                return True
+        print "Could not open file: \"%s\"" % path
+
+    def _FILE_Save(s, todo):
+        path = s._FILE_Running()
+        if path:
+            # realpath = os.path.realpath(path)
+            def pretendArchive():
+                print "FILE ARCHIVE TO BE DONE"
+            process = cmds.scriptJob(e=['SceneSaved', pretendArchive], ro=True)
+            try:
+                message = """
+<div>- This Scene was last saved on <em>%(time)s</em>.</div>
+<div>- Completing the task: <code>%(todo)s</code></div>
+<div>- The file <strong>has not been modified since.</strong></div><br>
+""" % {"time": time.ctime(), "todo": todo.label}
+                with Popup(message):
+                    cmds.file(save=True)  # Save the scene
+                return True
+            except RuntimeError as e:  # If scene save was canceled or failed. Reset everything
+                print "Warning: %s" % e
+                if cmds.scriptJob(ex=process):
+                    cmds.scriptJob(kill=process)
+        else: # Nothing in the scene to save
+            return True
+
+    def _FILE_SaveAs(s, todo, path):
+        if path:
+            cmds.file(rn=path)
+            return s._FILE_Save(todo)
+        else:
+            print "No path given to save."
+File = File()
+
+class safeOut(object):
+    """
+    Protect output during threads
+    """
+    def __init__(s):
+        s.oldOut = sys.stdout
+        sys.stdout = s
+
+    def write(s, *t):
+        t = "".join(t)
+        if len(t.rstrip()):
+            utils.executeDeferred(lambda: s.oldOut.write("%s\n" % t))
+
+    def __enter__(s):
+        return s
+
+    def __exit__(s, errType, errVal, trace):
+        sys.stdout = s.oldOut
+        if errType:
+            s.write("Uh oh... there was a problem. :(")
+            s.write("%s :: %s" % (errType.__name__, errVal))
+            for t in traceback.format_tb(trace):
+                s.write(t)
+        return True
