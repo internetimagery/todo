@@ -2,6 +2,8 @@
 # Created 30/09/15 Jason Dixon
 # http://internetimagery.com
 
+import _todo as cTodo
+
 class TodoScroller(object):
     """
     Todos displayed in scroll field
@@ -172,11 +174,10 @@ class TodoScroller(object):
                     }
                 )
 
-    def todoCreate(s, task, id=None):
+    def todoCreate(s, task):
         todo = cTodo.Todo(
             view=s.view,
             model=s.model,
-            id=id,
             task=task,
             parsers=s.parsers
         )
@@ -184,13 +185,12 @@ class TodoScroller(object):
         s.refresh(s.container)
 
     def todoComplete(s, todo, todoView, todoEdit, layout):
-        cacheID = todo.id
         cacheTask = todo.task
         s.todoDelete(todo, todoView, todoEdit, layout)
         if s.completeCallback(todo):
             print "Task Complete %s: %s." % (todo.id, todo.task)
         else: # Save failed. Reinstate Todo
-            s.todoCreate(cacheTask, cacheID)
+            s.todoCreate(cacheTask)
 
     def todoSpecial(s, todo, todoView, todoEdit, layout):
         if todo.special:

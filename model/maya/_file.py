@@ -47,9 +47,12 @@ class File(_file.File):
     def _FILE_Save(s, todo):
         path = s._FILE_Running()
         if path:
-            realpath = os.path.realpath(path)
-            cmds.file(save=True)
-            return True
+            # realpath = os.path.realpath(path)
+            try:
+                cmds.file(save=True)
+                return True
+            except RuntimeError:
+                pass
         else:
             "Could not save scene."
 

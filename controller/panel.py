@@ -1,5 +1,4 @@
 # Panel functionality
-import todo.images as img
 import maya.cmds as cmds
 
 class Panel(object):

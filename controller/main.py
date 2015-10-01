@@ -60,6 +60,7 @@ class Main(object):
             s.view, # view
             s.model, # model
             s.settings, # settings
+            s.parsers, # parsers
             s.completeTodo # Todo complete callback
         )
         container = []

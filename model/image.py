@@ -15,9 +15,9 @@ Icon = {
     "todo.delete"     : img.Icons["brush_16"],
     # Todo special entires
     "todo.web"        : img.Icons["web_16"],
-    "todo.file"       : img.Icons["folder_16"]
+    "todo.file"       : img.Icons["folder_16"],
     # Helpful Assistants
-    "assistant.1"     : img.Icons["office_man"]
-    "assistant.2"     : img.Icons["office_woman"]
+    "assistant.1"     : img.Icons["office_man"],
+    "assistant.2"     : img.Icons["office_woman"],
     "assistant.3"     : img.Icons["office_woman_coffee"]
 }
