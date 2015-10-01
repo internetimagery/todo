@@ -61,7 +61,6 @@ class Main(object):
             s.model, # model
             s.settings, # settings
             s.parsers, # parsers
-            s.completeTodo # Todo complete callback
         )
         container = []
         keys = s.model.CRUD.read() # Initialize our Todos
@@ -94,17 +93,6 @@ class Main(object):
                     "message"   : str(e)
                 }
             )
-
-    def completeTodo(s, todo):
-        """
-        Todo is being checked off!
-        """
-        f = s.model.File.save(todo)
-        print "Saved and response:", f
-        if f:
-            return True
-        else:
-            return False
 
     def buildSettings(s, element):
         s.view.Title(
