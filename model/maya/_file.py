@@ -70,6 +70,30 @@ cmds.fileInfo(rm=uid)
         if cmds.objExists(s.job):
             cmds.delete(s.job)
 
+class safeOut(object):
+    """
+    Protect output during threads
+    """
+    def __init__(s):
+        s.oldOut = sys.stdout
+        sys.stdout = s
+
+    def write(s, *t):
+        t = "".join(t)
+        if len(t.rstrip()):
+            utils.executeDeferred(lambda: s.oldOut.write("%s\n" % t))
+
+    def __enter__(s):
+        return s
+
+    def __exit__(s, errType, errVal, trace):
+        sys.stdout = s.oldOut
+        if errType:
+            s.write("Uh oh... there was a problem. :(")
+            s.write("%s :: %s" % (errType.__name__, errVal))
+            for t in traceback.format_tb(trace):
+                s.write(t)
+        return True
 
 class File(_file.File):
     """
@@ -109,14 +133,16 @@ class File(_file.File):
                 return True
         print "Could not open file: \"%s\"" % path
 
-    def _FILE_Save(s, todo):
+    def _FILE_Save(s, todo, archive):
         path = s._FILE_Running()
         if path:
             if todo:
-                # realpath = os.path.realpath(path)
-                def pretendArchive():
-                    print "FILE ARCHIVE TO BE DONE"
-                process = cmds.scriptJob(e=['SceneSaved', pretendArchive], ro=True)
+                def fileArchive(): # Begin the archive process
+                    realpath = os.path.realpath(path)
+                    if archive:
+                        archive(realpath)
+
+                process = cmds.scriptJob(e=['SceneSaved', fileArchive], ro=True)
                 try:
                     message = """
 <div>- This Scene was last saved on <em>%(time)s</em>.</div>
@@ -146,28 +172,3 @@ class File(_file.File):
         else:
             print "No path given to save."
 File = File()
-
-class safeOut(object):
-    """
-    Protect output during threads
-    """
-    def __init__(s):
-        s.oldOut = sys.stdout
-        sys.stdout = s
-
-    def write(s, *t):
-        t = "".join(t)
-        if len(t.rstrip()):
-            utils.executeDeferred(lambda: s.oldOut.write("%s\n" % t))
-
-    def __enter__(s):
-        return s
-
-    def __exit__(s, errType, errVal, trace):
-        sys.stdout = s.oldOut
-        if errType:
-            s.write("Uh oh... there was a problem. :(")
-            s.write("%s :: %s" % (errType.__name__, errVal))
-            for t in traceback.format_tb(trace):
-                s.write(t)
-        return True

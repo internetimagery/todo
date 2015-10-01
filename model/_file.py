@@ -39,15 +39,15 @@ class File(object):
                     webbrowser.open(path)
         else:
             print "Could not load file: \"%s\"" % path
-    def save(s, todo=None, path=None):
+    def save(s, todo=None, path=None, archive=None):
         """
         Save file. If todo, then archive the file too.
         """
         curr = s._FILE_Running()
         if not path or curr == path: #saving over the same file
-            return s._FILE_Save(todo)
+            return s._FILE_Save(todo, archive)
         else: # Saving as a new file.
-            return s._FILE_SaveAs(todo, path)
+            return s._FILE_SaveAs(todo, path, archive)
 
     def _FILE_Setup(s):
         """
@@ -64,12 +64,12 @@ class File(object):
         Load a given file from a pathname
         """
         pass
-    def _FILE_Save(s, todo):
+    def _FILE_Save(s, todo, archive):
         """
         Save currently open scene
         """
         pass
-    def _FILE_SaveAs(s, todo, path):
+    def _FILE_SaveAs(s, todo, path, archive):
         """
         Save currently open scene as a new file
         """

@@ -61,6 +61,7 @@ class Main(object):
             s.model, # model
             s.settings, # settings
             s.parsers, # parsers
+            s.completeTodo # Todo complete callback
         )
         container = []
         keys = s.model.CRUD.read() # Initialize our Todos
@@ -93,6 +94,14 @@ class Main(object):
                     "message"   : str(e)
                 }
             )
+
+    def completeTodo(s, todo):
+        """
+        Todo complete.
+        """
+        def archivetemp(path):
+            print "temp archive function", path
+        return s.model.File.save(todo, archivetemp)
 
     def buildSettings(s, element):
         s.view.Title(
