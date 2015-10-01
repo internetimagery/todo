@@ -4,6 +4,7 @@
 
 import maya.cmds as cmds
 import todo.model._file as _file
+import os.path
 
 class File(_file.File):
     """
@@ -13,22 +14,47 @@ class File(_file.File):
         s.extensions = [".ma", ".mb"]
 
     def _FILE_Running(s):
-        """
-        Get the currently active filename or return if unsaved.
-        """
-        pass
+        f = cmds.file(q=True, sn=True)
+        return f if f else ""
+
     def _FILE_Load(s, path):
-        """
-        Load a given file from a pathname
-        """
-        pass
+        if path:
+            realpath = os.path.realpath(path)
+            if os.path.isfile(realpath):
+                if cmds.file(mf=True, q=True):  # File is modified. Need to prompt a save.
+                    answer = cmds.confirmDialog(
+                        t="Save Changes",
+                        m="Save changes to %s" % "file",
+                        b=["Save", "Don't Save", "Cancel"],
+                        db="Save",
+                        cb="Cancel",
+                        ds="Cancel"
+                        )
+                    if answer == "Save":
+                        if not path:
+                            loc = cmds.fileDialog2(ds=2, sff="Maya ASCII", ff="Maya Files (*.ma *.mb);;Maya ASCII (*.ma);;Maya Binary (*.mb);;")
+                            if loc:
+                                cmds.file(rn=loc[0])
+                            else:
+                                return
+                        s._FILE_Save(None)
+                    elif answer == "Cancel":
+                        return
+                cmds.file(path, o=True, f=True)
+                return
+        print "Could not open file: \"%s\"" % path
+
     def _FILE_Save(s, todo):
-        """
-        Save currently open scene
-        """
-        pass
+        path = s._FILE_Running()
+        if path:
+            realpath = os.path.realpath(path)
+            cmds.file(save=True)
+        else:
+            "Could not save scene."
+
     def _FILE_SaveAs(s, todo, path):
-        """
-        Save currently open scene as a new file
-        """
-        pass
+        if path:
+            cmds.file(rn=path)
+            s._FILE_Save(todo)
+        else:
+            print "No path given to save."
