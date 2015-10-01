@@ -22,6 +22,8 @@ class Range(Parser):
                     num2 = int(num2)
                     # We have succeeded in getting a range
                     s.ranges.append(sorted([num1, num2]))
+                    s.priority = 3
+                    s.description = "Go to frame range: %s" % "".join(["\n* %s - %s" % (r[0], r[1]) for r in s.ranges])
                 except ValueError:
                     pass
         s.buffer.append(token)

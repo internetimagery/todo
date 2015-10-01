@@ -12,10 +12,7 @@ class Todo(element.MayaElement):
     Attributes:
         label           : Name displayed on the Todo
         annotation      : Description of the Todo
-        icon            : Icon for the main button
-        editIcon        : Icon for the edit button
         editAnnotaion   : Description of the edit button
-        delIcon         : Icon for the delete button
         delAnnotation   : Description of the delete button
         specialIcon     : (optional) Icon for the special button
         specialAnn      : (optional) Description for the special button
@@ -34,6 +31,7 @@ class Todo(element.MayaElement):
         edit = s._events["edit"]
         s._root = cmds.rowLayout(nc=4, ad4=1, p=parent)
         s._labelBtn = cmds.iconTextButton(
+            image="fileSave.png",
             h=30,
             style="iconAndTextHorizontal",
             fn="fixedWidthFont",
@@ -46,11 +44,13 @@ class Todo(element.MayaElement):
             c=lambda: special(s)
             )
         s._editBtn = cmds.iconTextButton(
+            image="setEdEditMode.png",
             style="iconOnly",
             w=30,
             c=lambda: edit(s)
             )
         s._deleteBtn = cmds.iconTextButton(
+            image="removeRenderable.png",
             style="iconOnly",
             w=30,
             c=lambda: delete(s)
