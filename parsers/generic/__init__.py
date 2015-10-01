@@ -4,7 +4,9 @@
 
 def parsers():
     import web
+    import _file
     return [
-        web.Web
+        web.Web,
+        _file.File
         ]
 parsers = parsers()

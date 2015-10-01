@@ -4,12 +4,10 @@
 
 def parsers():
     import todo.parsers.generic as generic
-    import _file
     import frame
     import frameRange
     import _object
     return [
-        _file.File,
         frame.Frame,
         frameRange.Range,
         _object.Object
