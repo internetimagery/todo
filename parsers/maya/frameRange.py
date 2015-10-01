@@ -25,7 +25,10 @@ class Range(Parser):
                     # We have succeeded in getting a range
                     s.ranges.append(sorted([num1, num2]))
                     s.priority = 3
-                    s.description = "Go to frame range: %s" % "".join(["\n* %s - %s" % (r[0], r[1]) for r in s.ranges])
+                    if 1 < len(s.ranges):
+                        s.description = "Pick a frame range:" + "\n- ".join(["\n* %s" % r for r in s.ranges])
+                    else:
+                        s.description = "Go to frame range: %s - %s" % (s.ranges[0][0], s.ranges[0][1])
                     s.buffer = [] # flush the buffer
                 except ValueError:
                     pass

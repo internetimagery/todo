@@ -16,7 +16,10 @@ class Object(Parser):
             if obj:
                 s.objects |= set(obj)
                 s.priority = 5
-                s.description = "Select objects:%s" % "".join(["\n* %s" % o for o in s.objects])
+                if 1 < len(s.objects):
+                    s.description = "Select objects:" + "\n- ".join(["\n* %s" % o for o in s.objects])
+                else:
+                    s.description = "Select object: %s" % s.objects[0]
         except RuntimeError:
             pass
         return token

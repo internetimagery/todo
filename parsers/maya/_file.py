@@ -23,7 +23,10 @@ class File(Parser):
             path = os.path.realpath(os.path.join(s.root, token))
             if os.path.exists(path):
                 s.files.add(path)
-                s.description = "Open the files: %s" % ", ".join(s.files)
+                if 1 < len(s.files):
+                    s.description = "Open files:" + "\n- ".join(["\n* %s" % f for f in s.files])
+                else:
+                    s.description = "Open file: %s" % s.files[0]
                 s.priority += 2 # Higher priority if more files found
                 return os.path.basename(path)
         return token

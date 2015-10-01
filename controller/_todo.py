@@ -14,7 +14,8 @@ class Todo(object):
     id = id following format "TODO_123456"
     parsers = functions to parse out metadata from task
     """
-    def __init__(s, model, id=None, task="", parsers=[]):
+    def __init__(s, view, model, id=None, task="", parsers=[]):
+        s.view = view
         s.model = model
         s.parsers = [defaultParser.Group] + parsers
         s.label = ""
@@ -41,7 +42,7 @@ class Todo(object):
         if task:
             if 255 < len(task): # 255 character limit!
                 raise AttributeError, "Task is too long."
-            parsers = [p(s.model) for p in s.parsers] # init parsers
+            parsers = [p(s.view, s.model) for p in s.parsers] # init parsers
             label = ""
             tokens = shlex.split(task) # break into tokens
             filteredTokens = []

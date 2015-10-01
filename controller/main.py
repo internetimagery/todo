@@ -35,6 +35,7 @@ class Main(object):
                 if re.match(r"^TODO_[\d\.]+", key):
                     try:
                         s.container.append(cTodo.Todo(
+                            view=s.view,
                             model=s.model,
                             id=key,
                             parsers=s.parsers
@@ -84,8 +85,9 @@ class Main(object):
         """
         try:
             todo = cTodo.Todo(
-                task=element.text,
+                view=s.view,
                 model=s.model,
+                task=element.text,
                 parsers=s.parsers
             )
             s.container.append(todo)

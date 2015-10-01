@@ -18,7 +18,10 @@ class Web(Parser):
         if url.scheme and url.netloc:
             s.urls.add(token)
             s.priority += 10 # High priority for something so specific
-            s.description = "Open Urls: %s" % ", ".join(s.urls)
+            if 1 < len(s.urls):
+                s.description = "Open urls:" + "\n- ".join(["\n* %s" % u for u in s.urls])
+            else:
+                s.description = "Open url: %s" % s.urls[0]
             return url.netloc
         return token
     def run(s):
