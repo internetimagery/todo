@@ -21,7 +21,7 @@ class Web(Parser):
             if 1 < len(s.urls):
                 s.description = "Open urls:" + "\n- ".join(["\n* %s" % u for u in s.urls])
             else:
-                s.description = "Open url: %s" % s.urls[0]
+                s.description = "Open url: %s" % list(s.urls)[0]
             return url.netloc
         return token
     def run(s):

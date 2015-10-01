@@ -19,7 +19,7 @@ class Object(Parser):
                 if 1 < len(s.objects):
                     s.description = "Select objects:" + "\n- ".join(["\n* %s" % o for o in s.objects])
                 else:
-                    s.description = "Select object: %s" % s.objects[0]
+                    s.description = "Select object: %s" % list(s.objects)[0]
         except RuntimeError:
             pass
         return token

@@ -34,7 +34,13 @@ class CRUD(crud.CRUD):
     def read(s, k=None, default=None):
         if k:
             return s.cache[k] if k in s.cache else default
-        else:
+        else: # update cache on request for all data
+            for k, v in (lambda x: zip(x[::2], x[1::2]))(cmds.fileInfo(q=True)):
+                v = v.decode("unicode_escape")
+                try:
+                    s.cache[k] = json.loads(v)
+                except ValueError:
+                    s.cache[k] = v
             return s.cache.keys()
     """
     Update data

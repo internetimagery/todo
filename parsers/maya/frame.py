@@ -9,16 +9,16 @@ class Frame(Parser):
     def start(s):
         s.icon = "todo.frame"
         s.name = "frame"
-        s.frames = []
+        s.frames = set()
     def update(s, token):
         try:
             num = int(token)
-            s.frames.append(num)
+            s.frames.add(num)
             s.priority = 1
             if 1 < len(s.frames):
                 s.description = "Pick a frame:" + "\n- ".join(["\n* %s" % f for f in s.frames])
             else:
-                s.description = "Go to frame: %s" % s.frame[0]
+                s.description = "Go to frame: %s" % list(s.frame)[0]
         except ValueError:
             pass
         return token
@@ -29,7 +29,7 @@ class Frame(Parser):
             if 1 < len(s.frames):
                 query(s.frames, setFrame)
             else:
-                setFrame(s.frames[0])
+                setFrame(list(s.frames)[0])
 
 def query(item, callback):
     """
