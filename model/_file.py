@@ -17,7 +17,7 @@ class File(object):
         s.extensions = [] # extensions to check for compatability
         s._FILE_Setup()
     def load(s, path=None):
-        if path and os.path.isfile(path):
+        if path and os.path.exists(path):
             name, ext = os.path.splitext(path)
             if ext in s.extensions:
                 return s._FILE_Load(s, path) # Load file with software
