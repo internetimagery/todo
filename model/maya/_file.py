@@ -51,8 +51,8 @@ class File(_file.File):
             try:
                 cmds.file(save=True)
                 return True
-            except RuntimeError:
-                pass
+            except RuntimeError as e:
+                print "Warning: %s" % e
         else:
             "Could not save scene."
 

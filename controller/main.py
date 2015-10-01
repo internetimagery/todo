@@ -99,7 +99,9 @@ class Main(object):
         """
         Todo is being checked off!
         """
-        if s.model.File.save(todo):
+        f = s.model.File.save(todo)
+        print "Saved and response:", f
+        if f:
             return True
         else:
             return False

@@ -20,7 +20,7 @@ class File(object):
         if path and os.path.isfile(path):
             name, ext = os.path.splitext(path)
             if ext in s.extensions:
-                s._FILE_Load(s, path) # Load file with software
+                return s._FILE_Load(s, path) # Load file with software
             else: # Try opening the file with OS's software
                 try:
                     if sys.platform == "win32": # Window
@@ -45,9 +45,9 @@ class File(object):
         """
         curr = s._FILE_Running()
         if not path or curr == path: #saving over the same file
-            s._FILE_Save(todo)
+            return s._FILE_Save(todo)
         else: # Saving as a new file.
-            s._FILE_SaveAs(todo, path)
+            return s._FILE_SaveAs(todo, path)
 
     def _FILE_Setup(s):
         """
