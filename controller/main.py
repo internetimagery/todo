@@ -51,7 +51,8 @@ class Main(object):
         # Handle the Todo and Settings page changes
         cPanel.Panel(
             s.window, # Parent
-            s.view, # Interface
+            s.view, # view Interface
+            s.model, # model interface
             s.buildTodo, # Todo Page
             s.buildSettings # Settings Page
             )
@@ -70,6 +71,7 @@ class Main(object):
         s.scroller = cTodoScroller.TodoScroller(
             element, # parent
             s.view, # view
+            s.model, # model
             s.settings, # settings
             s.completeTodo # Todo complete callback
         )

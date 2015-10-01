@@ -7,7 +7,7 @@ import maya.cmds as cmds
 
 class Frame(Parser):
     def start(s):
-        s.icon = "centerCurrentTime.png"
+        s.icon = "todo.frame"
         s.name = "frame"
         s.frames = []
     def update(s, token):

@@ -10,7 +10,7 @@ import webbrowser
 class Web(Parser):
     def start(s):
         s.description = "Nothing to open."
-        s.icon = icon.get("web_16")
+        s.icon = "todo.web"
         s.name = "web"
         s.priority = 0 # Set at 0 and replace if token found
         s.urls = set()

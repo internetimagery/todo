@@ -13,7 +13,7 @@ import os
 class File(Parser):
     def start(s):
         s.description = "No files to open."
-        s.icon = "openScript.png"
+        s.icon = "todo.file"
         s.name = "file"
         s.files = set()
         filename = cmds.file(q=True, sn=True)

@@ -3,3 +3,4 @@
 # http://internetimagery.com
 
 from todo.model.maya.crud import CRUD
+from todo.model.maya.image import icon

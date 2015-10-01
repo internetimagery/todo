@@ -7,7 +7,7 @@ import maya.cmds as cmds
 
 class Range(Parser):
     def start(s):
-        s.icon = "traxFrameRange.png"
+        s.icon = "todo.range"
         s.name = "range"
         s.ranges = []
         s.buffer = []

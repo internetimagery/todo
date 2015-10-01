@@ -1,4 +1,4 @@
-# CRUD Interface to override for Todo persistance
+# CRUD Interface to override for Todo data persistance
 # Created 30/09/15 Jason Dixon
 # http://internetimagery.com
 

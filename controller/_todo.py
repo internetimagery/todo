@@ -14,8 +14,8 @@ class Todo(object):
     id = id following format "TODO_123456"
     parsers = functions to parse out metadata from task
     """
-    def __init__(s, CRUD, id=None, task="", parsers=[]):
-        s.crud = CRUD
+    def __init__(s, model, id=None, task="", parsers=[]):
+        s.model = model
         s.parsers = [defaultParser.Group] + parsers
         s.label = ""
         s.groups = set()
@@ -25,10 +25,10 @@ class Todo(object):
             s._task = task
             s.parseTask(task)
             if not id: # No id provided. Expected to create Task
-                s.crud.create(s.id, task)
+                s.model.CRUD.create(s.id, task)
                 print "Creating %s: %s." % (s.id, task)
         elif id: # No task provided, but ID provided
-            s._task = s.crud.read(id, "")
+            s._task = s.model.CRUD.read(id, "")
             print "Loaded task %s: %s." % (id, s._task)
             s.parseTask(s._task)
         else: # Neither task nor ID provided
@@ -41,7 +41,7 @@ class Todo(object):
         if task:
             if 255 < len(task): # 255 character limit!
                 raise AttributeError, "Task is too long."
-            parsers = [p() for p in s.parsers] # init parsers
+            parsers = [p(s.model) for p in s.parsers] # init parsers
             label = ""
             tokens = shlex.split(task) # break into tokens
             filteredTokens = []
@@ -62,7 +62,7 @@ class Todo(object):
         """
         Delete the Todo.
         """
-        s.crud.delete(s.id)
+        s.model.CRUD.delete(s.id)
 
     def task():
         doc = "A single todo Task"
@@ -72,10 +72,10 @@ class Todo(object):
             value = value.strip()
             s._task = value
             s.parseTask(value)
-            s.crud.update(s.id, value)
+            s.model.CRUD.update(s.id, value)
             print "Updated %s: %s." % (s.id, value)
         def fdel(s):
-            s.crud.delete(s.id)
+            s.model.CRUD.delete(s.id)
             del s._task
         return locals()
     task = property(**task())

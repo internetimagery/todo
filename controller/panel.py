@@ -6,9 +6,10 @@ class Panel(object):
     """
     Cotnrol the two panels, Todo and Settings
     """
-    def __init__(s, window, gui, todoCallback, settingsCallback):
+    def __init__(s, window, view, model, todoCallback, settingsCallback):
         s.window = window
-        s.gui = gui
+        s.view = view
+        s.model = model
         s.todoCallback = todoCallback
         s.settingsCallback = settingsCallback
         s.panel = None
@@ -16,11 +17,11 @@ class Panel(object):
     def buildSettings(s):
         if s.panel:
             s.panel.delete()
-        s.panel = s.gui.Panel(
+        s.panel = s.view.Panel(
             attributes={
                 "label"     : "<- Todo",
                 "annotation": "Click to return to your Todo list.",
-                "image"     : img.icon.get("settings_22")
+                "image"     : s.model.icon["panel.todo"]
             },
             events={
                 "trigger"   : s.buildTodo
@@ -31,11 +32,11 @@ class Panel(object):
     def buildTodo(s):
         if s.panel:
             s.panel.delete()
-        s.panel = s.gui.Panel(
+        s.panel = s.view.Panel(
             attributes={
                 "label"     : "Settings ->",
                 "annotation": "Click to view the Todo scripts settings. Settings are saved with the Maya scene, so you will need to set them for each scene.",
-                "image"     : img.icon.get("todo_22")
+                "image"     : s.model.icon["panel.settings"]
             },
             events={
                 "trigger"   : s.buildSettings

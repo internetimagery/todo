@@ -6,7 +6,8 @@ class Parser(object):
     """
     Single parser with requried information
     """
-    def __init__(s):
+    def __init__(s, model):
+        s.model = model
         s.description = "Replace this description with a relevant one."
         s.icon = "replaceme.png"
         s.name = "Base Parser. Replace me."

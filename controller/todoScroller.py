@@ -12,9 +12,10 @@ class TodoScroller(object):
     settings = settings interface
     completeCallback = run with the Todo when the todo is checked off
     """
-    def __init__(s, parent, view, settings, completeCallback):
+    def __init__(s, parent, view, model, settings, completeCallback):
         s.parent = parent
         s.view = view
+        s.model = model
         s.settings = settings
         s.completeCallback = completeCallback
         s.attach = None
@@ -109,14 +110,14 @@ class TodoScroller(object):
         todoAttributes={
             "label"         : label,
             "annotation"    : "Click to check off and save.\nTODO: %s" % label,
-            "icon"          : icon.get("save_16"), #"fileSave.png",
-            "editIcon"      : icon.get("todo_16"), #"setEdEditMode.png",
+            "icon"          : s.model.icon["todo.save"]
+            "editIcon"      : s.model.icon["todo.edit"]
             "editAnnotaion" : "Edit Task.",
-            "delIcon"       : icon.get("brush_16"), #"removeRenderable.png",
+            "delIcon"       : s.model.icon["todo.delete"]
             "delAnnotation" : "Delete Todo without saving."
             }
         if todo.special:
-            todoAttributes["specialIcon"] = todo.special.icon
+            todoAttributes["specialIcon"] = s.model.icon[todo.special.icon]
             todoAttributes["specialAnn"] = todo.special.description
         todoView = s.view.Todo(
             attributes=todoAttributes,

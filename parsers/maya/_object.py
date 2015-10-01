@@ -7,7 +7,7 @@ import maya.cmds as cmds
 
 class Object(Parser):
     def start(s):
-        s.icon = "selectByObject.png"
+        s.icon = "todo.object"
         s.name = "object"
         s.objects = set()
     def update(s, token):
