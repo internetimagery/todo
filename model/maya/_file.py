@@ -165,7 +165,7 @@ class File(_file.File):
         else: # Nothing in the scene to save
             return True
 
-    def _FILE_SaveAs(s, todo, path):
+    def _FILE_SaveAs(s, todo, path, archive):
         if path:
             cmds.file(rn=path)
             return s._FILE_Save(todo)

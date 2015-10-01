@@ -101,7 +101,10 @@ class Main(object):
         """
         def archivetemp(path):
             print "temp archive function", path
-        return s.model.File.save(todo, archivetemp)
+        return s.model.File.save(
+            todo=todo,
+            archive=archivetemp
+            )
 
     def buildSettings(s, element):
         s.view.Title(
