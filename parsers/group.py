@@ -5,7 +5,7 @@
 import parser
 
 class Group(parser.Parser):
-    def __init__(s):
+    def start(s):
         s.description = "Todos Grouped. This is a special Parser."
         s.name = "group"
         s.icon = ""

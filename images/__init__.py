@@ -12,7 +12,7 @@ def randomImage():
     path = os.path.join(root, "random")
     return random.choice([os.path.join(root, p) for p in os.listdir(path)])
 
-class IconStore(object):
+class icon(object):
     """
     All images in the icons folder
     """
@@ -22,4 +22,4 @@ class IconStore(object):
     def get(s, key):
         return s.icons.get(key, s.icons["error"])
 
-icon = IconStore()
+icon = icon()

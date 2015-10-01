@@ -51,7 +51,8 @@ class Todo(object):
             if filteredTokens:
                 s.label = " ".join(filteredTokens)
                 s.groups = parsers[0].tags # Get groups
-                s.special = sorted(parsers[1:], key=lambda x: x.priority)[-1] if 1 < len(parsers) else None
+                trimmed = [p for p in parsers if 0 < p.priority]
+                s.special = sorted(trimmed, key=lambda x: x.priority)[-1] if 1 < len(trimmed) else None
                 return
         raise AttributeError, "Task is empty"
 

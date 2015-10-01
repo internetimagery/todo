@@ -11,8 +11,8 @@ import todo.controller._todo as cTodo
 import todo.controller.todoContainer as cTodoContainer
 import todo.controller.todoScroller as cTodoScroller
 import todo.controller.settings as cSettings
-
 import todo.controller.panel as cPanel
+
 
 class Main(object):
     def __init__(s, software):
@@ -20,11 +20,13 @@ class Main(object):
         if software == "maya":
             import todo.model.maya as model
             import todo.view.maya as view
+            from todo.parsers.maya import parsers
         else:
             raise RuntimeError, "Unknown Software: %s." % software
         title = random.choice(todo.quotes.quotes)
         s.model = model
         s.view = view
+        s.parsers = parsers
         s.settings = cSettings.Settings(s.model.CRUD)
         s.container = []
         keys = s.model.CRUD.read() # Initialize our Todos
@@ -35,7 +37,7 @@ class Main(object):
                         s.container.append(cTodo.Todo(
                             CRUD=s.model.CRUD,
                             id=key,
-                            parsers=[]
+                            parsers=s.parsers
                             )
                         )
                     except AttributeError as e:
@@ -81,7 +83,7 @@ class Main(object):
             todo = cTodo.Todo(
                 task=element.text,
                 CRUD=s.model.CRUD,
-                parsers=[] # TODO. Add in parsers
+                parsers=s.parsers
             )
             s.container.append(todo)
             element.text = ""

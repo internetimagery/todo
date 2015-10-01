@@ -106,16 +106,20 @@ class TodoScroller(object):
             parent=parent
         )
         label = todo.label
+        todoAttributes={
+            "label"         : label,
+            "annotation"    : "Click to check off and save.\nTODO: %s" % label,
+            "icon"          : icon.get("save_16"), #"fileSave.png",
+            "editIcon"      : icon.get("todo_16"), #"setEdEditMode.png",
+            "editAnnotaion" : "Edit Task.",
+            "delIcon"       : icon.get("brush_16"), #"removeRenderable.png",
+            "delAnnotation" : "Delete Todo without saving."
+            }
+        if todo.special:
+            todoAttributes["specialIcon"] = todo.special.icon
+            todoAttributes["specialAnn"] = todo.special.description
         todoView = s.view.Todo(
-            attributes={
-                "label"         : label,
-                "annotation"    : "Click to check off and save.\nTODO: %s" % label,
-                "icon"          : icon.get("save_16"), #"fileSave.png",
-                "editIcon"      : icon.get("todo_16"), #"setEdEditMode.png",
-                "editAnnotaion" : "Edit Task.",
-                "delIcon"       : icon.get("brush_16"), #"removeRenderable.png",
-                "delAnnotation" : "Delete Todo without saving."
-                },
+            attributes=todoAttributes,
             events={
                 "complete"  : lambda x: s.todoComplete(todo, todoView, todoEdit, layout),
                 "special"   : lambda x: s.todoSpecial(todo, todoView, todoEdit, layout),
@@ -148,8 +152,18 @@ class TodoScroller(object):
         else: # Switching from edit mode back to viewer
             task = todoEdit.text
             try:
+                old = set(todo.groups)
                 todo.task = task
-                s.refresh(s.container)
+                new = set(todo.groups)
+                if old == new: # Groups haven't changed. Update in place
+                    todoEdit.visible = False
+                    todoView.visible = True
+                    todoView.label = todo.label
+                    if todo.special:
+                        todoView.specialIcon = todo.special.icon
+                        todoView.specialAnn = todo.special.description
+                else:
+                    s.refresh(s.container)
             except AttributeError as e:
                 s.view.Notice(
                     attributes={
