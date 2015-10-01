@@ -3,11 +3,12 @@
 # http://internetimagery.com
 
 from todo.parsers.parser import Parser
+import maya.cmds as cmds
 
 class Frame(Parser):
     def start(s):
         s.icon = "centerCurrentTime.png"
-        s.name = "range"
+        s.name = "frame"
         s.frames = []
     def update(s, token):
         try:

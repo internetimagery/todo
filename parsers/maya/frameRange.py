@@ -3,6 +3,7 @@
 # http://internetimagery.com
 
 from todo.parsers.parser import Parser
+import maya.cmds as cmds
 
 class Range(Parser):
     def start(s):
