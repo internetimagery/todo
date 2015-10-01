@@ -44,7 +44,7 @@ class File(object):
         Save file. If todo, then archive the file too.
         """
         curr = s._FILE_Running()
-        if curr == path: #saving over the same file
+        if not path or curr == path: #saving over the same file
             s._FILE_Save(todo)
         else: # Saving as a new file.
             s._FILE_SaveAs(todo, path)

@@ -18,7 +18,7 @@ class Frame(Parser):
             if 1 < len(s.frames):
                 s.description = "Pick a frame:" + "\n- ".join(["\n* %s" % f for f in s.frames])
             else:
-                s.description = "Go to frame: %s" % list(s.frame)[0]
+                s.description = "Go to frame: %s" % list(s.frames)[0]
         except ValueError:
             pass
         return token

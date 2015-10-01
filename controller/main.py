@@ -28,21 +28,6 @@ class Main(object):
         s.view = view
         s.parsers = parsers
         s.settings = cSettings.Settings(s.model.CRUD)
-        s.container = []
-        keys = s.model.CRUD.read() # Initialize our Todos
-        if keys:
-            for key in keys:
-                if re.match(r"^TODO_[\d\.]+", key):
-                    try:
-                        s.container.append(cTodo.Todo(
-                            view=s.view,
-                            model=s.model,
-                            id=key,
-                            parsers=s.parsers
-                            )
-                        )
-                    except AttributeError as e:
-                        print "Error loading %s: %s" % (key, e)
 
         s.window = s.view.Window(
             attributes={
@@ -77,22 +62,30 @@ class Main(object):
             s.settings, # settings
             s.completeTodo # Todo complete callback
         )
-        s.scroller.refresh(s.container)
+        container = []
+        keys = s.model.CRUD.read() # Initialize our Todos
+        if keys:
+            for key in keys:
+                if re.match(r"^TODO_[\d\.]+", key):
+                    try:
+                        container.append(cTodo.Todo(
+                            view=s.view,
+                            model=s.model,
+                            id=key,
+                            parsers=s.parsers
+                            )
+                        )
+                    except AttributeError as e:
+                        print "Error loading %s: %s" % (key, e)
+        s.scroller.refresh(container)
 
     def createTodo(s, element):
         """
         Run when creating a new todo
         """
         try:
-            todo = cTodo.Todo(
-                view=s.view,
-                model=s.model,
-                task=element.text,
-                parsers=s.parsers
-            )
-            s.container.append(todo)
+            s.scroller.todoCreate(element.text)
             element.text = ""
-            s.scroller.refresh(s.container)
         except AttributeError as e:
             s.view.Notice(
                 attributes={
@@ -105,7 +98,10 @@ class Main(object):
         """
         Todo is being checked off!
         """
-        print "Checking off todo. Horray!"
+        if s.model.File.save(todo):
+            return True
+        else:
+            return False
 
     def buildSettings(s, element):
         s.view.Title(

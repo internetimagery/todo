@@ -10,11 +10,12 @@ class TodoScroller(object):
     settings = settings interface
     completeCallback = run with the Todo when the todo is checked off
     """
-    def __init__(s, parent, view, model, settings, completeCallback):
+    def __init__(s, parent, view, model, settings, parsers, completeCallback):
         s.parent = parent
         s.view = view
         s.model = model
         s.settings = settings
+        s.parsers = parsers
         s.completeCallback = completeCallback
         s.attach = None
         s.todoStructure = {}
@@ -171,10 +172,25 @@ class TodoScroller(object):
                     }
                 )
 
+    def todoCreate(s, task, id=None):
+        todo = cTodo.Todo(
+            view=s.view,
+            model=s.model,
+            id=id,
+            task=task,
+            parsers=s.parsers
+        )
+        s.container.append(todo)
+        s.refresh(s.container)
+
     def todoComplete(s, todo, todoView, todoEdit, layout):
-        print "Task Complete %s: %s." % (todo.id, todo.task)
+        cacheID = todo.id
+        cacheTask = todo.task
+        s.todoDelete(todo, todoView, todoEdit, layout)
         if s.completeCallback(todo):
-            s.todoDelete(todo, todoView, todoEdit, layout)
+            print "Task Complete %s: %s." % (todo.id, todo.task)
+        else: # Save failed. Reinstate Todo
+            s.todoCreate(cacheTask, cacheID)
 
     def todoSpecial(s, todo, todoView, todoEdit, layout):
         if todo.special:
