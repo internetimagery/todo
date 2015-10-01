@@ -33,9 +33,9 @@ class File(object):
                                 return subprocess.Popen([com, path])
                             except OSError:
                                 pass
-                            raise OSError, "Can't open file."
-                except:
-                    print "Trouble opening file. Falling back to Browser"
+                            raise OSError, "No commands worked. :("
+                except Exception as e:
+                    print "Trouble: %s" % str(e)
                     webbrowser.open(path)
         else:
             print "Could not load file: \"%s\"" % path

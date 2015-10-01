@@ -108,14 +108,14 @@ class TodoScroller(object):
         todoAttributes={
             "label"         : label,
             "annotation"    : "Click to check off and save.\nTODO: %s" % label,
-            "icon"          : s.model.icon["todo.save"],
-            "editIcon"      : s.model.icon["todo.edit"],
+            "icon"          : s.model.Icon["todo.save"],
+            "editIcon"      : s.model.Icon["todo.edit"],
             "editAnnotaion" : "Edit Task.",
-            "delIcon"       : s.model.icon["todo.delete"],
+            "delIcon"       : s.model.Icon["todo.delete"],
             "delAnnotation" : "Delete Todo without saving."
             }
         if todo.special:
-            todoAttributes["specialIcon"] = s.model.icon[todo.special.icon]
+            todoAttributes["specialIcon"] = s.model.Icon[todo.special.icon]
             todoAttributes["specialAnn"] = todo.special.description
         todoView = s.view.Todo(
             attributes=todoAttributes,
@@ -159,7 +159,7 @@ class TodoScroller(object):
                     todoView.visible = True
                     todoView.label = todo.label
                     if todo.special:
-                        todoView.specialIcon = s.model.icon[todo.special.icon]
+                        todoView.specialIcon = s.model.Icon[todo.special.icon]
                         todoView.specialAnn = todo.special.description
                 else:
                     s.refresh(s.container)

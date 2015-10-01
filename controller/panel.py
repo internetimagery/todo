@@ -21,7 +21,7 @@ class Panel(object):
             attributes={
                 "label"     : "<- Todo",
                 "annotation": "Click to return to your Todo list.",
-                "image"     : s.model.icon["panel.todo"]
+                "image"     : s.model.Icon["panel.todo"]
             },
             events={
                 "trigger"   : s.buildTodo
@@ -36,7 +36,7 @@ class Panel(object):
             attributes={
                 "label"     : "Settings ->",
                 "annotation": "Click to view the Todo scripts settings. Settings are saved with the Maya scene, so you will need to set them for each scene.",
-                "image"     : s.model.icon["panel.settings"]
+                "image"     : s.model.Icon["panel.settings"]
             },
             events={
                 "trigger"   : s.buildSettings

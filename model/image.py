@@ -5,7 +5,7 @@
 import todo.images as img
 
 # Replace with software specific icons if desired.
-icon = {
+Icon = {
     # Top Button, panel switcher
     "panel.settings"  : img.icons["settings_22"],
     "panel.todo"      : img.icons["todo_22"],

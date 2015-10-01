@@ -2,20 +2,20 @@
 # Created 01/10/15 Jason Dixon
 # http://internetimagery.com
 
-from todo.model.image import icon
+from todo.model.image import Icon
 
 # Override Icons
 # Top Button, panel switcher
-icon["panel.settings"] = "attributes.png"
-icon["panel.todo"] = "revealSelected.png"
+Icon["panel.settings"] = "attributes.png"
+Icon["panel.todo"] = "revealSelected.png"
 # Todo entry
-icon["todo.save"] = "fileSave.png"
-icon["todo.edit"] = "setEdEditMode.png"
-icon["todo.delete"] = "removeRenderable.png"
+Icon["todo.save"] = "fileSave.png"
+Icon["todo.edit"] = "setEdEditMode.png"
+Icon["todo.delete"] = "removeRenderable.png"
 # Todo special entires
-icon["todo.web"] = "SP_ComputerIcon.png"
-icon["todo.file"] = "openScript.png"
+Icon["todo.web"] = "SP_ComputerIcon.png"
+Icon["todo.file"] = "openScript.png"
 # Maya specfic parsers!
-icon["todo.object"] = "selectByObject.png"
-icon["todo.frame"] = "centerCurrentTime.png"
-icon["todo.range"] = "traxFrameRange.png"
+Icon["todo.object"] = "selectByObject.png"
+Icon["todo.frame"] = "centerCurrentTime.png"
+Icon["todo.range"] = "traxFrameRange.png"
