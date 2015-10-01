@@ -3,9 +3,8 @@
 # http://internetimagery.com
 
 def parsers():
-    import todo.parsers.generic as generic
-    import _file
+    import web
     return [
-        _file.File
-        ] + generic.parsers
+        web.Web
+        ]
 parsers = parsers()

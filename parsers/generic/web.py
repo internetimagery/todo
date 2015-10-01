@@ -4,6 +4,7 @@
 
 from todo.parsers.parser import Parser
 from urlparse import urlparse
+import webbrowser
 
 class Web(Parser):
     def start(s):
@@ -21,4 +22,7 @@ class Web(Parser):
             return url.netloc
         return token
     def run(s):
-        print "DO THE URL THING"
+        if s.urls:
+            print "Opening: %s" % " & ".join(s.urls)
+            for url in s.urls:
+                webbrowser.open(url, new=2)
