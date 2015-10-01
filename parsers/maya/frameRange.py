@@ -13,6 +13,7 @@ class Range(Parser):
         s.buffer = []
         s.keywords = ["to", "through", "-", ":", "and", "->"] # Names that create a range
     def update(s, token):
+        s.buffer.append(token)
         if 3 <= len(s.buffer): # Buffer some tokens
             num1 = s.buffer.pop(0)
             word = s.buffer[0]
@@ -27,7 +28,6 @@ class Range(Parser):
                     s.description = "Go to frame range: %s" % "".join(["\n* %s - %s" % (r[0], r[1]) for r in s.ranges])
                 except ValueError:
                     pass
-        s.buffer.append(token)
         return token
     def run(s):
         if s.ranges:

@@ -100,7 +100,7 @@ class Main(object):
         """
         Todo is being checked off!
         """
-        pass
+        print "Checking off todo. Horray!"
 
     def buildSettings(s, element):
         s.view.Title(

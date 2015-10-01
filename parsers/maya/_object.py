@@ -9,20 +9,23 @@ class Object(Parser):
     def start(s):
         s.icon = "selectByObject.png"
         s.name = "object"
-        s.objects = []
+        s.objects = set()
     def update(s, token):
-        obj = cmds.ls(token, r=True)
-        if obj:
-            s.objects += obj
-            s.priority = 5
-            s.description = "Select objects:%s" % "".join(["\n* %s" % o for o in s.objects])
+        try:
+            obj = cmds.ls(token, r=True)
+            if obj:
+                s.objects |= set(obj)
+                s.priority = 5
+                s.description = "Select objects:%s" % "".join(["\n* %s" % o for o in s.objects])
+        except RuntimeError:
+            pass
         return token
     def run(s):
         if s.objects:
             def select(objs):
                 cmds.select(objs, r=True)
             if 1 < len(s.objects):
-                query(s.objects)
+                query(s.objects, select)
             else:
                 select(s.objects)
 
@@ -36,15 +39,15 @@ def query(objects, callback):
         callback(o)
     def pickAll(o):
         for obj in o:
-            print "Selecting %s" obj
+            print "Selecting %s" % obj
         cmds.deleteUI(window)
-        callback(o)
+        callback(list(o))
     def addPicker(o):
         cmds.button(
             l="Select object: %s" % o,
             c=lambda x: pick(o)
             )
-    window = cmds.window(t="Which range would you like?", rtf=True)
+    window = cmds.window(t="Which Object would you like?", rtf=True)
     cmds.columnLayout(adj=True)
     for o in objects:
         addPicker(o)

@@ -7,6 +7,7 @@ import maya.cmds as cmds
 import webbrowser
 import subprocess
 import os.path
+import sys
 import os
 
 class File(Parser):
@@ -20,7 +21,7 @@ class File(Parser):
     def update(s, token):
         if "/" in token:
             path = os.path.realpath(os.path.join(s.root, token))
-            if os.path.isfile(path):
+            if os.path.exists(path):
                 s.files.add(path)
                 s.description = "Open the files: %s" % ", ".join(s.files)
                 s.priority += 2 # Higher priority if more files found
@@ -42,29 +43,18 @@ def fileOpen(path):
     """
     Open a file
     """
-    def savePrompt():
-        p = cmds.setParent(q=True)
-        cmds.columnLayout(adj=True, p=p)
-        cmds.rowLayout(nc=2)
-        cmds.columnLayout()
-        eval(embedImage())
-        cmds.setParent("..")
-        cmds.columnLayout(adj=True)
-        cmds.text(al="left", hl=True, l="""
-<h3>There are unsaved changes in your scene.</h3>
-<div>Would you like to save before leaving?</div>""", h=70)
-        cmds.rowLayout(nc=3, h=30)
-        cmds.button(l="Yes please!".center(20), c="cmds.layoutDialog(dismiss=\"yes\")")
-        cmds.button(l="No Thanks".center(20), c="cmds.layoutDialog(dismiss=\"no\")")
-        cmds.button(l="Cancel".center(20), c="cmds.layoutDialog(dismiss=\"cancel\")")
-        cmds.setParent("..")
-        cmds.setParent("..")
-
     if os.path.isfile(path):
         if path[-3:] in [".ma", ".mb"]:  # Make a special exception for maya files.
-            if cmds.file(mf=True, q=True):  # File is modified. Need to make some changes.
-                answer = cmds.layoutDialog(ui=savePrompt, t="Excuse me one moment...")
-                if answer == "yes":
+            if cmds.file(mf=True, q=True):  # File is modified. Need to prompt a save.
+                answer = cmds.confirmDialog(
+                    t="Save Changes",
+                    m="Save changes to %s" % "file",
+                    b=["Save", "Don't Save", "Cancel"],
+                    db="Save",
+                    cb="Cancel",
+                    ds="Cancel"
+                    )
+                if answer == "Save":
                     if not cmds.file(q=True, sn=True):
                         loc = cmds.fileDialog2(ds=2, sff="Maya ASCII", ff="Maya Files (*.ma *.mb);;Maya ASCII (*.ma);;Maya Binary (*.mb);;")
                         if loc:
@@ -72,25 +62,26 @@ def fileOpen(path):
                         else:
                             return
                     cmds.file(save=True)
-                elif answer == "no":
-                    pass
-                else:
+                elif answer == "Cancel":
                     return
             cmds.file(path, o=True, f=True)
         else:
             universalOpen(path)
 
 
-def universalOpen(command):
+def universalOpen(path):
     """
     Open file in different OS's
     """
     try:
-        os.startfile(command)  # Open file on windows
+        os.startfile(path)  # Open file on windows
     except AttributeError:  # Open file on anything else
-        for com in [["open"], ["xdg-open"], ["gnome-open"], ["kde-open"], ["exo-open"]]:
+        if sys.platform == "darwin":
+            subprocess.Popen(["open", path])
+        for com in ["xdg-open", "gnome-open", "kde-open", "exo-open"]:
             try:
-                return subprocess.Popen(com + [command])
+                print "trying:", com, path
+                return subprocess.Popen([com, path])
             except OSError:
                 pass
-            webbrowser.open(command)
+            webbrowser.open(path)

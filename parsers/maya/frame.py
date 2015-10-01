@@ -28,21 +28,21 @@ class Frame(Parser):
             else:
                 setFrame(s.frames[0])
 
-def query(frames, callback):
+def query(item, callback):
     """
-    Ask user to pick desired range
+    Ask user to pick desired item
     """
-    def rangePick(f):
-        print "Going to frame %s" % f
+    def rangePick(i):
+        print "Going to frame %s" % i
         cmds.deleteUI(window)
-        callback(f)
-    def addPicker(f):
+        callback(i)
+    def addPicker(i):
         cmds.button(
-            l="Go to frame: %s" % f,
-            c=lambda x: rangePick(f)
+            l="Go to frame: %s" % i,
+            c=lambda x: rangePick(i)
             )
-    window = cmds.window(t="Which range would you like?", rtf=True)
+    window = cmds.window(t="Which frame would you like?", rtf=True)
     cmds.columnLayout(adj=True)
-    for f in frames:
-        addPicker(f)
+    for i in item:
+        addPicker(i)
     cmds.showWindow(window)

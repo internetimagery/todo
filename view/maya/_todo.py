@@ -73,19 +73,17 @@ class Todo(element.MayaElement):
                 image=s._attr["specialIcon"] if s._attr["specialIcon"] else"vacantCell.png",
                 ann=s._attr["specialAnn"] if s._attr["specialAnn"] else "You cannot use this button."
                 )
-        if attr == "editAnnotaion" or attr == "editIcon" or attr == None:
+        if attr == "editAnnotaion" or attr == None:
             cmds.iconTextButton(
                 s._editBtn,
                 e=True,
                 ann=s._attr["editAnnotaion"],
-                image=s._attr["editIcon"]
             )
-        if attr == "delAnnotation" or attr == "delIcon" or attr == None:
+        if attr == "delAnnotation" or attr == None:
             cmds.iconTextButton(
                 s._deleteBtn,
                 e=True,
                 ann=s._attr["delAnnotation"],
-                image=s._attr["delIcon"]
             )
 
     def _GUI_Delete(s):

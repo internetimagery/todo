@@ -39,6 +39,8 @@ class Todo(object):
         Parse out metadata from the task
         """
         if task:
+            if 255 < len(task): # 255 character limit!
+                raise AttributeError, "Task is too long."
             parsers = [p() for p in s.parsers] # init parsers
             label = ""
             tokens = shlex.split(task) # break into tokens
@@ -52,9 +54,9 @@ class Todo(object):
                 s.label = " ".join(filteredTokens)
                 s.groups = parsers[0].tags # Get groups
                 trimmed = [p for p in parsers if 0 < p.priority]
-                s.special = sorted(trimmed, key=lambda x: x.priority)[-1] if 1 < len(trimmed) else None
+                s.special = sorted(trimmed, key=lambda x: x.priority)[-1] if trimmed else None
                 return
-        raise AttributeError, "Task is empty"
+        raise AttributeError, "Task is empty."
 
     def delete(s):
         """
@@ -69,8 +71,8 @@ class Todo(object):
         def fset(s, value):
             value = value.strip()
             s._task = value
-            s.crud.update(s.id, value)
             s.parseTask(value)
+            s.crud.update(s.id, value)
             print "Updated %s: %s." % (s.id, value)
         def fdel(s):
             s.crud.delete(s.id)

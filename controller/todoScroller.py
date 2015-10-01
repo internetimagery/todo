@@ -178,7 +178,8 @@ class TodoScroller(object):
             s.todoDelete(todo, todoView, todoEdit, layout)
 
     def todoSpecial(s, todo, todoView, todoEdit, layout):
-        print "Special Function not defined yet!"
+        if todo.special:
+            todo.special.run()
 
     def todoDelete(s, todo, todoView, todoEdit, layout):
         print "Removing %s: %s." % (todo.id, todo.task)

@@ -4,6 +4,7 @@
 
 from todo.parsers.parser import Parser
 from urlparse import urlparse
+from todo.images import icon
 import webbrowser
 
 class Web(Parser):
