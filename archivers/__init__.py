@@ -2,7 +2,9 @@
 
 def Archives():
     import _file
+    import git
     return [
-        _file.File
+        _file.File,
+        git.Git
     ]
 Archives = Archives()

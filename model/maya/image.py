@@ -18,6 +18,7 @@ Icon["todo.file"] = "openScript.png"
 # Settings
 Icon["settings.file"] = "fileOpen.png"
 Icon["settings.filepath"] = "removeRenderable.png"
+Icon["settings.git.push"] = "createContainer.png"
 # Maya specfic parsers!
 Icon["todo.object"] = "selectByObject.png"
 Icon["todo.frame"] = "centerCurrentTime.png"

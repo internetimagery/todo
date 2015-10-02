@@ -19,6 +19,7 @@ Icon = {
     # Settings
     "settings.file"         : img.Icons["folder_22"],
     "settings.filepath"     : img.Icons["brush_22"],
+    "settings.git.push"     : img.Icons["web_22"],
     # Misc
     "assistant.1"           : img.Icons["office_man"],
     "assistant.2"           : img.Icons["office_woman"],
