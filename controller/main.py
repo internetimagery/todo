@@ -4,6 +4,7 @@
 
 import re
 import random
+import threading
 
 import todo.quotes
 
@@ -36,6 +37,7 @@ class Main(object):
             s.model, # model
             s.settings # settings
         ) for a in todo.archivers.Archives]
+        s.daemonArchive = True # Daemonize archives
 
         s.window = s.view.Window(
             attributes={
@@ -107,13 +109,29 @@ class Main(object):
         """
         Todo complete.
         """
-        def archiveFile(path):
-            for archive in s.archives:
-                archive.runArchive(todo, path)
+
         return s.model.File.save(
             todo=todo,
-            archive=archiveFile
+            archive=lambda x: s.archiveTodo(todo, x)
             )
+
+    def archiveTodo(s, todo, path):
+        """
+        Fire off the file archive routines!
+        """
+        threads = []
+        for a in s.archives:
+            if s.daemonArchive:
+                print "threadding"
+                th = threading.Thread(
+                    target=a.runArchive,
+                    args=(todo, path)
+                    )
+                th.daemon = True
+                th.start()
+                threads.append(th)
+            else:
+                a.runArchive(todo, path)
 
     def buildSettings(s, element):
         s.view.Title(

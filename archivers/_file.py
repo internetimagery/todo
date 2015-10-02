@@ -98,10 +98,8 @@ class File(archive.Archive):
     def runArchive(s, todo, filename):
         active = s.settings.get(s.settingName, False)
         target = os.path.realpath(filename)
-        print "active", active, "target", target
         if active and os.path.isfile(target):
             paths = s.settings.get(s.settingFileName, [])
-            print "paths", paths
             if paths:
                 basename = os.path.basename(target)
                 whitelist = [" ", ".", "_", "@"]  # Strip invalid characters
@@ -110,7 +108,6 @@ class File(archive.Archive):
                 project = s.model.File.project()
                 for path in paths:
                     folder = s.absolutePath(path, project)
-                    print "folder", folder
                     if os.path.isdir(folder):
                         dest = os.path.join(path, name)
                         z = zipfile.ZipFile(dest, "w")
