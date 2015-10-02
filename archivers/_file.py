@@ -18,7 +18,7 @@ class File(archive.Archive):
                 "annotation": "Store a backup of the current scene into the provided folder upon each Todo completion."
             },
             events={
-                "change"    : lambda x: s.settings.set(s.settingName, x)
+                "change"    : lambda x: s.settings.set(s.settingName, x.checked)
             },
             parent=parent
         )
@@ -62,8 +62,9 @@ class File(archive.Archive):
         def addFile(f):
             s.view.Button(
                 attributes={
-                    "label"     : s.absolutePath(f),
-                    "annotation": "Click to remove"
+                    "label"     : f,# s.absolutePath(f),
+                    "annotation": "Click to remove",
+                    "image"     : s.model.Icon["settings.filepath"]
                 },
                 events={
                     "pressed"   : lambda x: s.removeFile(f, x)
@@ -87,6 +88,6 @@ class File(archive.Archive):
         root = s.model.File.project()
         try:
             rPath = os.path.relpath(path, root)
-        except ValueError: # On windows, the path is on another drive
+        except ValueError: # On windows, the path is on another drive?
             rPath = path
-        return absolutePath(path).replace("\\", "/") if rPath[:2] == ".." else rPath.replace("\\", "/")
+        return s.absolutePath(path).replace("\\", "/") if rPath[:2] == ".." else rPath.replace("\\", "/")

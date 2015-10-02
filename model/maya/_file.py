@@ -3,6 +3,7 @@
 # http://internetimagery.com
 
 import maya.cmds as cmds
+import maya.utils as utils
 import todo.model._file as _file
 import os.path
 import base64
@@ -103,7 +104,7 @@ class File(_file.File):
         s.extensions = [".ma", ".mb"]
 
     def _FILE_Project(s):
-        path = cmds.workspace(q=True, rd=True)
+        path = utils.executeInMainThreadWithResult(lambda: cmds.workspace(q=True, rd=True))
         return path
 
     def _FILE_Dialog(S, directory):
@@ -114,7 +115,7 @@ class File(_file.File):
         return path[0] if path else None
 
     def _FILE_Running(s):
-        f = cmds.file(q=True, sn=True)
+        f = utils.executeInMainThreadWithResult(lambda: cmds.file(q=True, sn=True))
         return f if f else ""
 
     def _FILE_Load(s, path):
