@@ -14,6 +14,6 @@ class ScrollField(element.MayaElement):
             p=parent,
             bgc=[0.2, 0.2, 0.2],
             cr=True,
-            h=400
+            h=500
             )
         s._attach = s._root

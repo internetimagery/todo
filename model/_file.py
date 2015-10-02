@@ -48,7 +48,28 @@ class File(object):
             return s._FILE_Save(todo, archive)
         else: # Saving as a new file.
             return s._FILE_SaveAs(todo, path, archive)
-
+    def dialog(s, directory=False):
+        """
+        Open a file dialog
+        """
+        path = s._FILE_Dialog(directory)
+        return path.replace("\\", "/") if path else None
+    def project(s):
+        """
+        Return project path if applicable
+        """
+        path = s._FILE_Project()
+        return path.replace("\\", "/") if path else None
+    def _FILE_Project(s):
+        """
+        Project path
+        """
+        pass
+    def _FILE_Dialog(S, include):
+        """
+        Open a file picker
+        """
+        pass
     def _FILE_Setup(s):
         """
         Init any variables, such as extensions

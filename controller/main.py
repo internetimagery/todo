@@ -7,6 +7,8 @@ import random
 
 import todo.quotes
 
+import todo.archivers
+
 import todo.controller.todoContainer as cTodoContainer
 import todo.controller.todoScroller as cTodoScroller
 import todo.controller.settings as cSettings
@@ -28,6 +30,12 @@ class Main(object):
         s.view = view
         s.parsers = parsers
         s.settings = cSettings.Settings(s.model.CRUD)
+        # Set up our archivers
+        s.archives = [a(
+            s.view, # view
+            s.model, # model
+            s.settings # settings
+        ) for a in todo.archivers.Archives]
 
         s.window = s.view.Window(
             attributes={
@@ -113,4 +121,6 @@ class Main(object):
             },
             parent=element
         )
+        for archive in s.archives:
+            archive.buildSettings(element)
 Main("maya")

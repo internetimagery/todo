@@ -16,6 +16,8 @@ Icon = {
     # Todo special entires
     "todo.web"        : img.Icons["web_16"],
     "todo.file"       : img.Icons["folder_16"],
+    # Settings
+    "settings.file"    : img.Icons["folder_22"],
     # Misc
     "assistant.1"     : img.Icons["office_man"],
     "assistant.2"     : img.Icons["office_woman"],

@@ -102,6 +102,17 @@ class File(_file.File):
     def _FILE_Setup(s):
         s.extensions = [".ma", ".mb"]
 
+    def _FILE_Project(s):
+        path = cmds.workspace(q=True, rd=True)
+        return path
+
+    def _FILE_Dialog(S, directory):
+        if directory:
+            path = cmds.fileDialog2(ds=2, cap="Select a Folder.", fm=3, okc="Select")
+        else:
+            path = cmds.fileDialog2(ds=2, sff="Maya ASCII", ff="Maya Files (*.ma *.mb);;Maya ASCII (*.ma);;Maya Binary (*.mb);;")
+        return path[0] if path else None
+
     def _FILE_Running(s):
         f = cmds.file(q=True, sn=True)
         return f if f else ""

@@ -15,8 +15,9 @@ class CheckSection(element.MayaElement):
     def _GUI_Create(s, parent):
         change = s._events["change"]
         s._root = cmds.columnLayout(adj=True, p=parent)
-        s._box = cmds.checkBox(cc=change)
+        s._box = cmds.checkBox(cc=s.changedState)
         s._attach = cmds.columnLayout(adj=True)
+        s.changedState(s._attr["checked"])
     def _GUI_Update(s, attr):
         checked = s._attr["checked"]
         if attr == "checked" or attr == "label" or attr == None:
@@ -33,9 +34,10 @@ class CheckSection(element.MayaElement):
                 bgc=[0.5, 0.5, 0.5] if checked else [0.2, 0.2, 0.2],
                 ann=s._attr["annotation"]
                 )
-        if attr == "checked" or attr == None:
-            cmds.columnLayout(
-                s._attach,
-                e=True,
-                en=checked
-                )
+    def changedState(s, state):
+        s._events["change"](state)
+        cmds.columnLayout(
+            s._attach,
+            e=True,
+            en=state
+            )
