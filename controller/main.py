@@ -107,11 +107,12 @@ class Main(object):
         """
         Todo complete.
         """
-        def archivetemp(path):
-            print "temp archive function", path
+        def archiveFile(path):
+            for archive in s.archives:
+                archive.runArchive(todo, path)
         return s.model.File.save(
             todo=todo,
-            archive=archivetemp
+            archive=archiveFile
             )
 
     def buildSettings(s, element):

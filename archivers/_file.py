@@ -4,6 +4,9 @@
 
 import archive
 import os.path
+import zipfile
+import time
+import os
 
 class File(archive.Archive):
     def start(s):
@@ -42,7 +45,8 @@ class File(archive.Archive):
     def setFile(s, element):
         path = s.model.File.dialog(True)
         if path:
-            path = s.relativePath(path)
+            project = s.model.File.project()
+            path = s.relativePath(path, project)
             s.files.add(path)
             s.settings.set(s.settingFileName, list(s.files))
             s.buildFiles()
@@ -74,20 +78,41 @@ class File(archive.Archive):
         for f in s.files:
             addFile(f)
 
-    def absolutePath(s, path):
+    def absolutePath(s, path, root):
         """
         Taken relative path return a workable absolute path
         """
         root = s.model.File.project()
         return os.path.realpath(os.path.join(root, path))
 
-    def relativePath(s, path):
+    def relativePath(s, path, root):
         """
         Take an absolute path, return a relative path if in project
         """
-        root = s.model.File.project()
         try:
             rPath = os.path.relpath(path, root)
         except ValueError: # On windows, the path is on another drive?
             rPath = path
         return s.absolutePath(path).replace("\\", "/") if rPath[:2] == ".." else rPath.replace("\\", "/")
+
+    def runArchive(s, todo, filename):
+        active = s.settings.get(s.settingName, False)
+        target = os.path.realpath(filename)
+        print "active", active, "target", target
+        if active and os.path.isfile(target):
+            paths = s.settings.get(s.settingFileName, [])
+            print "paths", paths
+            if paths:
+                basename = os.path.basename(target)
+                whitelist = [" ", ".", "_", "@"]  # Strip invalid characters
+                label = "".join(ch for ch in todo.label if ch.isalnum() or ch in whitelist).rstrip()
+                name = "%s_%s_%s.zip" % (os.path.splitext(basename)[0], int(time.time() * 100), label)
+                project = s.model.File.project()
+                for path in paths:
+                    folder = s.absolutePath(path, project)
+                    print "folder", folder
+                    if os.path.isdir(folder):
+                        dest = os.path.join(path, name)
+                        z = zipfile.ZipFile(dest, "w")
+                        z.write(target, basename)
+                        z.close()
