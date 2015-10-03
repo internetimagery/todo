@@ -178,6 +178,7 @@ class TodoScroller(object):
         todo = cTodo.Todo(
             view=s.view,
             model=s.model,
+            data=s.data,
             task=task,
             parsers=s.parsers
         )

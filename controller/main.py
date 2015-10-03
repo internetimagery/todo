@@ -30,7 +30,6 @@ class Main(object):
         s.model = model
         s.view = view
         s.parsers = parsers
-        s.settings = cSettings.Settings(s.model.CRUD)
         # Set up our archivers
         s.archives = [a(
             s.view, # view

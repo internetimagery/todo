@@ -24,8 +24,8 @@ class Data(dict):
         s._check()
         print "Storing", k, v
         cmds.setAttr(s.node+".notes", json.dumps(s), type="string")
-    def __delitem__(s, k, v):
-        dict.__delitem__(s, k, v)
+    def __delitem__(s, k):
+        dict.__delitem__(s, k)
         s._check()
-        print "Removing", k, v
+        print "Removing", k
         cmds.setAttr(s.node+".notes", json.dumps(s), type="string")
