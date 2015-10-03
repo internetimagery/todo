@@ -13,17 +13,19 @@ class Git(archive.Archive):
         s.settingName = "setting.git"
         s.settingPushName = "setting.git.push"
         s.settingPushUrlName = "setting.git.push.url"
+    def set(s, key, val):
+        s.data[key] = val
     def buildSettings(s, parent):
         # Check if git is loaded.
         if not _version_[1]:
             s.section = s.view.CheckSection(
                 attributes={
-                    "checked"   : s.settings.get(s.settingName, False),
+                    "checked"   : s.data.get(s.settingName, False),
                     "label"     : "Git Archive (experimental)",
                     "annotation": "Commit the Maya file into Git (if the file is located in a valid repo) upon each Todo task completion."
                 },
                 events={
-                    "change"    : lambda x: s.settings.set(s.settingName, x.checked)
+                    "change"    : lambda x: s.set(s.settingName, x.checked)
                 },
                 parent=parent
             )
@@ -36,12 +38,12 @@ class Git(archive.Archive):
             )
             push = s.view.CheckSection(
                 attributes={
-                    "checked"   : s.settings.get(s.settingPushName, False),
+                    "checked"   : s.data.get(s.settingPushName, False),
                     "label"     : "Automatically PUSH commits.",
                     "annotation": "Commit the Maya file into Git (if the file is located in a valid repo) upon each Todo task completion."
                 },
                 events={
-                    "change"    : lambda x: s.settings.set(s.settingPushName, x.checked)
+                    "change"    : lambda x: s.set(s.settingPushName, x.checked)
                 },
                 parent=s.section
             )
@@ -54,7 +56,7 @@ class Git(archive.Archive):
             )
             btn1 = s.view.Button(
                 attributes={
-                    "label"     : s.settings.get(s.settingPushUrlName, "Click to enter a Branch Name"),
+                    "label"     : s.data.get(s.settingPushUrlName, "Click to enter a Branch Name"),
                     "annotation": "Click to enter a Branch name.",
                     "image"     : s.model.Icon["settings.git.push"]
                 },
@@ -65,7 +67,7 @@ class Git(archive.Archive):
             )
             btn2 = s.view.TodoEdit(
                 attributes={
-                    "text"      : s.settings.get(s.settingPushUrlName, ""),
+                    "text"      : s.data.get(s.settingPushUrlName, ""),
                     "label"     : "Update"
                 },
                 events={
@@ -80,24 +82,24 @@ class Git(archive.Archive):
         if vis1:
             btn1.visible = False
             btn2.visible = True
-            btn2.text = s.settings.get(s.settingPushUrlName, "")
+            btn2.text = s.data.get(s.settingPushUrlName, "")
         else:
             btn1.visible = True
             btn2.visible = False
             text = btn2.text
-            s.settings.set(s.settingPushUrlName, text)
+            s.set(s.settingPushUrlName, text)
             btn1.label = text if text else "Click to enter a Branch Name"
 
     def runArchive(s, todo, filename):
         path = os.path.realpath(filename)
-        if s.settings.get(s.settingName, False) and os.path.isfile(path):
+        if s.data.get(s.settingName, False) and os.path.isfile(path):
             check = GitInterface().status(path)
             if check[1]:
                 print "Cannot commit file: %s." % check[1]
             else:
-                if GitInterface().commit(path, todo.label) and s.settings.get(s.settingPushName, ""):
+                if GitInterface().commit(path, todo.label) and s.data.get(s.settingPushName, ""):
                     print "Pushing update"
-                    push = s.settings.get(s.settingPushUrlName, "")
+                    push = s.data.get(s.settingPushUrlName, "")
                     pushed = GitInterface().push(path, push)
                     print pushed[1] if pushed[1] else pushed[0]
 

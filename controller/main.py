@@ -12,7 +12,6 @@ import todo.archivers
 
 import todo.controller.todoContainer as cTodoContainer
 import todo.controller.todoScroller as cTodoScroller
-import todo.controller.settings as cSettings
 import todo.controller.panel as cPanel
 import todo.controller._todo as cTodo
 
@@ -27,6 +26,7 @@ class Main(object):
         else:
             raise RuntimeError, "Unknown Software: %s." % software
         title = random.choice(todo.quotes.quotes)
+        s.data = model.Data("Todo_Save_Data")
         s.model = model
         s.view = view
         s.parsers = parsers
@@ -35,7 +35,7 @@ class Main(object):
         s.archives = [a(
             s.view, # view
             s.model, # model
-            s.settings # settings
+            s.data # settings
         ) for a in todo.archivers.Archives]
         s.daemonArchive = True # Daemonize archives
 
@@ -69,12 +69,12 @@ class Main(object):
             element, # parent
             s.view, # view
             s.model, # model
-            s.settings, # settings
+            s.data, # data
             s.parsers, # parsers
             s.completeTodo # Todo complete callback
         )
         container = []
-        keys = s.model.CRUD.read() # Initialize our Todos
+        keys = s.data.keys() # Initialize our Todos
         if keys:
             for key in keys:
                 if re.match(r"^TODO_[\d\.]+", key):
@@ -82,6 +82,7 @@ class Main(object):
                         container.append(cTodo.Todo(
                             view=s.view,
                             model=s.model,
+                            data=s.data,
                             id=key,
                             parsers=s.parsers
                             )

@@ -3,14 +3,14 @@
 # http://internetimagery.com
 
 class Archive(object):
-    def __init__(s, view, model, settings):
+    def __init__(s, view, model, data):
         """
         Archive tool. Save the file off in various places to backup.
         """
         # Store our interfaces
         s.view = view
         s.model = model
-        s.settings = settings
+        s.data = data
         s.start()
     def start(s):
         """

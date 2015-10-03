@@ -12,11 +12,11 @@ class TodoScroller(object):
     settings = settings interface
     completeCallback = run with the Todo when the todo is checked off
     """
-    def __init__(s, parent, view, model, settings, parsers, checkCallback):
+    def __init__(s, parent, view, model, data, parsers, checkCallback):
         s.parent = parent
         s.view = view
         s.model = model
-        s.settings = settings
+        s.data = data
         s.parsers = parsers
         s.checkCallback = checkCallback
         s.attach = None
@@ -45,7 +45,7 @@ class TodoScroller(object):
             # Too many differences. Build em!
             s.todoStructure = new
             s.container = container
-            pos = s.settings.get("Todo.SectionState", {})
+            pos = s.data.get("Todo.SectionState", {})
             for group in sorted(s.todoStructure.keys()):
                 if group != "none":
                     s.groupPos[group] = pos.get(group, True)
@@ -86,7 +86,7 @@ class TodoScroller(object):
     def addGroup(s, name, parent):
         def changePos(element):
             s.groupPos[name] = element.position
-            s.settings.set("Todo.SectionState", s.groupPos)
+            s.data["Todo.SectionState"] = s.groupPos
         pos = s.groupPos.get(name, True)
         grp = s.view.CollapsableGroup(
             attributes={

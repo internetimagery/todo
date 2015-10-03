@@ -12,16 +12,18 @@ class File(archive.Archive):
     def start(s):
         s.settingName = "setting.file"
         s.settingFileName = "setting.file.files"
+    def set(s, k, v):
+        s.data[k] = v
     def buildSettings(s, parent):
-        s.files = set(s.settings.get(s.settingFileName, []))
+        s.files = set(s.data.get(s.settingFileName, []))
         s.section = s.view.CheckSection(
             attributes={
-                "checked"   : s.settings.get(s.settingName, False),
+                "checked"   : s.data.get(s.settingName, False),
                 "label"     : "File Archive",
                 "annotation": "Store a backup of the current scene into the provided folder upon each Todo completion."
             },
             events={
-                "change"    : lambda x: s.settings.set(s.settingName, x.checked)
+                "change"    : lambda x: s.set(s.settingName, x.checked)
             },
             parent=parent
         )
@@ -48,13 +50,13 @@ class File(archive.Archive):
             project = s.model.File.project()
             path = s.relativePath(path, project)
             s.files.add(path)
-            s.settings.set(s.settingFileName, list(s.files))
+            s.data[s.settingFileName] = list(s.files)
             s.buildFiles()
 
     def removeFile(s, path, element):
         if path in s.files:
             s.files.remove(path)
-            s.settings.set(s.settingFileName, list(s.files))
+            s.data = [s.settingFileName] = list(s.files)
             element.delete()
 
     def buildFiles(s):
@@ -96,10 +98,10 @@ class File(archive.Archive):
         return s.absolutePath(path).replace("\\", "/") if rPath[:2] == ".." else rPath.replace("\\", "/")
 
     def runArchive(s, todo, filename):
-        active = s.settings.get(s.settingName, False)
+        active = s.data.get(s.settingName, False)
         target = os.path.realpath(filename)
         if active and os.path.isfile(target):
-            paths = s.settings.get(s.settingFileName, [])
+            paths = s.data.get(s.settingFileName, [])
             if paths:
                 basename = os.path.basename(target)
                 whitelist = [" ", ".", "_", "@"]  # Strip invalid characters

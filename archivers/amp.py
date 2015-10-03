@@ -29,12 +29,12 @@ class Amp(archive.Archive):
         if _version_:
             s.section = s.view.CheckSection(
                 attributes={
-                    "checked"   : s.settings.get(s.settingName, False),
+                    "checked"   : s.data.get(s.settingName, False),
                     "label"     : "AMP Archive",
                     "annotation": "Check the file into AMP upon each Todo task completion."
                 },
                 events={
-                    "change"    : lambda x: s.settings.set(s.settingName, x.checked)
+                    "change"    : lambda x: s.set(s.settingName, x.checked)
                 },
                 parent=parent
             )
@@ -45,9 +45,10 @@ class Amp(archive.Archive):
                 },
                 parent=s.section
             )
-
+    def set(s, k, v):
+        s.data[k] = v
     def runArchive(s, todo, filename):
-        if s.settings.get(s.settingName, False) and _version_:
+        if s.data.get(s.settingName, False) and _version_:
             path = os.path.realpath(filename)
             if path and os.path.isfile(path):
                 comment = todo.label
