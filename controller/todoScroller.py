@@ -176,8 +176,6 @@ class TodoScroller(object):
 
     def todoCreate(s, task):
         todo = cTodo.Todo(
-            view=s.view,
-            model=s.model,
             data=s.data,
             task=task,
             parsers=s.parsers

@@ -2,6 +2,7 @@
 # Created 30/09/15 Jason Dixon
 # http://internetimagery.com
 
+
 import time
 import shlex
 import todo.parsers.group as defaultParser
@@ -14,11 +15,9 @@ class Todo(object):
     id = id following format "TODO_123456"
     parsers = functions to parse out metadata from task
     """
-    def __init__(s, view, model, data, id=None, task="", parsers=[]):
-        s.view = view
-        s.model = model
+    def __init__(s, data, id=None, task="", parsers=[]):
         s.data = data
-        s.parsers = [defaultParser.Group] + parsers
+        s.parsers = [defaultParser.Group(None, None, None)] + parsers
         s.label = ""
         s.groups = set()
         s.special = None
@@ -43,19 +42,19 @@ class Todo(object):
         if task:
             if 255 < len(task): # 255 character limit!
                 raise AttributeError, "Task is too long."
-            parsers = [p(s.view, s.model, s.data) for p in s.parsers] # init parsers
             label = ""
             tokens = shlex.split(task) # break into tokens
             filteredTokens = []
+            for p in s.parsers: p.reset() # reset parsers
             for token in tokens:
-                for p in parsers:
+                for p in s.parsers:
                     token = p.update(token) if token else None
                 if token:
                     filteredTokens.append(token)
             if filteredTokens:
                 s.label = " ".join(filteredTokens)
-                s.groups = parsers[0].tags # Get groups
-                trimmed = [p for p in parsers if 0 < p.priority]
+                s.groups = s.parsers[0].tags # Get groups
+                trimmed = [p for p in s.parsers if 0 < p.priority]
                 s.special = sorted(trimmed, key=lambda x: x.priority)[-1] if trimmed else None
                 return
         raise AttributeError, "Task is empty."

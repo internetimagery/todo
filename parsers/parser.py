@@ -10,6 +10,7 @@ class Parser(object):
         s.view = view
         s.model = model
         s.data = data
+    def reset(s):
         s.description = "Replace this description with a relevant one."
         s.icon = "replaceme.png"
         s.name = "Base Parser. Replace me."
@@ -17,6 +18,7 @@ class Parser(object):
         s.start()
     def start(s):
         """
+        Set up everything needed to parse
         Override this
         """
         pass

@@ -3,29 +3,26 @@
 # http://internetimagery.com
 
 import maya.cmds as cmds
+import todo.model.data
 import json
 
-class Data(dict):
-    def __init__(s, node):
+
+class Data(todo.model.data.Data):
+    def _DATA_Retrieve(s, node):
         s.node = node
         s._check()
-        data = cmds.getAttr(s.node+".notes")
+        data = cmds.getAttr(s.node + ".notes")
         try:
-            dict.__init__(s, **json.loads(data.decode("unicode_escape")))
+            return json.loads(data.decode("unicode_escape"))
         except (TypeError, ValueError, AttributeError):
-            dict.__init__(s)
+            return {}
+    def _DATA_Store(s, data):
+        s._check()
+        cmds.setAttr(s.node + ".notes", json.dumps(data), type="string")
     def _check(s):
         if not cmds.objExists(s.node):
-            cmds.createNode("unknown", n=s.node, ss=True)
+            sel = cmds.ls(sl=True)
+            cmds.group(n=s.node, em=True)
+            cmds.select(sel, r=True)
         if not cmds.attributeQuery("notes", n=s.node, ex=True):
             cmds.addAttr(s.node, ln="notes", sn="nts", dt="string")
-    def __setitem__(s, k, v):
-        dict.__setitem__(s, k, v)
-        s._check()
-        print "Storing", k, v
-        cmds.setAttr(s.node+".notes", json.dumps(s), type="string")
-    def __delitem__(s, k):
-        dict.__delitem__(s, k)
-        s._check()
-        print "Removing", k
-        cmds.setAttr(s.node+".notes", json.dumps(s), type="string")

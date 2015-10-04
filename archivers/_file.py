@@ -12,8 +12,6 @@ class File(archive.Archive):
     def start(s):
         s.settingName = "setting.file"
         s.settingFileName = "setting.file.files"
-    def set(s, k, v):
-        s.data[k] = v
     def buildSettings(s, parent):
         s.files = set(s.data.get(s.settingFileName, []))
         s.section = s.view.CheckSection(
@@ -23,7 +21,7 @@ class File(archive.Archive):
                 "annotation": "Store a backup of the current scene into the provided folder upon each Todo completion."
             },
             events={
-                "change"    : lambda x: s.set(s.settingName, x.checked)
+                "change"    : lambda x: s.data.set(s.settingName, x.checked)
             },
             parent=parent
         )
@@ -56,7 +54,7 @@ class File(archive.Archive):
     def removeFile(s, path, element):
         if path in s.files:
             s.files.remove(path)
-            s.data = [s.settingFileName] = list(s.files)
+            s.data[s.settingFileName] = list(s.files)
             element.delete()
 
     def buildFiles(s):
@@ -111,7 +109,7 @@ class File(archive.Archive):
                 for path in paths:
                     folder = s.absolutePath(path, project)
                     if os.path.isdir(folder):
-                        dest = os.path.join(path, name)
+                        dest = os.path.realpath(os.path.join(path, name))
                         z = zipfile.ZipFile(dest, "w")
                         z.write(target, basename)
                         z.close()

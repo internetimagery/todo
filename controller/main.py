@@ -7,14 +7,12 @@ import random
 import threading
 
 import todo.quotes
-
 import todo.archivers
 
-import todo.controller.todoContainer as cTodoContainer
-import todo.controller.todoScroller as cTodoScroller
-import todo.controller.panel as cPanel
-import todo.controller._todo as cTodo
-
+import todoContainer as cTodoContainer
+import todoScroller as cTodoScroller
+import panel as cPanel
+import _todo as cTodo
 
 class Main(object):
     def __init__(s, software):
@@ -29,7 +27,7 @@ class Main(object):
         s.data = model.Data("Todo_Save_Data")
         s.model = model
         s.view = view
-        s.parsers = parsers
+        s.parsers = [p(view, model, s.data) for p in parsers]
         # Set up our archivers
         s.archives = [a(
             s.view, # view
@@ -37,7 +35,6 @@ class Main(object):
             s.data # settings
         ) for a in todo.archivers.Archives]
         s.daemonArchive = True # Daemonize archives
-
         s.window = s.view.Window(
             attributes={
                 "name"  : "TODO_WINDOW",
@@ -79,8 +76,6 @@ class Main(object):
                 if re.match(r"^TODO_[\d\.]+", key):
                     try:
                         container.append(cTodo.Todo(
-                            view=s.view,
-                            model=s.model,
                             data=s.data,
                             id=key,
                             parsers=s.parsers
@@ -109,7 +104,6 @@ class Main(object):
         """
         Todo complete.
         """
-
         return s.model.File.save(
             todo=todo,
             archive=lambda x: s.archiveTodo(todo, x)
@@ -122,7 +116,6 @@ class Main(object):
         threads = []
         for a in s.archives:
             if s.daemonArchive:
-                print "threadding"
                 th = threading.Thread(
                     target=a.runArchive,
                     args=(todo, path)
@@ -142,4 +135,3 @@ class Main(object):
         )
         for archive in s.archives:
             archive.buildSettings(element)
-Main("maya")
