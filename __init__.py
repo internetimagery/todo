@@ -4,12 +4,13 @@
 
 import todo.controller.main as main
 
+software = ""
+try:
+    import maya
+    software = "maya"
+except ImportError:
+    raise Exception, "Software not supported"
+
 def Start():
-    software = ""
-    try:
-        import maya
-        software = "maya"
-    except ImportError:
-        print "Software not supported"
     if software:
         main.Main(software)

@@ -18,11 +18,12 @@ class Data(todo.model.data.Data):
             return {}
     def _DATA_Store(s, data):
         s._check()
-        cmds.setAttr(s.node + ".notes", json.dumps(data), type="string")
+        cmds.setAttr(s.node + ".notes", l=False) # unlock attribute
+        cmds.setAttr(s.node + ".notes", json.dumps(data), type="string", l=True)
     def _check(s):
         if not cmds.objExists(s.node):
             sel = cmds.ls(sl=True)
             cmds.group(n=s.node, em=True)
             cmds.select(sel, r=True)
         if not cmds.attributeQuery("notes", n=s.node, ex=True):
-            cmds.addAttr(s.node, ln="notes", sn="nts", dt="string")
+            cmds.addAttr(s.node, ln="notes", sn="nts", dt="string", s=True)

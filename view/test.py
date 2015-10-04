@@ -1,28 +1,38 @@
-# Testing persistence through object storage
+# testing manually calling functions in the main thread from different threads
 
-import maya.cmds as cmds
-import json
+import Queue
 
-class Store(dict):
-    def __init__(s, node):
-        s.node = node
-        s._check()
-        data = cmds.getAttr(s.node+".notes")
+
+#somewhere accessible to both:
+callback_queue = Queue.Queue()
+
+def from_dummy_thread(func_to_call_from_main_thread):
+    callback_queue.put(func_to_call_from_main_thread)
+
+def from_main_thread_blocking():
+    callback = callback_queue.get() #blocks until an item is available
+    callback()
+
+def from_main_thread_nonblocking():
+    while True:
         try:
-            dict.__init__(s, **json.loads(data.decode("unicode_escape")))
-        except (TypeError, ValueError, AttributeError):
-            dict.__init__(s)
-    def _check(s):
-        if not cmds.objExists(s.node):
-            cmds.createNode("unknown", n=s.node, ss=True)
-        if not cmds.attributeQuery("notes", n=s.node, ex=True):
-            cmds.addAttr(s.node, ln="notes", sn="nts", dt="string")
-    def __setitem__(s, k, v):
-        dict.__setitem__(s, k, v)
-        s._check()
-        cmds.setAttr(s.node+".notes", json.dumps(s), type="string")
+            callback = callback_queue.get(False) #doesn't block
+        except Queue.Empty: #raised when queue is empty
+            break
+        callback()
 
+import threading
+import time
 
-s = Store("another")
-print len(s.get("long", "not here"))
-s["long"] = "b" * 3
+def print_num(dummyid, n):
+    print "From %s: %d" % (dummyid, n)
+def dummy_run(dummyid):
+    for i in xrange(5):
+        from_dummy_thread(lambda: print_num(dummyid, i))
+        time.sleep(0.5)
+
+threading.Thread(target=dummy_run, args=("a",)).start()
+threading.Thread(target=dummy_run, args=("b",)).start()
+
+while True:
+    from_main_thread_blocking()
