@@ -3,27 +3,23 @@
 # http://internetimagery.com
 
 import re
-import sys
-import os.path
-root = os.path.realpath(os.path.dirname(__file__))
+import sys as _sys
 reg = re.compile(r"([A-Z])")
-
 class Package(object):
     def __init__(s, local):
+        import os.path
         s.cache = {}
-        s.sys = sys
-        s.root = root
-        s.reg = reg
         s.local = local
+        s.reg = reg
+        s.root = os.path.realpath(os.path.dirname(s.local["__file__"]))
     def __getattr__(s, k):
         if k in s.local: return s.local[k]
         if k in s.cache: return s.cache[k]
-        path = list(s.sys.path)
-        s.sys.path.insert(0, s.root)
+        path = list(s.local["_sys"].path)
+        s.local["_sys"].path.insert(0, s.root)
         try:
             module = __import__(k)
             s.cache[k] = getattr(module, s.reg.sub(r"_\1", k).title())
-        finally:
-            s.sys.path[:] = path
+        finally: s.local["_sys"].path[:] = path
         return s.cache[k]
-sys.modules[__name__] = Package(locals())
+_sys.modules[__name__] = Package(locals())
