@@ -5,7 +5,7 @@
 import element
 import maya.cmds as cmds
 
-class HorizontalLayout(element.MayaElement):
+class Horizontal_Layout(element.MayaElement):
     """
     An empty placeholder
     """

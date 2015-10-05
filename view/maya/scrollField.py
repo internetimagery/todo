@@ -5,7 +5,7 @@
 import element
 import maya.cmds as cmds
 
-class ScrollField(element.MayaElement):
+class Scroll_Field(element.MayaElement):
     """
     The main scroll box. Inserting todo groups into.
     """

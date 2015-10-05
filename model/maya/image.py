@@ -2,24 +2,26 @@
 # Created 01/10/15 Jason Dixon
 # http://internetimagery.com
 
-from todo.model.image import Icon
+from todo.model.image import icon
 
 # Override Icons
 # Top Button, panel switcher
-Icon["panel.settings"] = "attributes.png"
-Icon["panel.todo"] = "revealSelected.png"
+icon["panel.settings"] = "attributes.png"
+icon["panel.todo"] = "revealSelected.png"
 # Todo entry
-Icon["todo.save"] = "fileSave.png"
-Icon["todo.edit"] = "setEdEditMode.png"
-Icon["todo.delete"] = "removeRenderable.png"
+icon["todo.save"] = "fileSave.png"
+icon["todo.edit"] = "setEdEditMode.png"
+icon["todo.delete"] = "removeRenderable.png"
 # Todo special entires
-Icon["todo.web"] = "SP_ComputerIcon.png"
-Icon["todo.file"] = "openScript.png"
+icon["todo.web"] = "SP_ComputerIcon.png"
+icon["todo.file"] = "openScript.png"
 # Settings
-Icon["settings.file"] = "fileOpen.png"
-Icon["settings.filepath"] = "removeRenderable.png"
-Icon["settings.git.push"] = "createContainer.png"
+icon["settings.file"] = "fileOpen.png"
+icon["settings.filepath"] = "removeRenderable.png"
+icon["settings.git.push"] = "createContainer.png"
 # Maya specfic parsers!
-Icon["todo.object"] = "selectByObject.png"
-Icon["todo.frame"] = "centerCurrentTime.png"
-Icon["todo.range"] = "traxFrameRange.png"
+icon["todo.object"] = "selectByObject.png"
+icon["todo.frame"] = "centerCurrentTime.png"
+icon["todo.range"] = "traxFrameRange.png"
+
+Image = icon

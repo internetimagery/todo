@@ -3,7 +3,7 @@ import maya.cmds as cmds
 import os.path
 import element
 
-class Window(element.MayaElement):
+class window(element.MayaElement):
     """
     Empty Main window with docking functionality. Woo!
     Attributes:

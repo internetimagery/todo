@@ -2,7 +2,7 @@
 import maya.cmds as cmds
 import element as element
 
-class CheckSection(element.MayaElement):
+class Check_Section(element.MayaElement):
     """
     A checkboxed section. Enable/Disable depending on the checked state.
     Attributes:

@@ -3,7 +3,7 @@
 import maya.cmds as cmds
 import todo.view.element
 
-class MayaElement(todo.view.element.Element):
+class Maya_Element(todo.view.element.Element):
     """
     Maya Gui base
     """

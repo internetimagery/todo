@@ -5,7 +5,7 @@
 import element
 import maya.cmds as cmds
 
-class TextButtonVertical(element.MayaElement):
+class Text_Button_Vertical(element.MayaElement):
     """
     A Fancy large text field for creating new Todos.
     Attributes:

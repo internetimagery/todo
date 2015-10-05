@@ -2,18 +2,28 @@
 # Created 30/09/15 Jason Dixon
 # http://internetimagery.com
 
-from window import Window
-from panel import Panel
-from textButtonVertical import TextButtonVertical
-from scrollField import ScrollField
-from collapsableGroup import CollapsableGroup
-from _todo import Todo, TodoEdit
+import re
+import sys
+import os.path
+root = os.path.realpath(os.path.dirname(__file__))
+reg = re.compile(r"([A-Z])")
 
-from checkSection import CheckSection
-
-
-from title import Title
-from notice import Notice
-from horizontalLayout import HorizontalLayout
-from button import Button
-from text import Text
+class Package(object):
+    def __init__(s, local):
+        s.cache = {}
+        s.sys = sys
+        s.root = root
+        s.reg = reg
+        s.local = local
+    def __getattr__(s, k):
+        if k in s.local: return s.local[k]
+        if k in s.cache: return s.cache[k]
+        path = list(s.sys.path)
+        s.sys.path.insert(0, s.root)
+        try:
+            module = __import__(k)
+            s.cache[k] = getattr(module, s.reg.sub(r"_\1", k).title())
+        finally:
+            s.sys.path[:] = path
+        return s.cache[k]
+sys.modules[__name__] = Package(locals())

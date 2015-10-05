@@ -5,7 +5,7 @@
 import element
 import maya.cmds as cmds
 
-class CollapsableGroup(element.MayaElement):
+class Collapsable_Group(element.MayaElement):
     """
     A collapsable grouping. Sort todos by their group and hide them away.
     Attributes:
