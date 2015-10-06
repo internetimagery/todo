@@ -4,10 +4,10 @@ from c4d import gui
 
 class Window(gui.GeDialog):
 
-    def __init__(s):
+    def __init__(s, requestSettings, requestTodoPage):
         s.elements = {} # Keep track of elements and their associative functions
-        s.requestSettings = None # Callback to get settings built
-        s.requestTodos = None # Callback to get todos information
+        s.requestSettings = requestSettings # Callback to get settings built
+        s.requestTodoPage = requestTodoPage # Callback to get todos information
         gui.GeDialog.__init__(s)
 
     def Open(s):
@@ -24,12 +24,17 @@ class Window(gui.GeDialog):
             id=s.getId(),
             flags=c4d.BFH_SCALEFIT|c4d.BFV_SCALEFIT
             )
-        s.buildTodo()
+        s.buildTodo(**s.requestTodoPage())
         s.buildSettings()
         s.GroupEnd()
         return True
 
-    def buildTodo(s):
+    def Command(s, id, msg):
+        if id in s.elements and s.elements[id]:
+            s.elements[id](id)
+        return True
+
+    def buildTodo(s, buttonName="Default", pageName="Default", newTodo=None):
         """
         Build the todo page
         """
@@ -37,7 +42,7 @@ class Window(gui.GeDialog):
             id=s.getId(),
             flags=c4d.BFH_SCALEFIT|c4d.BFV_SCALEFIT,
             cols=1,
-            title="Tasks",
+            title=pageName,
             groupflags=c4d.BFV_CMD_EQUALCOLUMNS
             )
         textfield = s.getId()
@@ -49,12 +54,17 @@ class Window(gui.GeDialog):
         s.AddButton(
             id=button,
             flags=c4d.BFH_SCALEFIT,
-            name="ADD A TODO IN HERE, ALSO REPLACE THIS TEXT"
+            name=buttonName
             )
         s.GroupEnd()
-        def newTask(id):
-            print s.GetString(textfield)
-        s.bind(button, newTask)
+        def new(id):
+            if newTodo:
+                if newTodo(s.GetString(textfield)):
+                    s.SetString(textfield, "") # Reset todo field if successful
+            else:
+                print "MISSING newTodo Callback!!"
+
+        s.bind(button, new)
 
     def buildSettings(s):
         """
@@ -70,10 +80,7 @@ class Window(gui.GeDialog):
         s.AddButton(1013, c4d.BFV_MASK, initw=145, name="INSERT SETTINGS IN HERE LATER")
         s.GroupEnd()
 
-    def Command(s, id, msg):
-        if id in s.elements and s.elements[id]:
-            s.elements[id](id)
-        return True
+
 
     def getId(s):
         start = 1050
@@ -92,5 +99,21 @@ class Window(gui.GeDialog):
             del s.elements[id]
 
 if __name__ == '__main__':
-    w = Window()
+    # TEST THE WINDOW
+    def buildTodo(): # fill in the information and give it to the GUI
+        return {
+            "buttonName"  : "Create a new TODO",
+            "pageName"    : "Tasks",
+            "newTodo"     : newTodo # Callback
+        }
+    def newTodo(text):
+        text = text.strip()
+        if text:
+            print "New Todo Text:", text
+            return True
+
+    w = Window(
+        lambda x: {},
+        buildTodo
+    )
     w.Open()
