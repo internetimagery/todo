@@ -60,6 +60,13 @@ class Window(gui.GeDialog):
         newTodo = callback when new todo is requested
         buildTodo = call to build out todo list based on given information dict
         """
+        def new(id):
+            if newTodo:
+                if newTodo(s.GetString(textfield)):
+                    s.SetString(textfield, "") # Reset todo field if successful
+            else:
+                print "MISSING newTodo Callback!!"
+
         if s.panelIds:
             for id in s.panelIds:
                 s.unbind(id)
@@ -92,6 +99,7 @@ class Window(gui.GeDialog):
             flags=c4d.BFH_SCALEFIT,
             name=buttonName
             )
+        s.bind(button, new)
         s.AddSeparatorH(c4d.BFH_SCALEFIT)
         s.ScrollGroupBegin( # Open Scroll
             id=0,
@@ -110,14 +118,6 @@ class Window(gui.GeDialog):
         s.GroupEnd() # Close Scroll
         s.GroupEnd() # Close Page
         s.LayoutChanged(id=s.wrapper)
-
-        def new(id):
-            if newTodo:
-                if newTodo(s.GetString(textfield)):
-                    s.SetString(textfield, "") # Reset todo field if successful
-            else:
-                print "MISSING newTodo Callback!!"
-        s.bind(button, new)
         s.buildTodos()
 
     def buildTodos(s):
@@ -133,37 +133,64 @@ class Window(gui.GeDialog):
             def add(todo):
                 def completeFunc(id):
                     print "Completed Todo!"
+                def specialFunc(id):
+                    print "Pressed special"
                 def editFunc(id):
                     print "Pressed edit"
+                    s.LayoutFlushGroup(id=group)
+                    textfield = s.getId()
+                    s.panelIds.append(textfield)
+                    s.AddEditText(
+                        id=textfield,
+                        flags=c4d.BFH_SCALEFIT,
+                    )
+                    editText = s.getId()
+                    s.panelIds.append(editText)
+                    s.AddButton(
+                        id=editText,
+                        flags=0,
+                        name="Update"
+                        )
+                    s.LayoutChanged(id=group)
+                    def temp(id):
+                        print "Edited!", s.GetString(textfield)
+                    s.bind(editText, temp)
                 def deleteFunc(id):
                     print "Pressed Delete"
                 group = s.getId()
                 s.GroupBegin( # Open Todo
                     id=group,
                     flags=c4d.BFH_SCALEFIT,
-                    cols=3
+                    cols=4
                     )
                 taskBtn = s.getId()
+                s.todoIds.append(taskBtn)
                 s.AddButton(
                     id=taskBtn,
                     flags=c4d.BFH_SCALEFIT,
                     name="Todo Number %s" % todo
                     )
+                s.bind(taskBtn, completeFunc)
+                if todo == 3:
+                    specialBtn = s.buildImageButton(
+                        c4d.RESOURCEIMAGE_OBJECTMANAGER_DISP2,
+                        "Special Button"
+                    )
+                    s.todoIds.append(specialBtn)
+                    s.bind(specialBtn, specialFunc)
                 editBtn = s.buildImageButton(
                     c4d.RESOURCEIMAGE_BROWSER_CATALOG,
                     "Edit the task"
                 )
+                s.todoIds.append(editBtn)
+                s.bind(editBtn, editFunc)
                 delBtn = s.buildImageButton(
                     c4d.RESOURCEIMAGE_CLEARSELECTION,
                     "Remove the task without saving."
                 )
-                s.GroupEnd() # Close todo
-                s.todoIds.append(taskBtn)
-                s.todoIds.append(editBtn)
                 s.todoIds.append(delBtn)
-                s.bind(taskBtn, completeFunc)
-                s.bind(editBtn, editFunc)
                 s.bind(delBtn, deleteFunc)
+                s.GroupEnd() # Close todo
             for todo in todos:
                 add(todo)
         s.GroupEnd() # Close Dummy
