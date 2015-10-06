@@ -16,23 +16,44 @@ class Window(gui.GeDialog):
             defaulth=500
             )
 
-    def InitValues(s):
-        return True
-
     def CreateLayout(s):
         s.SetTitle("Todo window")
-        s.TabGroupBegin(id=s.getId(), flags=c4d.BFH_CENTER)
-        s.GroupBegin(id=s.getId(), flags=c4d.BFH_MASK, cols=3, title="TABONE")
+        s.TabGroupBegin(
+            id=s.getId(),
+            flags=c4d.BFH_SCALEFIT|c4d.BFV_SCALEFIT
+            )
+        s.buildTodo()
+        s.buildSettings()
+        s.GroupEnd()
+        return True
+
+    def buildTodo(s):
+        """
+        Build the todo page
+        """
+        s.GroupBegin(
+            id=s.getId(),
+            flags=c4d.BFH_SCALEFIT|c4d.BFV_SCALEFIT,
+            cols=1,
+            title="Tasks",
+            groupflags=c4d.BFV_CMD_EQUALCOLUMNS
+            )
         s.AddButton(1013, c4d.BFV_MASK, initw=145, name="Tab one")
         s.GroupEnd()
-        s.GroupBegin(id=s.getId(), flags=c4d.BFH_MASK, cols=3, title="TABTWO")
-        s.AddButton(1013, c4d.BFV_MASK, initw=145, name="Tab Two")
+
+    def buildSettings(s):
+        """
+        Build the todo page
+        """
+        s.GroupBegin(
+            id=s.getId(),
+            flags=c4d.BFH_SCALEFIT|c4d.BFV_SCALEFIT,
+            cols=1,
+            title="Settings",
+            groupflags=c4d.BFV_CMD_EQUALCOLUMNS
+            )
+        s.AddButton(1013, c4d.BFV_MASK, initw=145, name="Tab two")
         s.GroupEnd()
-        s.GroupEnd()
-        def msg():
-            print "message"
-        s.bind(1013, msg)
-        return True
 
     def Command(s, id, msg):
         if id in s.events and s.events[id]:
