@@ -94,10 +94,43 @@ class Window(gui.GeDialog):
                 s.unbind(id)
         s.LayoutFlushGroup(id=s.todolist) # Empty the todo list!!
         if todos:
+            def add(todo):
+                def completeFunc(id):
+                    print "Completed Todo!"
+                def editFunc(id):
+                    print "Pressed edit"
+                def deleteFunc(id):
+                    print "Pressed Delete"
+                group = s.getId()
+                taskBtn = s.getId()
+                editBtn = s.getId()
+                delBtn = s.getId()
+                s.GroupBegin(
+                    id=group,
+                    flags=c4d.BFH_FIT,
+                    cols=3
+                    )
+                s.AddButton(
+                    id=taskBtn,
+                    flags=c4d.BFH_SCALEFIT,
+                    name="Todo Number %s" % todo
+                    )
+                s.AddButton(
+                    id=editBtn,
+                    flags=0,
+                    name="EDIT"
+                    )
+                s.AddButton(
+                    id=delBtn,
+                    flags=0,
+                    name="DEL"
+                    )
+                s.GroupEnd() # Close todo
+                s.bind(taskBtn, completeFunc)
+                s.bind(editBtn, editFunc)
+                s.bind(delBtn, deleteFunc)
             for todo in todos:
-                id = s.getId()
-                s.todoIds.append(id) # Save the ID for removal next refesh
-                s.AddButton(id, c4d.BFV_MASK, initw=145, name="Todo-%s" % todo)
+                add(todo)
         s.LayoutChanged(id=s.todolist)
 
     def buildSettingsPage(s):
