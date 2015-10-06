@@ -54,19 +54,12 @@ class Window(gui.GeDialog):
                 s.requestReset()
         return True
 
-    def buildTodoPage(s, buttonName="Default", pageName="Default", newTodo=None, buildTodo=None):
+    def buildTodoPage(s, newBtn="Default", pageBtn="Default", newTodo=None, buildTodo=None):
         """
         Build the todo page
         newTodo = callback when new todo is requested
         buildTodo = call to build out todo list based on given information dict
         """
-        def new(id):
-            if newTodo:
-                if newTodo(s.GetString(textfield)):
-                    s.SetString(textfield, "") # Reset todo field if successful
-            else:
-                print "MISSING newTodo Callback!!"
-
         if s.panelIds:
             for id in s.panelIds:
                 s.unbind(id)
@@ -75,7 +68,6 @@ class Window(gui.GeDialog):
             id=0,
             flags=c4d.BFH_SCALEFIT|c4d.BFV_SCALEFIT,
             cols=1,
-            title=pageName,
             groupflags=c4d.BFV_CMD_EQUALCOLUMNS
             )
         pageBtn = s.getId()
@@ -83,7 +75,7 @@ class Window(gui.GeDialog):
         s.AddButton(
             id=pageBtn,
             flags=c4d.BFH_RIGHT,
-            name="Settings ->"
+            name=pageBtn
             )
         s.bind(pageBtn, lambda x: s.buildSettingsPage(**s.requestSettingsPage()))
         textfield = s.getId()
@@ -97,9 +89,9 @@ class Window(gui.GeDialog):
         s.AddButton(
             id=button,
             flags=c4d.BFH_SCALEFIT,
-            name=buttonName
+            name=newBtn
             )
-        s.bind(button, new)
+        s.bind(button, lambda x: s.SetString(textfield, "") if newTodo(s.GetString(textfield)) else None )
         s.AddSeparatorH(c4d.BFH_SCALEFIT)
         s.ScrollGroupBegin( # Open Scroll
             id=0,
@@ -269,8 +261,8 @@ if __name__ == '__main__':
         print "Scene changed. Need to load more info"
     def infoTodo(): # fill in the information and give it to the GUI
         return {
-            "buttonName"  : "Create a new TODO",
-            "pageName"    : "Tasks",
+            "newBtn"  : "Create a new TODO",
+            "pageBtn"    : "Settings ->",
             "newTodo"     : newTodo # Callback
         }
     def buildTodo(): # Build out todos
