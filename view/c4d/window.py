@@ -108,19 +108,6 @@ class Window(gui.GeDialog):
             for id in s.todoIds:
                 s.unbind(id)
         s.LayoutFlushGroup(id=s.todolist) # Empty the todo list!!
-
-
-
-        bmpbutton = c4d.BaseContainer()
-        bmpbutton.SetBool(c4d.BITMAPBUTTON_BUTTON, True)
-        bmpbutton.SetString(c4d.BITMAPBUTTON_TOOLTIP, "Remove this Task")
-        bmpbutton.SetLong(c4d.BITMAPBUTTON_ICONID1, c4d.RESOURCEIMAGE_CLEARSELECTION)
-        s.AddCustomGui(
-            s.getId(),
-            c4d.CUSTOMGUI_BITMAPBUTTON, name="", flags=0, minw=0,
-            minh=0, customdata=bmpbutton)
-
-
         if todos:
             def add(todo):
                 def completeFunc(id):
@@ -130,29 +117,25 @@ class Window(gui.GeDialog):
                 def deleteFunc(id):
                     print "Pressed Delete"
                 group = s.getId()
-                taskBtn = s.getId()
-                editBtn = s.getId()
-                delBtn = s.getId()
                 s.GroupBegin( # Open Todo
                     id=group,
                     flags=c4d.BFH_SCALEFIT,
                     cols=3
                     )
+                taskBtn = s.getId()
                 s.AddButton(
                     id=taskBtn,
                     flags=c4d.BFH_SCALEFIT,
                     name="Todo Number %s" % todo
                     )
-                s.AddButton(
-                    id=editBtn,
-                    flags=0,
-                    name="EDIT"
-                    )
-                s.AddButton(
-                    id=delBtn,
-                    flags=0,
-                    name="DEL"
-                    )
+                editBtn = s.buildImageButton(
+                    c4d.RESOURCEIMAGE_BROWSER_CATALOG,
+                    "Edit the task"
+                )
+                delBtn = s.buildImageButton(
+                    c4d.RESOURCEIMAGE_CLEARSELECTION,
+                    "Remove the task without saving."
+                )
                 s.GroupEnd() # Close todo
                 s.todoIds.append(taskBtn)
                 s.todoIds.append(editBtn)
@@ -179,7 +162,21 @@ class Window(gui.GeDialog):
         s.AddButton(1013, c4d.BFV_MASK, initw=145, name="INSERT SETTINGS IN HERE LATER")
         s.GroupEnd() # Close Page
 
-
+    def buildImageButton(s, image, text):
+        bmpbutton = c4d.BaseContainer()
+        bmpbutton.SetBool(c4d.BITMAPBUTTON_BUTTON, True)
+        bmpbutton.SetString(c4d.BITMAPBUTTON_TOOLTIP, text)
+        bmpbutton.SetLong(c4d.BITMAPBUTTON_ICONID1, image)
+        id = s.getId()
+        s.AddCustomGui(
+            id,
+            c4d.CUSTOMGUI_BITMAPBUTTON,
+            name="",
+            flags=0,
+            minw=0,
+            minh=0,
+            customdata=bmpbutton)
+        return id
 
     def getId(s):
         start = 1050
