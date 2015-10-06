@@ -4,10 +4,11 @@ from c4d import gui
 
 class Window(gui.GeDialog):
 
-    def __init__(s, requestSettings, requestTodoPage):
+    def __init__(s, requestSettingsPage, requestTodoPage):
         s.elements = {} # Keep track of elements and their associative functions
-        s.requestSettings = requestSettings # Callback to get settings built
+        s.requestSettingsPage = requestSettingsPage # Callback to get settings built
         s.requestTodoPage = requestTodoPage # Callback to get todos information
+        s.todoIds = [] # Store the ids of Todos, to free them up
         gui.GeDialog.__init__(s)
 
     def Open(s):
@@ -24,8 +25,8 @@ class Window(gui.GeDialog):
             id=s.getId(),
             flags=c4d.BFH_SCALEFIT|c4d.BFV_SCALEFIT
             )
-        s.buildTodo(**s.requestTodoPage())
-        s.buildSettings()
+        s.buildTodoPage(**s.requestTodoPage())
+        s.buildSettingsPage(**s.requestSettingsPage())
         s.GroupEnd()
         return True
 
@@ -34,9 +35,11 @@ class Window(gui.GeDialog):
             s.elements[id](id)
         return True
 
-    def buildTodo(s, buttonName="Default", pageName="Default", newTodo=None):
+    def buildTodoPage(s, buttonName="Default", pageName="Default", newTodo=None, buildTodo=None):
         """
         Build the todo page
+        newTodo = callback when new todo is requested
+        buildTodo = call to build out todo list based on given information dict
         """
         s.GroupBegin(
             id=s.getId(),
@@ -56,17 +59,48 @@ class Window(gui.GeDialog):
             flags=c4d.BFH_SCALEFIT,
             name=buttonName
             )
-        s.GroupEnd()
+        s.AddSeparatorH(c4d.BFH_SCALEFIT)
+        s.ScrollGroupBegin(
+            id=s.getId(),
+            flags=c4d.BFH_SCALEFIT|c4d.BFV_SCALEFIT,
+            scrollflags=c4d.SCROLLGROUP_VERT
+            )
+        s.todolist = s.getId()
+        s.GroupBegin(
+            id=s.todolist,
+            flags=c4d.BFH_FIT|c4d.BFV_TOP,
+            cols=1
+            )
+            # EMPTY PLACEHOLDER GROUP TO FILL WTIH TODOS
+        s.GroupEnd() # Close todolist
+        s.GroupEnd() # Close Scroll layout
+        s.GroupEnd() # Close whole page
         def new(id):
             if newTodo:
                 if newTodo(s.GetString(textfield)):
                     s.SetString(textfield, "") # Reset todo field if successful
             else:
                 print "MISSING newTodo Callback!!"
-
         s.bind(button, new)
+        s.buildTodos()
 
-    def buildSettings(s):
+    def buildTodos(s):
+        """
+        Insert and refesh the todos
+        """
+        todos = range(10)
+        if s.todoIds:
+            for id in s.todoIds:
+                s.unbind(id)
+        s.LayoutFlushGroup(id=s.todolist) # Empty the todo list!!
+        if todos:
+            for todo in todos:
+                id = s.getId()
+                s.todoIds.append(id) # Save the ID for removal next refesh
+                s.AddButton(id, c4d.BFV_MASK, initw=145, name="Todo-%s" % todo)
+        s.LayoutChanged(id=s.todolist)
+
+    def buildSettingsPage(s):
         """
         Build the todo page
         """
@@ -100,12 +134,15 @@ class Window(gui.GeDialog):
 
 if __name__ == '__main__':
     # TEST THE WINDOW
-    def buildTodo(): # fill in the information and give it to the GUI
+    def infoTodo(): # fill in the information and give it to the GUI
         return {
             "buttonName"  : "Create a new TODO",
             "pageName"    : "Tasks",
             "newTodo"     : newTodo # Callback
         }
+    def buildTodo(): # Build out todos
+        pass
+
     def newTodo(text):
         text = text.strip()
         if text:
@@ -113,7 +150,7 @@ if __name__ == '__main__':
             return True
 
     w = Window(
-        lambda x: {},
-        buildTodo
+        lambda: {},
+        infoTodo
     )
     w.Open()
