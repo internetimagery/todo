@@ -32,25 +32,48 @@ class Main(object):
             "pageBtnName"    : "Settings ->",
             "requestBuild"   : s.refreshTodo
         }
+
     def resetData(s):
+        """
+        Gather all data from the scene
+        """
         print "Reset requested"
 
     def refreshTodo(s):
-        s.buildTodo()
+        """
+        Build the Todo List, or Refresh it when changes are made.
+        """
+        todos = {} # Build out todo structure
+        s.buildTodo(todos)
 
     def todoNew(s, text):
+        """
+        New Todo requested.
+        """
         text = text.strip()
         if text:
             print "Creating:", text
             return True
 
     def todoEdit(s, text):
+        """
+        Todo edit requested
+        """
         print "Editing todo", text
     def todoDelete(s):
+        """
+        Todo deletion requested
+        """
         print "Delete todo"
     def todoSpecial(s):
+        """
+        Todo special requested
+        """
         print "Trigger special todo function"
     def todoComplete(s):
+        """
+        Todo Completion requested.
+        """
         print "Todo completed!"
 
 if __name__ == '__main__':

@@ -114,7 +114,7 @@ class Window(gui.GeDialog):
         s.LayoutChanged(id=s.wrapper)
         ctrls["requestBuild"]()
 
-    def buildTodos(s):
+    def buildTodos(s, todos):
         """
         Insert and refesh the todos
         """
