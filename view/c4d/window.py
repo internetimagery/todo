@@ -9,6 +9,7 @@ class Window(gui.GeDialog):
         s.requestSettingsPage = requestSettingsPage # Callback to get settings built
         s.requestTodoPage = requestTodoPage # Callback to get todos information
         s.todoIds = [] # Store the ids of Todos, to free them up
+        s.lastDoc = None # Previous document, to detect scene change
         gui.GeDialog.__init__(s)
 
     def Open(s):
@@ -35,13 +36,27 @@ class Window(gui.GeDialog):
             s.elements[id](id)
         return True
 
+    def CoreMessage(s, id, msg):
+        if id == c4d.EVMSG_DOCUMENTRECALCULATED: # Scene redrawn
+            current = c4d.documents.GetActiveDocument()
+            currName = current.GetDocumentName()
+            currPath = current.GetDocumentPath()
+            identifier = "%s:%s" % (
+                currName,
+                currPath if currPath else ""
+                )
+            if s.lastDoc != identifier:
+                print "Scene Changed!"
+                s.lastDoc = identifier
+        return True
+
     def buildTodoPage(s, buttonName="Default", pageName="Default", newTodo=None, buildTodo=None):
         """
         Build the todo page
         newTodo = callback when new todo is requested
         buildTodo = call to build out todo list based on given information dict
         """
-        s.GroupBegin(
+        s.GroupBegin( # Open Page
             id=s.getId(),
             flags=c4d.BFH_SCALEFIT|c4d.BFV_SCALEFIT,
             cols=1,
@@ -49,32 +64,32 @@ class Window(gui.GeDialog):
             groupflags=c4d.BFV_CMD_EQUALCOLUMNS
             )
         textfield = s.getId()
-        button = s.getId()
         s.AddEditText(
             id=textfield,
             flags=c4d.BFH_SCALEFIT,
         )
+        button = s.getId()
         s.AddButton(
             id=button,
             flags=c4d.BFH_SCALEFIT,
             name=buttonName
             )
         s.AddSeparatorH(c4d.BFH_SCALEFIT)
-        s.ScrollGroupBegin(
+        s.ScrollGroupBegin( # Open Scroll
             id=s.getId(),
             flags=c4d.BFH_SCALEFIT|c4d.BFV_SCALEFIT,
             scrollflags=c4d.SCROLLGROUP_VERT
             )
         s.todolist = s.getId()
-        s.GroupBegin(
+        s.GroupBegin( # Open Dummy
             id=s.todolist,
             flags=c4d.BFH_FIT|c4d.BFV_TOP,
             cols=1
             )
-            # EMPTY PLACEHOLDER GROUP TO FILL WTIH TODOS
-        s.GroupEnd() # Close todolist
-        s.GroupEnd() # Close Scroll layout
-        s.GroupEnd() # Close whole page
+        # EMPTY SPACE FOR TODOS TO BE PLACED
+        s.GroupEnd() # Close Dummy
+        s.GroupEnd() # Close Scroll
+        s.GroupEnd() # Close Page
         def new(id):
             if newTodo:
                 if newTodo(s.GetString(textfield)):
@@ -93,6 +108,19 @@ class Window(gui.GeDialog):
             for id in s.todoIds:
                 s.unbind(id)
         s.LayoutFlushGroup(id=s.todolist) # Empty the todo list!!
+
+
+
+        bmpbutton = c4d.BaseContainer()
+        bmpbutton.SetBool(c4d.BITMAPBUTTON_BUTTON, True)
+        bmpbutton.SetString(c4d.BITMAPBUTTON_TOOLTIP, "Remove this Task")
+        bmpbutton.SetLong(c4d.BITMAPBUTTON_ICONID1, c4d.RESOURCEIMAGE_CLEARSELECTION)
+        s.AddCustomGui(
+            s.getId(),
+            c4d.CUSTOMGUI_BITMAPBUTTON, name="", flags=0, minw=0,
+            minh=0, customdata=bmpbutton)
+
+
         if todos:
             def add(todo):
                 def completeFunc(id):
@@ -105,9 +133,9 @@ class Window(gui.GeDialog):
                 taskBtn = s.getId()
                 editBtn = s.getId()
                 delBtn = s.getId()
-                s.GroupBegin(
+                s.GroupBegin( # Open Todo
                     id=group,
-                    flags=c4d.BFH_FIT,
+                    flags=c4d.BFH_SCALEFIT,
                     cols=3
                     )
                 s.AddButton(
@@ -126,18 +154,22 @@ class Window(gui.GeDialog):
                     name="DEL"
                     )
                 s.GroupEnd() # Close todo
+                s.todoIds.append(taskBtn)
+                s.todoIds.append(editBtn)
+                s.todoIds.append(delBtn)
                 s.bind(taskBtn, completeFunc)
                 s.bind(editBtn, editFunc)
                 s.bind(delBtn, deleteFunc)
             for todo in todos:
                 add(todo)
+        s.GroupEnd() # Close Dummy
         s.LayoutChanged(id=s.todolist)
 
     def buildSettingsPage(s):
         """
         Build the todo page
         """
-        s.GroupBegin(
+        s.GroupBegin( # Open Page
             id=s.getId(),
             flags=c4d.BFH_SCALEFIT|c4d.BFV_SCALEFIT,
             cols=1,
@@ -145,7 +177,7 @@ class Window(gui.GeDialog):
             groupflags=c4d.BFV_CMD_EQUALCOLUMNS
             )
         s.AddButton(1013, c4d.BFV_MASK, initw=145, name="INSERT SETTINGS IN HERE LATER")
-        s.GroupEnd()
+        s.GroupEnd() # Close Page
 
 
 
