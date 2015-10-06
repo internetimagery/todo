@@ -4,7 +4,8 @@ from c4d import gui
 
 class Window(gui.GeDialog):
 
-    def __init__(s, requestSettingsPage, requestTodoPage, requestReset):
+    def __init__(s, title, requestSettingsPage, requestTodoPage, requestReset):
+        s.title = title
         s.elements = {} # Keep track of elements and their associative functions
         s.requestSettingsPage = requestSettingsPage # Callback to get settings built
         s.requestTodoPage = requestTodoPage # Callback to get todos information
@@ -24,7 +25,7 @@ class Window(gui.GeDialog):
             )
 
     def CreateLayout(s):
-        s.SetTitle("Todo window") # TODO add a way for this info to be provided
+        s.SetTitle(s.title)
         s.wrapper = s.getId()
         s.GroupBegin( # Open Page
             id=s.wrapper,
@@ -32,7 +33,7 @@ class Window(gui.GeDialog):
             cols=1
             )
         s.GroupEnd()
-        s.buildTodoPage(**s.requestTodoPage())
+        s.buildTodoPage(s.requestTodoPage({"buildTodos" : s.buildTodos}))
         return True
 
     def Command(s, id, msg):
@@ -54,12 +55,13 @@ class Window(gui.GeDialog):
                 s.requestReset()
         return True
 
-    def buildTodoPage(s, newBtn="Default", pageBtn="Default", newTodo=None, buildTodo=None):
+    def buildTodoPage(s, ctrls):
         """
         Build the todo page
         newTodo = callback when new todo is requested
         buildTodo = call to build out todo list based on given information dict
         """
+        s.ctrls = ctrls # Store our latest controls
         if s.panelIds:
             for id in s.panelIds:
                 s.unbind(id)
@@ -75,9 +77,9 @@ class Window(gui.GeDialog):
         s.AddButton(
             id=pageBtn,
             flags=c4d.BFH_RIGHT,
-            name=pageBtn
+            name=ctrls["pageBtnName"]
             )
-        s.bind(pageBtn, lambda x: s.buildSettingsPage(**s.requestSettingsPage()))
+        s.bind(pageBtn, lambda x: s.buildSettingsPage(s.requestSettingsPage({})))
         textfield = s.getId()
         s.panelIds.append(textfield)
         s.AddEditText(
@@ -89,9 +91,9 @@ class Window(gui.GeDialog):
         s.AddButton(
             id=button,
             flags=c4d.BFH_SCALEFIT,
-            name=newBtn
+            name=ctrls["newBtnName"]
             )
-        s.bind(button, lambda x: s.SetString(textfield, "") if newTodo(s.GetString(textfield)) else None )
+        s.bind(button, lambda x: s.SetString(textfield, "") if ctrls["sendNew"](s.GetString(textfield)) else None)
         s.AddSeparatorH(c4d.BFH_SCALEFIT)
         s.ScrollGroupBegin( # Open Scroll
             id=0,
@@ -110,7 +112,7 @@ class Window(gui.GeDialog):
         s.GroupEnd() # Close Scroll
         s.GroupEnd() # Close Page
         s.LayoutChanged(id=s.wrapper)
-        s.buildTodos()
+        ctrls["requestBuild"]()
 
     def buildTodos(s):
         """
@@ -124,11 +126,10 @@ class Window(gui.GeDialog):
         if todos:
             def add(todo):
                 def completeFunc(id):
-                    print "Completed Todo!"
+                    s.ctrls["sendComplete"]()
                 def specialFunc(id):
-                    print "Pressed special"
+                    s.ctrls["sendSpecial"]()
                 def editFunc(id):
-                    print "Pressed edit"
                     s.LayoutFlushGroup(id=group)
                     textfield = s.getId()
                     s.panelIds.append(textfield)
@@ -144,11 +145,9 @@ class Window(gui.GeDialog):
                         name="Update"
                         )
                     s.LayoutChanged(id=group)
-                    def temp(id):
-                        print "Edited!", s.GetString(textfield)
-                    s.bind(editText, temp)
+                    s.bind(editText, lambda x: s.ctrls["sendEdit"](s.GetString(textfield)))
                 def deleteFunc(id):
-                    print "Pressed Delete"
+                    s.ctrls["sendDelete"]()
                 group = s.getId()
                 s.GroupBegin( # Open Todo
                     id=group,
@@ -188,10 +187,11 @@ class Window(gui.GeDialog):
         s.GroupEnd() # Close Dummy
         s.LayoutChanged(id=s.todolist)
 
-    def buildSettingsPage(s):
+    def buildSettingsPage(s, ctrls):
         """
         Build the todo page
         """
+        s.ctrls = ctrls # Store our latest controls
         if s.panelIds:
             for id in s.panelIds:
                 s.unbind(id)
@@ -217,7 +217,7 @@ class Window(gui.GeDialog):
             name="Settings are Scene Independant."
         )
         s.AddSeparatorH(c4d.BFH_SCALEFIT)
-        s.bind(pageBtn, lambda x: s.buildTodoPage(**s.requestTodoPage()))
+        s.bind(pageBtn, lambda x: s.buildTodoPage(s.requestTodoPage({"buildTodos" : s.buildTodos})))
         s.AddButton(1013, c4d.BFV_MASK, initw=145, name="INSERT SETTINGS IN HERE LATER")
         s.GroupEnd() # Close Page
         s.LayoutChanged(id=s.wrapper)
@@ -256,27 +256,29 @@ class Window(gui.GeDialog):
             del s.elements[id]
 
 if __name__ == '__main__':
+    pass
     # TEST THE WINDOW
-    def resetScene():
-        print "Scene changed. Need to load more info"
-    def infoTodo(): # fill in the information and give it to the GUI
-        return {
-            "newBtn"  : "Create a new TODO",
-            "pageBtn"    : "Settings ->",
-            "newTodo"     : newTodo # Callback
-        }
-    def buildTodo(): # Build out todos
-        pass
-
-    def newTodo(text):
-        text = text.strip()
-        if text:
-            print "New Todo Text:", text
-            return True
-
-    w = Window(
-        lambda: {},
-        infoTodo,
-        resetScene
-    )
-    w.Open()
+    # def resetScene():
+    #     print "Scene changed. Need to load more info"
+    # def infoTodo(): # fill in the information and give it to the GUI
+    #     return {
+    #         "newBtnName"  : "Create a new TODO",
+    #         "pageBtnName"    : "Settings ->",
+    #         "newTodo"     : newTodo # Callback
+    #     }
+    # def buildTodo(): # Build out todos
+    #     pass
+    #
+    # def newTodo(text):
+    #     text = text.strip()
+    #     if text:
+    #         print "New Todo Text:", text
+    #         return True
+    #
+    # w = Window(
+    #     "Todo window",
+    #     lambda: {},
+    #     infoTodo,
+    #     resetScene
+    # )
+    # w.Open()
