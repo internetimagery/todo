@@ -53,28 +53,37 @@ class Main(object):
         text = text.strip()
         if text:
             print "Creating:", text
+            s.refreshTodo()
             return True
 
     def todoEdit(s, text):
         """
         Todo edit requested
         """
-        print "Editing todo", text
+        text = text.strip()
+        if text:
+            print "Editing todo", text
+            s.refreshTodo()
+
     def todoDelete(s):
         """
         Todo deletion requested
         """
         print "Delete todo"
+        s.refreshTodo()
+
     def todoSpecial(s):
         """
         Todo special requested
         """
         print "Trigger special todo function"
+
     def todoComplete(s):
         """
         Todo Completion requested.
         """
         print "Todo completed!"
+        s.todoDelete()
 
 if __name__ == '__main__':
     import todo.view.c4d as view
