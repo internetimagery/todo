@@ -10,7 +10,19 @@ def save(doc, data):
 def load(doc):
     container = doc.GetDataInstance().GetContainer(12345)
     data = container.GetString(1001)
+#
+# save(doc, "here is saved text")
+#
+# print load(doc)
 
-save(doc, "here is saved text")
+# Create Null object
+obj = c4d.BaseObject(c4d.Onull)#c4d.Ocube)
 
-print load(doc)
+# Add object into scene
+doc.InsertObject(obj)
+
+# Tell the object that it was inserted
+obj.Message(c4d.MSG_MENUPREPARE)
+
+# Update UI
+c4d.EventAdd()
