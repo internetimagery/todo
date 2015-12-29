@@ -27,3 +27,4 @@ class Data(todo.model.data.Data):
             cmds.select(sel, r=True)
         if not cmds.attributeQuery("notes", n=s.node, ex=True):
             cmds.addAttr(s.node, ln="notes", sn="nts", dt="string", s=True)
+            cmds.lockNode(s.node)
