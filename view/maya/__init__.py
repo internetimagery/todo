@@ -19,7 +19,8 @@ class Package(object):
         s.local["_sys"].path.insert(0, s.root)
         try:
             module = __import__(k)
-            s.cache[k] = getattr(module, s.reg.sub(r"_\1", k).title())
+            name = s.reg.sub(r"_\1", k).title()
+            s.cache[k] = getattr(module, name) if hasattr(module, name) else module
         finally: s.local["_sys"].path[:] = path
         return s.cache[k]
 _sys.modules[__name__] = Package(locals())
